@@ -7,7 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      /* Tema Escuro (Padrão: Azul Cobalto Profundo & Ciano Elétrico) */
       --bg-base: #060b19;
       --bg-surface: #0d162c;
       --bg-elevated: #13203f;
@@ -26,7 +25,6 @@
     }
 
     body.light-mode {
-      /* Tema Claro (Fundo limpo de alta legibilidade para leitura prolongada) */
       --bg-base: #f8fafc;
       --bg-surface: #ffffff;
       --bg-elevated: #f1f5f9;
@@ -61,7 +59,7 @@
     /* Layout Principal com Sidebar Retrátil */
     .app-layout {
       display: grid;
-      grid-template-columns: 315px 1fr;
+      grid-template-columns: 320px 1fr;
       min-height: 100vh;
       transition: grid-template-columns 0.22s ease;
     }
@@ -77,13 +75,44 @@
     /* Sidebar */
     .sidebar {
       background: var(--bg-surface); border-right: 1px solid var(--border-color);
-      padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      padding: 18px; display: flex; flex-direction: column; gap: 12px;
       overflow-x: hidden; transition: padding 0.2s ease, opacity 0.15s ease;
     }
     .app-layout.sidebar-collapsed .sidebar {
       padding: 0; opacity: 0; pointer-events: none; border: none;
     }
-    .brand { font-size: 1.15rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 1.12rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .brand-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* Botão Flutuante no Canto Esquerdo ao Recolher o Menu */
+    .sidebar-expand-fab {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 45;
+      background: var(--cobalt-primary);
+      color: #fff;
+      border: 1px solid var(--cyan-accent);
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 7px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.35);
+      display: none;
+      transition: background 0.15s ease, padding-left 0.15s ease;
+    }
+    .sidebar-expand-fab:hover {
+      background: var(--cobalt-hover);
+      padding-left: 11px;
+    }
+    .app-layout.sidebar-collapsed .sidebar-expand-fab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     /* Filtro de Tags (Matérias) */
     .tags-bar { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
@@ -91,10 +120,12 @@
       background: var(--bg-elevated); border: 1px solid var(--border-color);
       color: var(--text-muted); font-size: 0.74rem; font-weight: 600;
       padding: 4px 10px; border-radius: 99px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
       transition: all 0.15s ease;
     }
     .tag-pill:hover { border-color: var(--cyan-accent); color: var(--text-main); }
     .tag-pill.active { background: var(--cobalt-primary); border-color: var(--cyan-accent); color: #fff; }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
     /* Lista de Leis */
     #lista-leis {
@@ -104,21 +135,22 @@
     .grupo-materia-titulo {
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px; padding-left: 2px;
+      display: flex; align-items: center; gap: 6px;
     }
     .lei-item {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
       border-radius: 8px; padding: 12px; cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
     }
     .lei-item:hover { transform: scale(1.015); border-color: var(--cyan-accent); }
-    .lei-item.active { border-color: var(--cyan-accent); background: rgba(29, 78, 216, 0.22); }
+    .lei-item.active { border-width: 2px; border-color: var(--cyan-accent); }
     .lei-item-title { font-weight: 600; font-size: 0.94rem; margin-bottom: 6px; line-height: 1.35; }
     .lei-item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
     .badge {
       display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
     }
-    .badge-tag { background: rgba(29, 78, 216, 0.25); color: var(--cyan-accent); border: 1px solid var(--cobalt-primary); }
+    .badge-tag { border: 1px solid currentColor; }
     .badge-update { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
@@ -128,8 +160,8 @@
     @media (max-width: 600px) { .main-content { padding: 18px 16px; } }
 
     .top-controls {
-      display: flex; justify-content: space-between; align-items: center; gap: 10px;
-      margin-bottom: 18px;
+      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      margin-bottom: 14px;
     }
     .toolbar {
       display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
@@ -143,98 +175,46 @@
       display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
     }
 
-    /* =====================================================================
-       FORMATO VADE MECUM: TEXTO CORRIDO + CAPUT EM BLOCO + ESTRUTURA CENTRAL
-       ===================================================================== */
+    /* Formato Vade Mecum */
     .disp-estrutura {
-      margin-top: 38px;
-      margin-bottom: 18px;
-      padding: 12px 16px;
-      text-align: center;
-      color: var(--cyan-accent);
-      font-weight: 700;
-      font-size: 0.96rem;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      border-top: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      background: var(--bg-elevated);
-      border-radius: 6px;
+      margin-top: 38px; margin-bottom: 18px; padding: 12px 16px;
+      text-align: center; color: var(--cyan-accent); font-weight: 700;
+      font-size: 0.96rem; text-transform: uppercase; letter-spacing: 0.8px;
+      border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+      background: var(--bg-elevated); border-radius: 6px;
     }
+    .disp-row { position: relative; transition: background-color 0.15s ease; }
 
-    .disp-row {
-      position: relative;
-      transition: background-color 0.15s ease;
-    }
-
-    /* Caput (Artigo) em Bloco Destacado */
     .disp-artigo {
-      background: var(--bg-caput);
-      border-left: 4px solid var(--cyan-accent);
-      border-radius: 6px;
-      padding: 12px 16px;
-      margin-top: 22px;
-      margin-bottom: 8px;
+      background: var(--bg-caput); border-left: 4px solid var(--cyan-accent);
+      border-radius: 6px; padding: 12px 16px; margin-top: 22px; margin-bottom: 8px;
       font-size: 1.01rem;
     }
-
-    /* Parágrafos, Incisos e Alíneas em Texto Corrido Sutil */
     .disp-paragrafo {
-      padding: 4px 12px 4px 18px;
-      margin-bottom: 4px;
-      border-left: 2px solid var(--border-color);
-      color: var(--text-secondary);
-      font-size: 0.98rem;
+      padding: 4px 12px 4px 18px; margin-bottom: 4px;
+      border-left: 2px solid var(--border-color); color: var(--text-secondary); font-size: 0.98rem;
     }
     .disp-inciso {
-      padding: 3px 12px 3px 32px;
-      margin-bottom: 2px;
-      color: var(--text-secondary);
-      font-size: 0.96rem;
+      padding: 3px 12px 3px 32px; margin-bottom: 2px;
+      color: var(--text-secondary); font-size: 0.96rem;
     }
     .disp-alinea {
-      padding: 2px 12px 2px 48px;
-      margin-bottom: 2px;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
+      padding: 2px 12px 2px 48px; margin-bottom: 2px;
+      color: var(--text-secondary); font-size: 0.95rem;
     }
-
     .disp-paragrafo:hover, .disp-inciso:hover, .disp-alinea:hover {
-      background: var(--cyan-soft);
-      border-radius: 4px;
+      background: var(--cyan-soft); border-radius: 4px;
     }
 
-    .disp-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .disp-text-body {
-      flex: 1;
-      text-align: justify;
-    }
-    .disp-rotulo {
-      font-weight: 700;
-      color: var(--cyan-accent);
-      margin-right: 6px;
-    }
-    .disp-paragrafo .disp-rotulo,
-    .disp-inciso .disp-rotulo,
-    .disp-alinea .disp-rotulo {
-      color: var(--text-main);
-      font-weight: 600;
+    .disp-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .disp-text-body { flex: 1; text-align: justify; }
+    .disp-rotulo { font-weight: 700; color: var(--cyan-accent); margin-right: 6px; }
+    .disp-paragrafo .disp-rotulo, .disp-inciso .disp-rotulo, .disp-alinea .disp-rotulo {
+      color: var(--text-main); font-weight: 600;
     }
 
-    .disp-actions {
-      opacity: 0.25;
-      transition: opacity 0.15s ease;
-      flex-shrink: 0;
-    }
-    .disp-row:hover .disp-actions,
-    .disp-row.has-notes .disp-actions {
-      opacity: 1;
-    }
+    .disp-actions { opacity: 0.25; transition: opacity 0.15s ease; flex-shrink: 0; }
+    .disp-row:hover .disp-actions, .disp-row.has-notes .disp-actions { opacity: 1; }
 
     .disp-alterado-tag {
       font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
@@ -242,25 +222,12 @@
     }
 
     /* Grifos no Texto */
-    mark.user-hl {
-      padding: 1px 3px;
-      border-radius: 3px;
-      color: #0f172a;
-      cursor: pointer;
-    }
+    mark.user-hl { padding: 1px 3px; border-radius: 3px; color: #0f172a; cursor: pointer; }
 
-    /* Barra Flutuante de Grifo ao Selecionar Texto */
     .highlight-popover {
-      position: fixed;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-surface);
-      border: 1px solid var(--cyan-accent);
-      padding: 8px 12px;
-      border-radius: 99px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      z-index: 100;
+      position: fixed; display: none; align-items: center; gap: 8px;
+      background: var(--bg-surface); border: 1px solid var(--cyan-accent);
+      padding: 8px 12px; border-radius: 99px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 100;
     }
     .highlight-popover.open { display: flex; }
     .hl-swatch {
@@ -270,61 +237,60 @@
     .hl-swatch:hover { transform: scale(1.18); }
 
     /* Anotações Retráteis & Rich Text */
-    .notas-wrapper {
-      margin-top: 8px;
-      margin-bottom: 8px;
-    }
+    .notas-wrapper { margin-top: 8px; margin-bottom: 8px; }
     .notas-toggle-bar {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 0.78rem; font-weight: 600; color: var(--cyan-accent);
       background: var(--bg-elevated); border: 1px solid var(--border-color);
       padding: 3px 10px; border-radius: 6px; cursor: pointer;
     }
-    .notas-lista {
-      margin-top: 6px; display: flex; flex-direction: column; gap: 8px;
-    }
+    .notas-lista { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
     .nota-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--warning);
-      padding: 10px 14px; border-radius: 6px; font-size: 0.92rem;
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      border-left: 4px solid var(--warning); padding: 10px 14px; border-radius: 6px; font-size: 0.92rem;
     }
     .nota-box.STF { border-left-color: #0284c7; }
     .nota-box.STJ { border-left-color: #7c3aed; }
     .nota-box.Doutrina { border-left-color: #10b981; }
-
     .nota-meta {
       display: flex; justify-content: space-between; align-items: center;
       font-size: 0.76rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;
     }
-    .nota-conteudo-oculto {
-      font-style: italic; color: var(--text-muted); font-size: 0.84rem;
-    }
+    .nota-conteudo-oculto { font-style: italic; color: var(--text-muted); font-size: 0.84rem; }
 
-    /* Editor Rich Text no Modal de Anotação */
+    /* Editor Rich Text */
     .rich-toolbar {
       display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-      background: var(--bg-elevated); padding: 8px; border-radius: 6px;
-      border: 1px solid var(--border-color);
+      background: var(--bg-elevated); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);
     }
     .rich-btn {
       background: var(--bg-surface); border: 1px solid var(--border-color);
-      color: var(--text-main); padding: 4px 10px; border-radius: 4px;
-      cursor: pointer; font-size: 0.85rem;
+      color: var(--text-main); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
     }
     .rich-btn:hover { border-color: var(--cyan-accent); }
     .rich-editor {
       min-height: 140px; max-height: 300px; overflow-y: auto;
       background: var(--bg-base); border: 1px solid var(--border-color);
-      color: var(--text-main); padding: 12px; border-radius: 6px;
-      font-size: 0.95rem; line-height: 1.6;
+      color: var(--text-main); padding: 12px; border-radius: 6px; font-size: 0.95rem; line-height: 1.6;
     }
     .rich-editor:focus { outline: none; border-color: var(--cyan-accent); }
+
+    /* Lista de Gerenciamento de Tags no Modal */
+    .tag-manager-list {
+      max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    }
+    .tag-manager-row {
+      display: grid; grid-template-columns: 1fr 44px auto auto; gap: 8px; align-items: center;
+      background: var(--bg-elevated); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color);
+    }
 
     /* Inputs e Botões */
     input, select {
       width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
       color: var(--text-main); padding: 9px 12px; border-radius: 6px; font-size: 0.9rem;
+    }
+    input[type="color"] {
+      padding: 2px; height: 36px; cursor: pointer; background: transparent;
     }
     input:focus, select:focus { outline: none; border-color: var(--cyan-accent); }
     .btn {
@@ -335,7 +301,7 @@
     .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
-    .btn-sm { padding: 3px 9px; font-size: 0.76rem; }
+    .btn-sm { padding: 4px 9px; font-size: 0.76rem; }
     .btn-warning { background: var(--warning); color: #000; }
 
     /* Modal */
@@ -370,11 +336,18 @@
 
   <!-- APLICAÇÃO PRINCIPAL -->
   <div id="app-view" class="app-layout hidden">
+    <!-- BOTÃO FLUTUANTE PARA ABRIR O MENU QUANDO RECOLHIDO -->
+    <button class="sidebar-expand-fab" onclick="alternarSidebar()" title="Expandir menu lateral">▶</button>
+
     <!-- BARRA LATERAL -->
     <aside class="sidebar">
       <div class="brand">
         <span>Legislação & Notas</span>
-        <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
+        <div class="brand-actions">
+          <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar Tags / Matérias">🏷️</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
+          <button class="btn btn-outline btn-sm" onclick="alternarSidebar()" title="Recolher menu lateral">◀</button>
+        </div>
       </div>
 
       <button class="btn" onclick="abrirModalNovaLei()">+ Cadastrar Lei (Planalto/Senado)</button>
@@ -391,9 +364,7 @@
 
     <!-- CONTEÚDO DA LEI -->
     <main class="main-content">
-      <!-- BARRA SUPERIOR DE LEITURA (RETRAIR MENU & MODO CLARO/ESCURO) -->
       <div class="top-controls">
-        <button class="btn btn-outline btn-sm" id="btn-toggle-sidebar" onclick="alternarSidebar()">◀ Recolher Menu</button>
         <button class="btn btn-outline btn-sm" id="btn-toggle-theme" onclick="alternarTema()">☀️ Modo Claro</button>
       </div>
 
@@ -413,7 +384,7 @@
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <input type="text" id="busca-artigo" placeholder="Filtrar artigo ou palavra..." oninput="filtrarDispositivos()" style="width:200px;" />
-            <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar Tag</button>
+            <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar Lei/Tag</button>
             <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
           </div>
         </div>
@@ -446,15 +417,16 @@
   <div id="modal-nova-lei" class="modal-backdrop">
     <div class="modal">
       <h3>Cadastrar Nova Lei</h3>
-      <input type="text" id="nova-lei-titulo" placeholder="Nome curto (ex: Lei 14.133/21 - Licitações)" />
+      <input type="text" id="nova-lei-titulo" placeholder="Nome curto da lei (aparecerá antes do Art. 1º)" />
       <div>
-        <input type="text" id="nova-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag (ex: Direito Administrativo)" />
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (selecione ou digite uma nova):</label>
+        <input type="text" id="nova-lei-materia" list="sugestoes-materias" placeholder="Ex: Direito Administrativo" autocomplete="off" />
         <datalist id="sugestoes-materias"></datalist>
       </div>
       <input type="url" id="nova-lei-url" placeholder="URL do Planalto ou Senado (ex: https://www.planalto.gov.br/...)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-nova-lei')">Cancelar</button>
-        <button class="btn" onclick="salvarNovaLei()">Extrair e Salvar</button>
+        <button class="btn" onclick="iniciarFluxoSalvarLei('nova')">Extrair e Salvar</button>
       </div>
     </div>
   </div>
@@ -464,10 +436,50 @@
     <div class="modal">
       <h3>Editar Lei / Matéria</h3>
       <input type="text" id="edit-lei-titulo" placeholder="Título da lei" />
-      <input type="text" id="edit-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag (ex: Direito Administrativo)" />
+      <div>
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (selecione ou digite uma nova):</label>
+        <input type="text" id="edit-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag" autocomplete="off" />
+      </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-editar-lei')">Cancelar</button>
-        <button class="btn" onclick="salvarEdicaoLei()">Salvar Alterações</button>
+        <button class="btn" onclick="iniciarFluxoSalvarLei('edicao')">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AVISO E SELEÇÃO DE COR PARA NOVA TAG -->
+  <div id="modal-nova-tag-cor" class="modal-backdrop" style="z-index: 60;">
+    <div class="modal">
+      <h3 style="color: var(--cyan-accent);">🏷️ Nova Tag Detectada</h3>
+      <p style="font-size: 0.9rem;">
+        A tag <strong id="nome-nova-tag-preview" style="color:var(--cyan-accent);"></strong> ainda não está cadastrada. Selecione uma cor para identificá-la nos cards de leis:
+      </p>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <input type="color" id="cor-nova-tag-input" value="#0284c7" style="width:64px;" />
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="hl-swatch" style="background:#0284c7;" onclick="document.getElementById('cor-nova-tag-input').value='#0284c7'"></button>
+          <button type="button" class="hl-swatch" style="background:#059669;" onclick="document.getElementById('cor-nova-tag-input').value='#059669'"></button>
+          <button type="button" class="hl-swatch" style="background:#7c3aed;" onclick="document.getElementById('cor-nova-tag-input').value='#7c3aed'"></button>
+          <button type="button" class="hl-swatch" style="background:#d97706;" onclick="document.getElementById('cor-nova-tag-input').value='#d97706'"></button>
+          <button type="button" class="hl-swatch" style="background:#dc2626;" onclick="document.getElementById('cor-nova-tag-input').value='#dc2626'"></button>
+          <button type="button" class="hl-swatch" style="background:#db2777;" onclick="document.getElementById('cor-nova-tag-input').value='#db2777'"></button>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-nova-tag-cor')">Cancelar</button>
+        <button class="btn" onclick="confirmarCriacaoTagESalvar()">Confirmar Tag e Prosseguir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GERENCIAR / EDITAR TAGS CADASTRADAS -->
+  <div id="modal-gerenciar-tags" class="modal-backdrop">
+    <div class="modal">
+      <h3>🏷️ Gerenciar Tags (Matérias)</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted);">Edite o nome ou a cor de qualquer matéria. As alterações refletem imediatamente em todas as leis vinculadas.</p>
+      <div id="lista-gerenciar-tags" class="tag-manager-list"></div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-gerenciar-tags')">Fechar</button>
       </div>
     </div>
   </div>
@@ -485,7 +497,6 @@
         <option value="Doutrina">📚 Doutrina / Pegadinha de Prova</option>
       </select>
 
-      <!-- Barra de Formatação: Negrito, Itálico, Sublinhado e Cor do Texto -->
       <div class="rich-toolbar">
         <button type="button" class="rich-btn" onclick="formatarNota('bold')" title="Negrito"><b>B</b></button>
         <button type="button" class="rich-btn" onclick="formatarNota('italic')" title="Itálico"><i>I</i></button>
@@ -537,6 +548,7 @@
 
     let usuarioAtual = null;
     let leisCache = [];
+    let tagsCache = [];
     let leiSelecionada = null;
     let filtroMateriaAtual = "Todas";
     let dispositivosCache = [];
@@ -544,6 +556,7 @@
     let grifosCache = {};
     let gruposNotasRecolhidos = {};
     let selecaoAtualGrifo = null;
+    let acaoPendenteLei = null;
 
     window.addEventListener("DOMContentLoaded", async () => {
       if (localStorage.getItem("vm_theme") === "light") {
@@ -555,19 +568,15 @@
       if (session) iniciarApp(session.user);
     });
 
-    // =========================================================================
-    // CONTROLES DE LEITURA (TEMA CLARO/ESCURO & RETRAIR SIDEBAR)
-    // =========================================================================
     function alternarTema() {
       const isLight = document.body.classList.toggle("light-mode");
       localStorage.setItem("vm_theme", isLight ? "light" : "dark");
       document.getElementById("btn-toggle-theme").textContent = isLight ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+      renderizarSidebar();
     }
 
     function alternarSidebar() {
-      const layout = document.getElementById("app-view");
-      const collapsed = layout.classList.toggle("sidebar-collapsed");
-      document.getElementById("btn-toggle-sidebar").textContent = collapsed ? "▶ Expandir Menu" : "◀ Recolher Menu";
+      document.getElementById("app-view").classList.toggle("sidebar-collapsed");
     }
 
     async function fazerLogin() {
@@ -593,18 +602,62 @@
       usuarioAtual = user;
       document.getElementById("auth-view").classList.add("hidden");
       document.getElementById("app-view").classList.remove("hidden");
-      carregarLeis();
+      carregarDadosIniciais();
     }
 
     // =========================================================================
-    // GERENCIAMENTO DE LEIS E TAGS (MATÉRIAS)
+    // CONVERSÃO DE COR PARA FUNDO SUAVE DO CARD (VÁRIAS VEZES MAIS CLARO)
     // =========================================================================
+    function hexParaRgbaSuave(hex, alpha) {
+      if (!hex || !hex.startsWith("#") || hex.length < 7) return "";
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function obterCorTag(nomeTag) {
+      const encontrada = tagsCache.find(t => t.nome.toLowerCase() === (nomeTag || "").trim().toLowerCase());
+      return encontrada ? encontrada.cor : null;
+    }
+
+    // =========================================================================
+    // GERENCIAMENTO DE TAGS (MATÉRIAS) E LEIS
+    // =========================================================================
+    async function carregarDadosIniciais() {
+      await carregarTags();
+      await carregarLeis();
+    }
+
+    async function carregarTags() {
+      const { data } = await sb.from("tags_materias").select("*").order("nome", { ascending: true });
+      tagsCache = data || [];
+      atualizarSugestoesMaterias();
+    }
+
     async function carregarLeis() {
       const { data, error } = await sb.from("leis").select("*").order("titulo", { ascending: true });
       if (error) return console.error(error);
       leisCache = data || [];
 
-      atualizarSugestoesMaterias();
+      // Sincroniza tags existentes nas leis que ainda não estejam em tags_materias
+      const nomesTagsSalvas = new Set(tagsCache.map(t => t.nome.toLowerCase()));
+      const tagsFaltantes = [...new Set(leisCache.map(l => (l.materia || "Geral").trim()))]
+        .filter(nome => nome && !nomesTagsSalvas.has(nome.toLowerCase()));
+
+      if (tagsFaltantes.length > 0) {
+        for (const nome of tagsFaltantes) {
+          await sb.from("tags_materias").insert({
+            user_id: usuarioAtual.id,
+            nome,
+            cor: "#1d4ed8"
+          });
+        }
+        await carregarTags();
+      } else {
+        atualizarSugestoesMaterias();
+      }
+
       renderizarFiltroMaterias();
       renderizarSidebar();
 
@@ -615,26 +668,25 @@
 
     function atualizarSugestoesMaterias() {
       const datalist = document.getElementById("sugestoes-materias");
-      const padroes = [
-        "Direito Administrativo", "Direito Tributário", "Direito Constitucional",
-        "Legislação Tributária", "AFO / LRF", "Direito Civil", "Direito Empresarial", "Direito Penal"
-      ];
-      const existentes = leisCache.map(l => (l.materia || "Geral").trim());
-      const unicas = [...new Set([...padroes, ...existentes])].sort();
-      datalist.innerHTML = unicas.map(m => `<option value="${m}">`).join("");
+      const ordenadas = [...tagsCache].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+      datalist.innerHTML = ordenadas.map(t => `<option value="${t.nome}">`).join("");
     }
 
     function renderizarFiltroMaterias() {
       const bar = document.getElementById("filtro-materias");
-      const materias = ["Todas", ...new Set(leisCache.map(l => (l.materia || "Geral").trim()))];
+      const materiasOrdenadas = [...new Set(leisCache.map(l => (l.materia || "Geral").trim()))]
+        .sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const opcoes = ["Todas", ...materiasOrdenadas];
 
-      if (!materias.includes(filtroMateriaAtual)) filtroMateriaAtual = "Todas";
+      if (!opcoes.includes(filtroMateriaAtual)) filtroMateriaAtual = "Todas";
 
       bar.innerHTML = "";
-      materias.forEach(mat => {
+      opcoes.forEach(mat => {
         const pill = document.createElement("button");
         pill.className = "tag-pill" + (filtroMateriaAtual === mat ? " active" : "");
-        pill.textContent = mat;
+        const cor = mat !== "Todas" ? obterCorTag(mat) : null;
+        const dotHtml = cor ? `<span class="tag-dot" style="background:${cor};"></span>` : "";
+        pill.innerHTML = `${dotHtml}<span>${mat}</span>`;
         pill.onclick = () => {
           filtroMateriaAtual = mat;
           renderizarFiltroMaterias();
@@ -647,6 +699,7 @@
     function renderizarSidebar() {
       const container = document.getElementById("lista-leis");
       container.innerHTML = "";
+      const isLight = document.body.classList.contains("light-mode");
 
       const filtradas = filtroMateriaAtual === "Todas"
         ? leisCache
@@ -659,10 +712,13 @@
         grupos[mat].push(lei);
       });
 
-      Object.keys(grupos).sort().forEach(materia => {
+      Object.keys(grupos).sort((a, b) => a.localeCompare(b, "pt-BR")).forEach(materia => {
+        const corTag = obterCorTag(materia);
+
         if (filtroMateriaAtual === "Todas") {
           const header = document.createElement("div");
           header.className = "grupo-materia-titulo";
+          if (corTag) header.style.color = corTag;
           header.textContent = materia;
           container.appendChild(header);
         }
@@ -671,6 +727,12 @@
           const div = document.createElement("div");
           div.className = "lei-item" + (leiSelecionada && leiSelecionada.id === lei.id ? " active" : "");
           div.onclick = () => selecionarLei(lei);
+
+          // Aplica fundo em tom várias vezes mais claro baseado na cor da tag
+          if (corTag) {
+            div.style.backgroundColor = hexParaRgbaSuave(corTag, isLight ? 0.13 : 0.18);
+            div.style.borderColor = hexParaRgbaSuave(corTag, 0.55);
+          }
 
           let statusBadge = "";
           if (lei.tem_atualizacao) {
@@ -681,10 +743,14 @@
             statusBadge = `<span class="badge badge-err">Erro</span>`;
           }
 
+          const tagStyle = corTag
+            ? `style="color:${corTag}; background:${hexParaRgbaSuave(corTag, 0.15)}; border-color:${corTag};"`
+            : "";
+
           div.innerHTML = `
             <div class="lei-item-title">${lei.titulo}</div>
             <div class="lei-item-meta">
-              <span class="badge badge-tag">${materia}</span>
+              <span class="badge badge-tag" ${tagStyle}>${materia}</span>
               ${statusBadge}
             </div>
           `;
@@ -693,6 +759,160 @@
       });
     }
 
+    // =========================================================================
+    // FLUXO DE CADASTRO / EDIÇÃO COM DETECÇÃO DE NOVA TAG E ESCOLHA DE COR
+    // =========================================================================
+    function iniciarFluxoSalvarLei(origem) {
+      if (origem === "nova") {
+        const titulo = document.getElementById("nova-lei-titulo").value.trim();
+        const materia = document.getElementById("nova-lei-materia").value.trim() || "Geral";
+        const url = document.getElementById("nova-lei-url").value.trim();
+        if (!titulo || !url) return alert("Preencha o título e a URL.");
+
+        acaoPendenteLei = { origem: "nova", titulo, materia, url };
+      } else {
+        if (!leiSelecionada) return;
+        const titulo = document.getElementById("edit-lei-titulo").value.trim();
+        const materia = document.getElementById("edit-lei-materia").value.trim() || "Geral";
+        if (!titulo) return alert("Informe o título da lei.");
+
+        acaoPendenteLei = { origem: "edicao", id: leiSelecionada.id, titulo, materia };
+      }
+
+      const tagJaExiste = tagsCache.some(
+        t => t.nome.toLowerCase() === acaoPendenteLei.materia.toLowerCase()
+      );
+
+      if (!tagJaExiste) {
+        document.getElementById("nome-nova-tag-preview").textContent = acaoPendenteLei.materia;
+        document.getElementById("cor-nova-tag-input").value = "#0284c7";
+        document.getElementById("modal-nova-tag-cor").classList.add("open");
+      } else {
+        executarSalvamentoLei();
+      }
+    }
+
+    async function confirmarCriacaoTagESalvar() {
+      if (!acaoPendenteLei) return;
+      const corEscolhida = document.getElementById("cor-nova-tag-input").value;
+
+      const { error } = await sb.from("tags_materias").insert({
+        user_id: usuarioAtual.id,
+        nome: acaoPendenteLei.materia,
+        cor: corEscolhida
+      });
+
+      if (error && !error.message.includes("duplicate")) {
+        return alert("Erro ao criar tag: " + error.message);
+      }
+
+      fecharModal("modal-nova-tag-cor");
+      await carregarTags();
+      await executarSalvamentoLei();
+    }
+
+    async function executarSalvamentoLei() {
+      if (!acaoPendenteLei) return;
+      const dados = acaoPendenteLei;
+      acaoPendenteLei = null;
+
+      if (dados.origem === "nova") {
+        const { error } = await sb.from("leis").insert({
+          user_id: usuarioAtual.id,
+          titulo: dados.titulo,
+          materia: dados.materia,
+          url: dados.url,
+          status_extracao: "pendente"
+        });
+
+        if (error) return alert("Erro ao cadastrar: " + error.message);
+
+        fecharModal("modal-nova-lei");
+        document.getElementById("nova-lei-titulo").value = "";
+        document.getElementById("nova-lei-materia").value = "";
+        document.getElementById("nova-lei-url").value = "";
+
+        await dispararWorkflowGitHub("extrair_pendentes");
+        await carregarLeis();
+      } else {
+        const { error } = await sb.from("leis").update({
+          titulo: dados.titulo,
+          materia: dados.materia
+        }).eq("id", dados.id);
+
+        if (error) return alert("Erro ao atualizar: " + error.message);
+
+        fecharModal("modal-editar-lei");
+        await carregarLeis();
+        const atualizada = leisCache.find(l => l.id === dados.id);
+        if (atualizada) selecionarLei(atualizada);
+      }
+    }
+
+    // =========================================================================
+    // MODAL DE EDIÇÃO / GERENCIAMENTO DE TAGS EXISTENTES
+    // =========================================================================
+    function abrirModalGerenciarTags() {
+      const lista = document.getElementById("lista-gerenciar-tags");
+      lista.innerHTML = "";
+
+      const ordenadas = [...tagsCache].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+      if (ordenadas.length === 0) {
+        lista.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">Nenhuma tag cadastrada ainda.</p>`;
+      }
+
+      ordenadas.forEach(tag => {
+        const row = document.createElement("div");
+        row.className = "tag-manager-row";
+        row.innerHTML = `
+          <input type="text" id="tag-nome-${tag.id}" value="${tag.nome}" />
+          <input type="color" id="tag-cor-${tag.id}" value="${tag.cor || '#1d4ed8'}" />
+          <button class="btn btn-sm" onclick="salvarAlteracaoTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')">Salvar</button>
+          <button class="btn btn-outline btn-sm" onclick="excluirTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')" style="color:var(--danger);">×</button>
+        `;
+        lista.appendChild(row);
+      });
+
+      document.getElementById("modal-gerenciar-tags").classList.add("open");
+    }
+
+    async function salvarAlteracaoTag(tagId, nomeAntigo) {
+      const novoNome = document.getElementById(`tag-nome-${tagId}`).value.trim();
+      const novaCor = document.getElementById(`tag-cor-${tagId}`).value;
+      if (!novoNome) return alert("O nome da tag não pode ficar vazio.");
+
+      const { error } = await sb.from("tags_materias").update({
+        nome: novoNome,
+        cor: novaCor
+      }).eq("id", tagId);
+
+      if (error) return alert("Erro ao salvar tag: " + error.message);
+
+      if (novoNome !== nomeAntigo) {
+        await sb.from("leis").update({ materia: novoNome }).eq("materia", nomeAntigo);
+      }
+
+      await carregarTags();
+      await carregarLeis();
+      if (leiSelecionada) {
+        const atualizada = leisCache.find(l => l.id === leiSelecionada.id);
+        if (atualizada) selecionarLei(atualizada);
+      }
+      alert("Tag atualizada!");
+    }
+
+    async function excluirTag(tagId, nomeTag) {
+      if (!confirm(`Remover a tag "${nomeTag}"? As leis vinculadas passarão para "Geral".`)) return;
+      await sb.from("tags_materias").delete().eq("id", tagId);
+      await sb.from("leis").update({ materia: "Geral" }).eq("materia", nomeTag);
+      await carregarTags();
+      await carregarLeis();
+      abrirModalGerenciarTags();
+    }
+
+    // =========================================================================
+    // LEITURA DA LEI, TEXTO CORRIDO, GRIFOS E ANOTAÇÕES
+    // =========================================================================
     async function selecionarLei(lei) {
       leiSelecionada = lei;
       renderizarSidebar();
@@ -700,14 +920,25 @@
       document.getElementById("estado-vazio").classList.add("hidden");
       document.getElementById("leitor-lei").classList.remove("hidden");
       document.getElementById("titulo-lei-atual").textContent = lei.titulo;
-      document.getElementById("tag-lei-atual").textContent = lei.materia || "Geral";
+
+      const tagAtualEl = document.getElementById("tag-lei-atual");
+      const mat = lei.materia || "Geral";
+      const corTag = obterCorTag(mat);
+      tagAtualEl.textContent = mat;
+      if (corTag) {
+        tagAtualEl.style.color = corTag;
+        tagAtualEl.style.backgroundColor = hexParaRgbaSuave(corTag, 0.15);
+        tagAtualEl.style.borderColor = corTag;
+      } else {
+        tagAtualEl.style = "cursor:pointer;";
+      }
+
       document.getElementById("link-fonte-lei").href = lei.url;
 
       const banner = document.getElementById("banner-atualizacao");
       if (lei.tem_atualizacao) banner.classList.remove("hidden");
       else banner.classList.add("hidden");
 
-      // Carrega todos os dispositivos vigentes em páginas de 1000 (supera o limite padrão da API)
       let todosDisps = [];
       let inicio = 0;
       const passo = 1000;
@@ -755,9 +986,6 @@
       renderizarDispositivos(dispositivosCache);
     }
 
-    // =========================================================================
-    // RENDERIZAÇÃO EM TEXTO CORRIDO, CAPUT EM BLOCO, GRIFOS E NOTAS RETRÁTEIS
-    // =========================================================================
     function escaparHtml(str) {
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
@@ -929,7 +1157,7 @@
     }
 
     // =========================================================================
-    // ATUALIZAÇÃO SEGURA (PRESERVANDO ANOTAÇÕES POR SLUG)
+    // ATUALIZAÇÃO SEGURA E INTEGRAÇÃO GITHUB
     // =========================================================================
     async function aplicarAtualizacaoSegura() {
       if (!leiSelecionada) return;
@@ -969,54 +1197,11 @@
       if (atualizada) selecionarLei(atualizada);
     }
 
-    // =========================================================================
-    // CADASTRO, EDIÇÃO DE TAG & INTEGRAÇÃO GITHUB ACTIONS
-    // =========================================================================
-    async function salvarNovaLei() {
-      const titulo = document.getElementById("nova-lei-titulo").value.trim();
-      const materia = document.getElementById("nova-lei-materia").value.trim() || "Geral";
-      const url = document.getElementById("nova-lei-url").value.trim();
-      if (!titulo || !url) return alert("Preencha o título e a URL.");
-
-      const { error } = await sb.from("leis").insert({
-        user_id: usuarioAtual.id,
-        titulo,
-        materia,
-        url,
-        status_extracao: "pendente"
-      });
-
-      if (error) return alert("Erro ao cadastrar: " + error.message);
-
-      fecharModal("modal-nova-lei");
-      document.getElementById("nova-lei-titulo").value = "";
-      document.getElementById("nova-lei-materia").value = "";
-      document.getElementById("nova-lei-url").value = "";
-
-      await dispararWorkflowGitHub("extrair_pendentes");
-      carregarLeis();
-    }
-
     function abrirModalEditarLei() {
       if (!leiSelecionada) return;
       document.getElementById("edit-lei-titulo").value = leiSelecionada.titulo;
       document.getElementById("edit-lei-materia").value = leiSelecionada.materia || "Geral";
       document.getElementById("modal-editar-lei").classList.add("open");
-    }
-
-    async function salvarEdicaoLei() {
-      if (!leiSelecionada) return;
-      const titulo = document.getElementById("edit-lei-titulo").value.trim();
-      const materia = document.getElementById("edit-lei-materia").value.trim() || "Geral";
-      if (!titulo) return alert("Informe o título da lei.");
-
-      const { error } = await sb.from("leis").update({ titulo, materia }).eq("id", leiSelecionada.id);
-      if (error) return alert("Erro ao atualizar: " + error.message);
-
-      fecharModal("modal-editar-lei");
-      await carregarLeis();
-      const atualizada = leisCache.find(l => l.id === leiSelecionada.id);
-      if (atualizada) selecionarLei(atualizada);
     }
 
     async function dispararWorkflowGitHub(modo) {
@@ -1107,7 +1292,10 @@
     }
 
     // Modais auxiliares
-    function abrirModalNovaLei() { document.getElementById("modal-nova-lei").classList.add("open"); }
+    function abrirModalNovaLei() {
+      atualizarSugestoesMaterias();
+      document.getElementById("modal-nova-lei").classList.add("open");
+    }
     async function abrirModalConfig() {
       const { data } = await sb.from("config_integracao").select("*").eq("user_id", usuarioAtual.id).single();
       if (data) {
