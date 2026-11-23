@@ -5,12 +5,9 @@ import sys
 import time
 import unicodedata
 from datetime import datetime, timezone
-import requests
-import urllib3
+from curl_cffi import requests as cffi_requests
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
@@ -18,17 +15,6 @@ MODO = os.environ.get("MODO_EXECUCAO", "verificar_todas")
 LEI_ID_ALVO = os.environ.get("LEI_ID_ALVO", "").strip()
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
-HEADERS_HTTP = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-}
 
 REGEX_CABECALHO_ESTRUTURA = re.compile(
     r"^(LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+"
@@ -51,30 +37,70 @@ def slug_seguro(txt: str) -> str:
     return limpo[:60] if limpo else "ITEM"
 
 
-def baixar_html_oficial(url: str) -> str:
-    sessao = requests.Session()
-    sessao.headers.update(HEADERS_HTTP)
-
-    ultimo_erro = None
-    for tentativa in range(1, 4):
+def decodificar_bytes(conteudo_bytes: bytes) -> str:
+    for enc in ("utf-8", "windows-1252", "iso-8859-1"):
         try:
-            resp = sessao.get(url, timeout=60, verify=False)
-            resp.raise_for_status()
-            conteudo_bytes = resp.content
-            for enc in ("utf-8", "windows-1252", "iso-8859-1"):
-                try:
-                    texto = conteudo_bytes.decode(enc)
-                    if "Art." in texto or "art." in texto:
-                        return texto
-                except UnicodeDecodeError:
-                    continue
-            return resp.text
-        except Exception as err:
-            ultimo_erro = err
-            print(f"   Tentativa {tentativa}/3 falhou ({err}). Aguardando...", file=sys.stderr)
-            time.sleep(3 * tentativa)
+            texto = conteudo_bytes.decode(enc)
+            if "Art." in texto or "art." in texto:
+                return texto
+        except UnicodeDecodeError:
+            continue
+    return conteudo_bytes.decode("utf-8", errors="ignore")
 
-    raise RuntimeError(f"Falha ao baixar URL oficial após 3 tentativas: {ultimo_erro}")
+
+def baixar_via_playwright(url: str) -> str:
+    from playwright.sync_api import sync_playwright
+
+    print("   Acionando navegador Chromium real (Playwright)...", file=sys.stderr)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
+        )
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            ),
+            locale="pt-BR",
+            ignore_https_errors=True,
+        )
+        page = context.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=90000)
+        page.wait_for_timeout(4000)
+        html = page.content()
+        browser.close()
+        return html
+
+
+def baixar_html_oficial(url: str) -> str:
+    # 1. Tentativa rápida com assinatura TLS real do Chrome (curl_cffi)
+    for perfil in ("chrome124", "chrome120", "safari17_0"):
+        try:
+            resp = cffi_requests.get(
+                url,
+                impersonate=perfil,
+                timeout=60,
+                verify=False,
+                headers={
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                },
+            )
+            if resp.status_code == 200:
+                html = decodificar_bytes(resp.content)
+                if "Art." in html or "art." in html:
+                    return html
+        except Exception as err:
+            print(f"   Perfil {perfil} falhou ({err}).", file=sys.stderr)
+            time.sleep(2)
+
+    # 2. Fallback automático: abre Chromium headless real
+    html_browser = baixar_via_playwright(url)
+    if "Art." in html_browser or "art." in html_browser:
+        return html_browser
+
+    raise RuntimeError("Não foi possível obter o conteúdo da lei nem via curl_cffi nem via Chromium.")
 
 
 def linha_parece_descricao_estrutura(linha: str) -> bool:
@@ -110,7 +136,6 @@ def extrair_dispositivos(html: str) -> list[dict]:
         texto_geral = soup.get_text("\n")
         blocos_brutos = [normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)]
 
-    # Une cabeçalhos estruturais ("TÍTULO I") à descrição da linha imediatamente seguinte ("Dos Princípios Fundamentais")
     blocos_consolidados = []
     idx = 0
     while idx < len(blocos_brutos):
@@ -263,8 +288,8 @@ def inserir_em_lotes(lei_id: str, dispositivos: list[dict], status: str):
         }
         for d in dispositivos
     ]
-    for i in range(0, len(registros), 300):
-        supabase.table("dispositivos").insert(registros[i : i + 300]).execute()
+    for i in range(0, len(registros), 150):
+        supabase.table("dispositivos").insert(registros[i : i + 150]).execute()
 
 
 def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
@@ -283,7 +308,6 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
         novo_hash = calcular_hash(dispositivos)
         hash_atual = lei.get("hash_atual")
 
-        # Verifica se a lei está sem dispositivos vigentes no banco (ex: falha anterior)
         resp_exist = (
             supabase.table("dispositivos")
             .select("id", count="exact")
@@ -294,13 +318,10 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
         )
         sem_vigentes = (resp_exist.count or 0) == 0
 
-        # Primeira extração, recuperação de lei vazia ou reestruturação segura dos índices
         if not hash_atual or forcar_reestruturacao or sem_vigentes:
-            # 1. Grava primeiro em status temporário 'reestruturando' (nunca apaga antes de concluir!)
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
             inserir_em_lotes(lei_id, dispositivos, "reestruturando")
 
-            # 2. Só após todos os lotes serem gravados com sucesso, troca para 'vigente'
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "vigente").execute()
             supabase.table("dispositivos").update({"versao_status": "vigente"}).eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
 
@@ -309,10 +330,9 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
                 "status_extracao": "concluido",
                 "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
             }).eq("id", lei_id).execute()
-            print(f" -> Estrutura/índice atualizado com segurança ({len(dispositivos)} dispositivos).")
+            print(f" -> Estrutura/índice atualizado com sucesso ({len(dispositivos)} dispositivos).")
             return
 
-        # Verificação de alteração legislativa
         if novo_hash != hash_atual:
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "pendente").execute()
             inserir_em_lotes(lei_id, dispositivos, "pendente")
@@ -332,7 +352,6 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
 
     except Exception as e:
         print(f" -> Erro ao processar {lei['titulo']}: {e}", file=sys.stderr)
-        # Limpa eventual rascunho incompleto sem tocar nos dispositivos vigentes
         supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
         supabase.table("leis").update({"status_extracao": "erro"}).eq("id", lei_id).execute()
 
@@ -340,8 +359,7 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
 def main():
     if MODO in ("verificar_lei", "reprocessar_indice_lei") and LEI_ID_ALVO:
         resp = supabase.table("leis").select("*").eq("id", LEI_ID_ALVO).execute()
-        leis = resp.data or []
-        for lei in leis:
+        for lei in (resp.data or []):
             processar_lei(lei, forcar_reestruturacao=(MODO == "reprocessar_indice_lei"))
         return
 
