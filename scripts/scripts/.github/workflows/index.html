@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vade Mecum Inteligente | Lei Seca & Jurisprudência</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-base: #060b19;
+      --bg-surface: #0d162c;
+      --bg-elevated: #13203f;
+      --cobalt-primary: #1d4ed8;
+      --cobalt-hover: #2563eb;
+      --cyan-accent: #00e5ff;
+      --cyan-soft: rgba(0, 229, 255, 0.12);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #1e325c;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; }
+
+    /* Login */
+    .auth-container {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .auth-card {
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 32px; width: 100%; max-width: 400px;
+    }
+    .auth-card h1 { color: var(--cyan-accent); font-size: 1.5rem; margin-bottom: 8px; }
+    .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+    /* Layout Principal */
+    .app-layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+    @media (max-width: 850px) {
+      .app-layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border-color); }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-color);
+      padding: 20px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .brand { font-size: 1.2rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; }
+    .lei-item {
+      background: var(--bg-elevated); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 12px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .lei-item:hover { transform: scale(1.015); border-color: var(--cyan-accent); }
+    .lei-item.active { border-color: var(--cyan-accent); background: rgba(29, 78, 216, 0.25); }
+    .lei-item-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .badge {
+      display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
+    }
+    .badge-update { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
+    .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+    /* Área de Leitura */
+    .main-content { padding: 28px; max-width: 960px; width: 100%; margin: 0 auto; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Banner de Atualização Legislativa */
+    .update-banner {
+      background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning);
+      border-radius: 10px; padding: 16px; margin-bottom: 24px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    }
+
+    /* Dispositivos da Lei */
+    .disp-estrutura {
+      margin-top: 28px; margin-bottom: 12px; color: var(--cyan-accent);
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color); padding-bottom: 6px;
+    }
+    .disp-card {
+      background: var(--bg-surface); border: 1px solid transparent;
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
+      transition: border-color 0.15s ease;
+    }
+    .disp-card:hover { border-color: var(--border-color); }
+    .disp-artigo { border-left: 3px solid var(--cyan-accent); }
+    .disp-paragrafo { margin-left: 16px; border-left: 2px solid var(--cobalt-primary); }
+    .disp-inciso { margin-left: 32px; }
+    .disp-alinea { margin-left: 48px; }
+
+    .disp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .disp-rotulo { font-weight: 700; color: var(--cyan-accent); margin-right: 6px; }
+    .disp-alterado-tag {
+      font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
+      border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
+    }
+
+    /* Anotações & STF/STJ */
+    .notas-lista { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .nota-box {
+      background: var(--bg-elevated); border-left: 3px solid var(--warning);
+      padding: 10px 12px; border-radius: 6px; font-size: 0.9rem;
+    }
+    .nota-box.STF { border-left-color: #38bdf8; }
+    .nota-box.STJ { border-left-color: #a78bfa; }
+    .nota-meta {
+      display: flex; justify-content: space-between; font-size: 0.75rem;
+      color: var(--text-muted); margin-bottom: 4px; font-weight: 600;
+    }
+
+    /* Inputs e Botões */
+    input, select, textarea {
+      width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-size: 0.9rem;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan-accent); }
+    .btn {
+      background: var(--cobalt-primary); color: #fff; border: none; padding: 9px 14px;
+      border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+    .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
+    .btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+    .btn-warning { background: var(--warning); color: #000; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 24px; width: 100%; max-width: 520px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE LOGIN -->
+  <div id="auth-view" class="auth-container">
+    <div class="auth-card">
+      <h1>Vade Mecum Inteligente</h1>
+      <p>Acesse suas leis comentadas e jurisprudências sincronizadas.</p>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <input type="email" id="login-email" placeholder="Seu e-mail" />
+        <input type="password" id="login-pass" placeholder="Sua senha" />
+        <button class="btn" onclick="fazerLogin()">Entrar</button>
+        <p id="auth-error" style="color: var(--danger); font-size: 0.85rem;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICAÇÃO PRINCIPAL -->
+  <div id="app-view" class="app-layout hidden">
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span>Legislação & Notas</span>
+        <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
+      </div>
+
+      <button class="btn" onclick="abrirModalNovaLei()">+ Cadastrar Lei (Planalto/Senado)</button>
+      <button class="btn btn-outline btn-sm" onclick="dispararWorkflowGitHub('verificar_todas')">🔄 Verificar Alterações Agora</button>
+
+      <div id="lista-leis" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto;"></div>
+
+      <button class="btn btn-outline btn-sm" style="margin-top:auto;" onclick="sair()">Sair</button>
+    </aside>
+
+    <!-- CONTEÚDO DA LEI -->
+    <main class="main-content">
+      <div id="estado-vazio" style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+        <h2>Selecione ou cadastre uma lei ao lado</h2>
+        <p>Cole o link do Planalto ou do Senado Federal para estruturar artigos, incisos e alíneas automaticamente.</p>
+      </div>
+
+      <div id="leitor-lei" class="hidden">
+        <div class="toolbar">
+          <div>
+            <h2 id="titulo-lei-atual" style="color: var(--cyan-accent);"></h2>
+            <a id="link-fonte-lei" href="#" target="_blank" style="font-size:0.8rem; color:var(--text-muted);">Abrir texto oficial na fonte ↗</a>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="busca-artigo" placeholder="Filtrar artigo ou palavra..." oninput="filtrarDispositivos()" style="width:220px;" />
+            <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
+          </div>
+        </div>
+
+        <!-- ALERTA DE ALTERAÇÃO LEGISLATIVA -->
+        <div id="banner-atualizacao" class="update-banner hidden">
+          <div>
+            <strong style="color: var(--warning);">⚠️ Alteração legislativa detectada na fonte oficial!</strong>
+            <p style="font-size: 0.85rem; color: var(--text-main);">O texto no Planalto/Senado mudou. Atualize mantendo todas as suas anotações intactas.</p>
+          </div>
+          <button class="btn btn-warning" onclick="aplicarAtualizacaoSegura()">Atualizar Lei (Preservar Notas)</button>
+        </div>
+
+        <div id="container-dispositivos"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR NOVA LEI -->
+  <div id="modal-nova-lei" class="modal-backdrop">
+    <div class="modal">
+      <h3>Cadastrar Nova Lei</h3>
+      <input type="text" id="nova-lei-titulo" placeholder="Nome curto (ex: Lei de Responsabilidade Fiscal - LC 101/00)" />
+      <input type="url" id="nova-lei-url" placeholder="URL do Planalto ou Senado (ex: https://www.planalto.gov.br/...)" />
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-nova-lei')">Cancelar</button>
+        <button class="btn" onclick="salvarNovaLei()">Extrair e Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO -->
+  <div id="modal-nota" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="modal-nota-titulo">Nova Anotação / Jurisprudência</h3>
+      <input type="hidden" id="nota-slug" />
+      <input type="hidden" id="nota-id" />
+      <select id="nota-tribunal">
+        <option value="Nota">📝 Anotação Pessoal / Resumo</option>
+        <option value="STF">⚖️ Jurisprudência STF</option>
+        <option value="STJ">⚖️ Jurisprudência STJ</option>
+        <option value="Doutrina">📚 Doutrina / Pegadinha de Prova</option>
+      </select>
+      <textarea id="nota-conteudo" rows="6" placeholder="Digite o entendimento, súmula, informativo ou observação..."></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-nota')">Cancelar</button>
+        <button class="btn" onclick="salvarNota()">Salvar Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURAÇÃO GITHUB ACTIONS -->
+  <div id="modal-config" class="modal-backdrop">
+    <div class="modal">
+      <h3>Integração GitHub Actions</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted);">Permite que o site acione o robô extrator imediatamente ao cadastrar uma lei nova.</p>
+      <input type="text" id="cfg-owner" placeholder="Seu usuário do GitHub (ex: mxwbr)" />
+      <input type="text" id="cfg-repo" placeholder="Nome do repositório (ex: vade-mecum)" />
+      <input type="password" id="cfg-token" placeholder="Fine-grained Token (permissão Actions: Read & Write)" />
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-config')">Fechar</button>
+        <button class="btn" onclick="salvarConfigGitHub()">Salvar Configuração</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // PREENCHA COM AS CHAVES DO SEU PROJETO SUPABASE (Project Settings -> API)
+    // =========================================================================
+    const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
+    const SUPABASE_ANON_KEY = "SUA-CHAVE-ANON-PUBLICA";
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let usuarioAtual = null;
+    let leisCache = [];
+    let leiSelecionada = null;
+    let dispositivosCache = [];
+    let anotacoesCache = {}; // Mapa: slug -> array de notas
+
+    // Inicialização
+    window.addEventListener("DOMContentLoaded", async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) iniciarApp(session.user);
+    });
+
+    async function fazerLogin() {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-pass").value;
+      const errEl = document.getElementById("auth-error");
+      errEl.textContent = "";
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        errEl.textContent = "Falha no login: " + error.message;
+      } else {
+        iniciarApp(data.user);
+      }
+    }
+
+    async function sair() {
+      await sb.auth.signOut();
+      location.reload();
+    }
+
+    function iniciarApp(user) {
+      usuarioAtual = user;
+      document.getElementById("auth-view").classList.add("hidden");
+      document.getElementById("app-view").classList.remove("hidden");
+      carregarLeis();
+    }
+
+    // =========================================================================
+    // GERENCIAMENTO DE LEIS
+    // =========================================================================
+    async function carregarLeis() {
+      const { data, error } = await sb.from("leis").select("*").order("created_at", { ascending: false });
+      if (error) return console.error(error);
+      leisCache = data || [];
+      renderizarSidebar();
+
+      // Se houver alguma lei processando, verifica novamente em 5 segundos
+      if (leisCache.some(l => l.status_extracao === "pendente" || l.status_extracao === "processando")) {
+        setTimeout(carregarLeis, 5000);
+      }
+    }
+
+    function renderizarSidebar() {
+      const container = document.getElementById("lista-leis");
+      container.innerHTML = "";
+
+      leisCache.forEach(lei => {
+        const div = document.createElement("div");
+        div.className = "lei-item" + (leiSelecionada && leiSelecionada.id === lei.id ? " active" : "");
+        div.onclick = () => selecionarLei(lei);
+
+        let badge = "";
+        if (lei.tem_atualizacao) {
+          badge = `<span class="badge badge-update">⚠️ Atualização disponível</span>`;
+        } else if (lei.status_extracao === "pendente" || lei.status_extracao === "processando") {
+          badge = `<span class="badge badge-proc">⏳ Extraindo texto...</span>`;
+        } else if (lei.status_extracao === "erro") {
+          badge = `<span class="badge badge-err">Erro na extração</span>`;
+        }
+
+        div.innerHTML = `<div class="lei-item-title">${lei.titulo}</div>${badge}`;
+        container.appendChild(div);
+      });
+    }
+
+    async function selecionarLei(lei) {
+      leiSelecionada = lei;
+      renderizarSidebar();
+
+      document.getElementById("estado-vazio").classList.add("hidden");
+      document.getElementById("leitor-lei").classList.remove("hidden");
+      document.getElementById("titulo-lei-atual").textContent = lei.titulo;
+      document.getElementById("link-fonte-lei").href = lei.url;
+
+      const banner = document.getElementById("banner-atualizacao");
+      if (lei.tem_atualizacao) banner.classList.remove("hidden");
+      else banner.classList.add("hidden");
+
+      // Carrega dispositivos vigentes
+      const { data: disps } = await sb
+        .from("dispositivos")
+        .select("*")
+        .eq("lei_id", lei.id)
+        .eq("versao_status", "vigente")
+        .order("ordem", { ascending: true });
+
+      dispositivosCache = disps || [];
+
+      // Carrega anotações vinculadas aos slugs
+      const { data: notas } = await sb
+        .from("anotacoes")
+        .select("*")
+        .eq("lei_id", lei.id)
+        .order("updated_at", { ascending: true });
+
+      anotacoesCache = {};
+      (notas || []).forEach(n => {
+        if (!anotacoesCache[n.slug]) anotacoesCache[n.slug] = [];
+        anotacoesCache[n.slug].push(n);
+      });
+
+      renderizarDispositivos(dispositivosCache);
+    }
+
+    function renderizarDispositivos(lista) {
+      const container = document.getElementById("container-dispositivos");
+      container.innerHTML = "";
+
+      if (lista.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted);">Aguardando processamento do extrator ou nenhum dispositivo encontrado.</p>`;
+        return;
+      }
+
+      lista.forEach(d => {
+        if (d.tipo === "estrutura") {
+          const h = document.createElement("div");
+          h.className = "disp-estrutura";
+          h.textContent = d.texto;
+          container.appendChild(h);
+          return;
+        }
+
+        const card = document.createElement("div");
+        card.className = `disp-card disp-${d.tipo}`;
+
+        const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
+        const notasDoSlug = anotacoesCache[d.slug] || [];
+
+        let notasHtml = "";
+        if (notasDoSlug.length > 0) {
+          notasHtml = `<div class="notas-lista">` + notasDoSlug.map(n => `
+            <div class="nota-box ${n.tribunal}">
+              <div class="nota-meta">
+                <span>${n.tribunal}</span>
+                <div>
+                  <button class="btn btn-outline btn-sm" onclick="editarNota('${n.id}', '${d.slug}')">Editar</button>
+                  <button class="btn btn-outline btn-sm" onclick="excluirNota('${n.id}')" style="color:var(--danger);">×</button>
+                </div>
+              </div>
+              <div style="white-space: pre-wrap;">${n.conteudo}</div>
+            </div>
+          `).join("") + `</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="disp-header">
+            <div>
+              <span class="disp-rotulo">${d.rotulo}</span>
+              <span>${d.texto}</span>
+              ${tagAlterado}
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="abrirModalNota('${d.slug}')">+ Nota</button>
+          </div>
+          ${notasHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filtrarDispositivos() {
+      const termo = document.getElementById("busca-artigo").value.toLowerCase().trim();
+      if (!termo) return renderizarDispositivos(dispositivosCache);
+
+      const filtrados = dispositivosCache.filter(d =>
+        (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
+        (d.texto && d.texto.toLowerCase().includes(termo))
+      );
+      renderizarDispositivos(filtrados);
+    }
+
+    // =========================================================================
+    // ATUALIZAÇÃO SEGURA (PRESERVANDO ANOTAÇÕES POR SLUG)
+    // =========================================================================
+    async function aplicarAtualizacaoSegura() {
+      if (!leiSelecionada) return;
+      if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações e jurisprudências serão mantidas nos mesmos artigos/incisos.")) return;
+
+      const leiId = leiSelecionada.id;
+
+      // 1. Busca a versão pendente baixada pelo GitHub Actions
+      const { data: pendentes } = await sb
+        .from("dispositivos")
+        .select("*")
+        .eq("lei_id", leiId)
+        .eq("versao_status", "pendente");
+
+      if (!pendentes || pendentes.length === 0) return;
+
+      // 2. Mapeia os textos antigos para destacar o que mudou
+      const mapaAntigo = {};
+      dispositivosCache.forEach(d => { mapaAntigo[d.slug] = d.texto; });
+
+      // 3. Remove a versão vigente antiga e promove a pendente para vigente
+      await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
+
+      for (const p of pendentes) {
+        const mudou = mapaAntigo[p.slug] && mapaAntigo[p.slug] !== p.texto;
+        await sb.from("dispositivos").update({
+          versao_status: "vigente",
+          foi_alterado: mudou
+        }).eq("id", p.id);
+      }
+
+      // 4. Atualiza o hash oficial na tabela de leis
+      await sb.from("leis").update({
+        hash_atual: leiSelecionada.hash_pendente,
+        hash_pendente: null,
+        tem_atualizacao: false
+      }).eq("id", leiId);
+
+      alert("Lei atualizada com sucesso! Todas as anotações foram preservadas.");
+      await carregarLeis();
+      const atualizada = leisCache.find(l => l.id === leiId);
+      if (atualizada) selecionarLei(atualizada);
+    }
+
+    // =========================================================================
+    // CADASTRO DE LEI & INTEGRAÇÃO GITHUB ACTIONS
+    // =========================================================================
+    async function salvarNovaLei() {
+      const titulo = document.getElementById("nova-lei-titulo").value.trim();
+      const url = document.getElementById("nova-lei-url").value.trim();
+      if (!titulo || !url) return alert("Preencha o título e a URL.");
+
+      const { error } = await sb.from("leis").insert({
+        user_id: usuarioAtual.id,
+        titulo,
+        url,
+        status_extracao: "pendente"
+      });
+
+      if (error) return alert("Erro ao cadastrar: " + error.message);
+
+      fecharModal("modal-nova-lei");
+      document.getElementById("nova-lei-titulo").value = "";
+      document.getElementById("nova-lei-url").value = "";
+
+      await dispararWorkflowGitHub("extrair_pendentes");
+      carregarLeis();
+    }
+
+    async function dispararWorkflowGitHub(modo) {
+      const { data: cfg } = await sb.from("config_integracao").select("*").eq("user_id", usuarioAtual.id).single();
+      if (!cfg) {
+        console.warn("GitHub Actions não configurado no modal ⚙️. O robô rodará no agendamento diário.");
+        return;
+      }
+
+      const apiUrl = `https://api.github.com/repos/${cfg.github_owner}/${cfg.github_repo}/actions/workflows/leis_bot.yml/dispatches`;
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${cfg.github_token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref: "main", inputs: { modo } })
+      });
+    }
+
+    async function excluirLeiAtual() {
+      if (!leiSelecionada) return;
+      if (!confirm(`Excluir "${leiSelecionada.titulo}" e todas as suas notas?`)) return;
+      await sb.from("leis").delete().eq("id", leiSelecionada.id);
+      leiSelecionada = null;
+      document.getElementById("leitor-lei").classList.add("hidden");
+      document.getElementById("estado-vazio").classList.remove("hidden");
+      carregarLeis();
+    }
+
+    // =========================================================================
+    // CRUD DE ANOTAÇÕES (STF / STJ / NOTAS)
+    // =========================================================================
+    function abrirModalNota(slug) {
+      document.getElementById("nota-slug").value = slug;
+      document.getElementById("nota-id").value = "";
+      document.getElementById("nota-tribunal").value = "Nota";
+      document.getElementById("nota-conteudo").value = "";
+      document.getElementById("modal-nota").classList.add("open");
+    }
+
+    function editarNota(notaId, slug) {
+      const nota = (anotacoesCache[slug] || []).find(n => n.id === notaId);
+      if (!nota) return;
+      document.getElementById("nota-slug").value = slug;
+      document.getElementById("nota-id").value = nota.id;
+      document.getElementById("nota-tribunal").value = nota.tribunal;
+      document.getElementById("nota-conteudo").value = nota.conteudo;
+      document.getElementById("modal-nota").classList.add("open");
+    }
+
+    async function salvarNota() {
+      const slug = document.getElementById("nota-slug").value;
+      const notaId = document.getElementById("nota-id").value;
+      const tribunal = document.getElementById("nota-tribunal").value;
+      const conteudo = document.getElementById("nota-conteudo").value.trim();
+      if (!conteudo) return;
+
+      if (notaId) {
+        await sb.from("anotacoes").update({ tribunal, conteudo, updated_at: new Date().toISOString() }).eq("id", notaId);
+      } else {
+        await sb.from("anotacoes").insert({
+          lei_id: leiSelecionada.id,
+          user_id: usuarioAtual.id,
+          slug,
+          tribunal,
+          conteudo
+        });
+      }
+
+      fecharModal("modal-nota");
+      selecionarLei(leiSelecionada);
+    }
+
+    async function excluirNota(notaId) {
+      if (!confirm("Remover esta anotação?")) return;
+      await sb.from("anotacoes").delete().eq("id", notaId);
+      selecionarLei(leiSelecionada);
+    }
+
+    // Modais auxiliares
+    function abrirModalNovaLei() { document.getElementById("modal-nova-lei").classList.add("open"); }
+    async function abrirModalConfig() {
+      const { data } = await sb.from("config_integracao").select("*").eq("user_id", usuarioAtual.id).single();
+      if (data) {
+        document.getElementById("cfg-owner").value = data.github_owner;
+        document.getElementById("cfg-repo").value = data.github_repo;
+        document.getElementById("cfg-token").value = data.github_token;
+      }
+      document.getElementById("modal-config").classList.add("open");
+    }
+
+    async function salvarConfigGitHub() {
+      const github_owner = document.getElementById("cfg-owner").value.trim();
+      const github_repo = document.getElementById("cfg-repo").value.trim();
+      const github_token = document.getElementById("cfg-token").value.trim();
+      await sb.from("config_integracao").upsert({
+        user_id: usuarioAtual.id, github_owner, github_repo, github_token
+      });
+      fecharModal("modal-config");
+      alert("Integração salva!");
+    }
+
+    function fecharModal(id) { document.getElementById(id).classList.remove("open"); }
+  </script>
+</body>
+</html>
