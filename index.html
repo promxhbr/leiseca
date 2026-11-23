@@ -37,7 +37,7 @@
     .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
 
     /* Layout Principal */
-    .app-layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+    .app-layout { display: grid; grid-template-columns: 315px 1fr; min-height: 100vh; }
     @media (max-width: 850px) {
       .app-layout { grid-template-columns: 1fr; }
       .sidebar { border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -46,19 +46,50 @@
     /* Sidebar */
     .sidebar {
       background: var(--bg-surface); border-right: 1px solid var(--border-color);
-      padding: 20px; display: flex; flex-direction: column; gap: 16px;
+      padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      overflow-x: hidden;
     }
     .brand { font-size: 1.2rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; }
+
+    /* Filtro de Tags (Matérias) */
+    .tags-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px;
+    }
+    .tag-pill {
+      background: var(--bg-elevated); border: 1px solid var(--border-color);
+      color: var(--text-muted); font-size: 0.74rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 99px; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tag-pill:hover { border-color: var(--cyan-accent); color: var(--text-main); }
+    .tag-pill.active {
+      background: var(--cobalt-primary); border-color: var(--cyan-accent); color: #fff;
+    }
+
+    /* Lista de Leis (Sem barra de rolagem horizontal no hover) */
+    #lista-leis {
+      display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto; overflow-x: hidden; padding: 4px;
+    }
+    .grupo-materia-titulo {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px;
+      padding-left: 2px;
+    }
     .lei-item {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
-      border-radius: 8px; padding: 12px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease;
+      border-radius: 8px; padding: 12px; cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
     .lei-item:hover { transform: scale(1.015); border-color: var(--cyan-accent); }
     .lei-item.active { border-color: var(--cyan-accent); background: rgba(29, 78, 216, 0.25); }
-    .lei-item-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .lei-item-title { font-weight: 600; font-size: 0.94rem; margin-bottom: 6px; }
+    .lei-item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
     .badge {
-      display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
+      display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
     }
+    .badge-tag { background: rgba(29, 78, 216, 0.35); color: #93c5fd; border: 1px solid var(--cobalt-primary); }
     .badge-update { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
@@ -173,7 +204,11 @@
       <button class="btn" onclick="abrirModalNovaLei()">+ Cadastrar Lei (Planalto/Senado)</button>
       <button class="btn btn-outline btn-sm" onclick="dispararWorkflowGitHub('verificar_todas')">🔄 Verificar Alterações Agora</button>
 
-      <div id="lista-leis" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto;"></div>
+      <!-- FILTRO POR TAG / MATÉRIA -->
+      <div id="filtro-materias" class="tags-bar"></div>
+
+      <!-- LISTA AGRUPADA DE LEIS -->
+      <div id="lista-leis"></div>
 
       <button class="btn btn-outline btn-sm" style="margin-top:auto;" onclick="sair()">Sair</button>
     </aside>
@@ -188,11 +223,15 @@
       <div id="leitor-lei" class="hidden">
         <div class="toolbar">
           <div>
-            <h2 id="titulo-lei-atual" style="color: var(--cyan-accent);"></h2>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <h2 id="titulo-lei-atual" style="color: var(--cyan-accent);"></h2>
+              <span id="tag-lei-atual" class="badge badge-tag" style="cursor:pointer;" onclick="abrirModalEditarLei()" title="Clique para editar título ou matéria"></span>
+            </div>
             <a id="link-fonte-lei" href="#" target="_blank" style="font-size:0.8rem; color:var(--text-muted);">Abrir texto oficial na fonte ↗</a>
           </div>
-          <div style="display:flex; gap:8px; align-items:center;">
-            <input type="text" id="busca-artigo" placeholder="Filtrar artigo ou palavra..." oninput="filtrarDispositivos()" style="width:220px;" />
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="busca-artigo" placeholder="Filtrar artigo ou palavra..." oninput="filtrarDispositivos()" style="width:200px;" />
+            <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar Tag</button>
             <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
           </div>
         </div>
@@ -215,11 +254,37 @@
   <div id="modal-nova-lei" class="modal-backdrop">
     <div class="modal">
       <h3>Cadastrar Nova Lei</h3>
-      <input type="text" id="nova-lei-titulo" placeholder="Nome curto (ex: Lei de Responsabilidade Fiscal - LC 101/00)" />
+      <input type="text" id="nova-lei-titulo" placeholder="Nome curto (ex: Lei 14.133/21 - Licitações)" />
+      <div>
+        <input type="text" id="nova-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag (ex: Direito Administrativo)" />
+        <datalist id="sugestoes-materias">
+          <option value="Direito Administrativo">
+          <option value="Direito Tributário">
+          <option value="Direito Constitucional">
+          <option value="Legislação Tributária">
+          <option value="AFO / LRF">
+          <option value="Direito Civil">
+          <option value="Direito Empresarial">
+          <option value="Direito Penal">
+        </datalist>
+      </div>
       <input type="url" id="nova-lei-url" placeholder="URL do Planalto ou Senado (ex: https://www.planalto.gov.br/...)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-nova-lei')">Cancelar</button>
         <button class="btn" onclick="salvarNovaLei()">Extrair e Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR TÍTULO E TAG (MATÉRIA) DA LEI -->
+  <div id="modal-editar-lei" class="modal-backdrop">
+    <div class="modal">
+      <h3>Editar Lei / Matéria</h3>
+      <input type="text" id="edit-lei-titulo" placeholder="Título da lei" />
+      <input type="text" id="edit-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag (ex: Direito Administrativo)" />
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-editar-lei')">Cancelar</button>
+        <button class="btn" onclick="salvarEdicaoLei()">Salvar Alterações</button>
       </div>
     </div>
   </div>
@@ -251,7 +316,7 @@
       <p style="font-size:0.82rem; color:var(--text-muted);">Permite que o site acione o robô extrator imediatamente ao cadastrar uma lei nova.</p>
       <input type="text" id="cfg-owner" placeholder="Seu usuário do GitHub (ex: mxwbr)" />
       <input type="text" id="cfg-repo" placeholder="Nome do repositório (ex: vade-mecum)" />
-      <input type="password" id="cfg-token" placeholder="Fine-grained Token (permissão Actions: Read & Write)" />
+      <input type="password" id="cfg-token" placeholder="Token do GitHub (permissão workflow / Actions)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-config')">Fechar</button>
         <button class="btn" onclick="salvarConfigGitHub()">Salvar Configuração</button>
@@ -268,10 +333,10 @@
     let usuarioAtual = null;
     let leisCache = [];
     let leiSelecionada = null;
+    let filtroMateriaAtual = "Todas";
     let dispositivosCache = [];
-    let anotacoesCache = {}; // Mapa: slug -> array de notas
+    let anotacoesCache = {};
 
-    // Inicialização
     window.addEventListener("DOMContentLoaded", async () => {
       const { data: { session } } = await sb.auth.getSession();
       if (session) iniciarApp(session.user);
@@ -304,40 +369,100 @@
     }
 
     // =========================================================================
-    // GERENCIAMENTO DE LEIS
+    // GERENCIAMENTO DE LEIS E TAGS (MATÉRIAS)
     // =========================================================================
     async function carregarLeis() {
-      const { data, error } = await sb.from("leis").select("*").order("created_at", { ascending: false });
+      const { data, error } = await sb.from("leis").select("*").order("titulo", { ascending: true });
       if (error) return console.error(error);
       leisCache = data || [];
+
+      atualizarSugestoesMaterias();
+      renderizarFiltroMaterias();
       renderizarSidebar();
 
-      // Se houver alguma lei processando, verifica novamente em 5 segundos
       if (leisCache.some(l => l.status_extracao === "pendente" || l.status_extracao === "processando")) {
         setTimeout(carregarLeis, 5000);
       }
+    }
+
+    function atualizarSugestoesMaterias() {
+      const datalist = document.getElementById("sugestoes-materias");
+      const padroes = [
+        "Direito Administrativo", "Direito Tributário", "Direito Constitucional",
+        "Legislação Tributária", "AFO / LRF", "Direito Civil", "Direito Empresarial", "Direito Penal"
+      ];
+      const existentes = leisCache.map(l => (l.materia || "Geral").trim());
+      const unicas = [...new Set([...padroes, ...existentes])].sort();
+      datalist.innerHTML = unicas.map(m => `<option value="${m}">`).join("");
+    }
+
+    function renderizarFiltroMaterias() {
+      const bar = document.getElementById("filtro-materias");
+      const materias = ["Todas", ...new Set(leisCache.map(l => (l.materia || "Geral").trim()))];
+
+      if (!materias.includes(filtroMateriaAtual)) filtroMateriaAtual = "Todas";
+
+      bar.innerHTML = "";
+      materias.forEach(mat => {
+        const pill = document.createElement("button");
+        pill.className = "tag-pill" + (filtroMateriaAtual === mat ? " active" : "");
+        pill.textContent = mat;
+        pill.onclick = () => {
+          filtroMateriaAtual = mat;
+          renderizarFiltroMaterias();
+          renderizarSidebar();
+        };
+        bar.appendChild(pill);
+      });
     }
 
     function renderizarSidebar() {
       const container = document.getElementById("lista-leis");
       container.innerHTML = "";
 
-      leisCache.forEach(lei => {
-        const div = document.createElement("div");
-        div.className = "lei-item" + (leiSelecionada && leiSelecionada.id === lei.id ? " active" : "");
-        div.onclick = () => selecionarLei(lei);
+      const filtradas = filtroMateriaAtual === "Todas"
+        ? leisCache
+        : leisCache.filter(l => (l.materia || "Geral").trim() === filtroMateriaAtual);
 
-        let badge = "";
-        if (lei.tem_atualizacao) {
-          badge = `<span class="badge badge-update">⚠️ Atualização disponível</span>`;
-        } else if (lei.status_extracao === "pendente" || lei.status_extracao === "processando") {
-          badge = `<span class="badge badge-proc">⏳ Extraindo texto...</span>`;
-        } else if (lei.status_extracao === "erro") {
-          badge = `<span class="badge badge-err">Erro na extração</span>`;
+      // Agrupa visualmente por Matéria
+      const grupos = {};
+      filtradas.forEach(lei => {
+        const mat = (lei.materia || "Geral").trim();
+        if (!grupos[mat]) grupos[mat] = [];
+        grupos[mat].push(lei);
+      });
+
+      Object.keys(grupos).sort().forEach(materia => {
+        if (filtroMateriaAtual === "Todas") {
+          const header = document.createElement("div");
+          header.className = "grupo-materia-titulo";
+          header.textContent = materia;
+          container.appendChild(header);
         }
 
-        div.innerHTML = `<div class="lei-item-title">${lei.titulo}</div>${badge}`;
-        container.appendChild(div);
+        grupos[materia].forEach(lei => {
+          const div = document.createElement("div");
+          div.className = "lei-item" + (leiSelecionada && leiSelecionada.id === lei.id ? " active" : "");
+          div.onclick = () => selecionarLei(lei);
+
+          let statusBadge = "";
+          if (lei.tem_atualizacao) {
+            statusBadge = `<span class="badge badge-update">⚠️ Atualização</span>`;
+          } else if (lei.status_extracao === "pendente" || lei.status_extracao === "processando") {
+            statusBadge = `<span class="badge badge-proc">⏳ Extraindo...</span>`;
+          } else if (lei.status_extracao === "erro") {
+            statusBadge = `<span class="badge badge-err">Erro</span>`;
+          }
+
+          div.innerHTML = `
+            <div class="lei-item-title">${lei.titulo}</div>
+            <div class="lei-item-meta">
+              <span class="badge badge-tag">${materia}</span>
+              ${statusBadge}
+            </div>
+          `;
+          container.appendChild(div);
+        });
       });
     }
 
@@ -348,13 +473,13 @@
       document.getElementById("estado-vazio").classList.add("hidden");
       document.getElementById("leitor-lei").classList.remove("hidden");
       document.getElementById("titulo-lei-atual").textContent = lei.titulo;
+      document.getElementById("tag-lei-atual").textContent = lei.materia || "Geral";
       document.getElementById("link-fonte-lei").href = lei.url;
 
       const banner = document.getElementById("banner-atualizacao");
       if (lei.tem_atualizacao) banner.classList.remove("hidden");
       else banner.classList.add("hidden");
 
-      // Carrega dispositivos vigentes
       const { data: disps } = await sb
         .from("dispositivos")
         .select("*")
@@ -364,7 +489,6 @@
 
       dispositivosCache = disps || [];
 
-      // Carrega anotações vinculadas aos slugs
       const { data: notas } = await sb
         .from("anotacoes")
         .select("*")
@@ -455,7 +579,6 @@
 
       const leiId = leiSelecionada.id;
 
-      // 1. Busca a versão pendente baixada pelo GitHub Actions
       const { data: pendentes } = await sb
         .from("dispositivos")
         .select("*")
@@ -464,11 +587,9 @@
 
       if (!pendentes || pendentes.length === 0) return;
 
-      // 2. Mapeia os textos antigos para destacar o que mudou
       const mapaAntigo = {};
       dispositivosCache.forEach(d => { mapaAntigo[d.slug] = d.texto; });
 
-      // 3. Remove a versão vigente antiga e promove a pendente para vigente
       await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
 
       for (const p of pendentes) {
@@ -479,7 +600,6 @@
         }).eq("id", p.id);
       }
 
-      // 4. Atualiza o hash oficial na tabela de leis
       await sb.from("leis").update({
         hash_atual: leiSelecionada.hash_pendente,
         hash_pendente: null,
@@ -493,16 +613,18 @@
     }
 
     // =========================================================================
-    // CADASTRO DE LEI & INTEGRAÇÃO GITHUB ACTIONS
+    // CADASTRO, EDIÇÃO DE TAG & INTEGRAÇÃO GITHUB ACTIONS
     // =========================================================================
     async function salvarNovaLei() {
       const titulo = document.getElementById("nova-lei-titulo").value.trim();
+      const materia = document.getElementById("nova-lei-materia").value.trim() || "Geral";
       const url = document.getElementById("nova-lei-url").value.trim();
       if (!titulo || !url) return alert("Preencha o título e a URL.");
 
       const { error } = await sb.from("leis").insert({
         user_id: usuarioAtual.id,
         titulo,
+        materia,
         url,
         status_extracao: "pendente"
       });
@@ -511,18 +633,38 @@
 
       fecharModal("modal-nova-lei");
       document.getElementById("nova-lei-titulo").value = "";
+      document.getElementById("nova-lei-materia").value = "";
       document.getElementById("nova-lei-url").value = "";
 
       await dispararWorkflowGitHub("extrair_pendentes");
       carregarLeis();
     }
 
+    function abrirModalEditarLei() {
+      if (!leiSelecionada) return;
+      document.getElementById("edit-lei-titulo").value = leiSelecionada.titulo;
+      document.getElementById("edit-lei-materia").value = leiSelecionada.materia || "Geral";
+      document.getElementById("modal-editar-lei").classList.add("open");
+    }
+
+    async function salvarEdicaoLei() {
+      if (!leiSelecionada) return;
+      const titulo = document.getElementById("edit-lei-titulo").value.trim();
+      const materia = document.getElementById("edit-lei-materia").value.trim() || "Geral";
+      if (!titulo) return alert("Informe o título da lei.");
+
+      const { error } = await sb.from("leis").update({ titulo, materia }).eq("id", leiSelecionada.id);
+      if (error) return alert("Erro ao atualizar: " + error.message);
+
+      fecharModal("modal-editar-lei");
+      await carregarLeis();
+      const atualizada = leisCache.find(l => l.id === leiSelecionada.id);
+      if (atualizada) selecionarLei(atualizada);
+    }
+
     async function dispararWorkflowGitHub(modo) {
       const { data: cfg } = await sb.from("config_integracao").select("*").eq("user_id", usuarioAtual.id).single();
-      if (!cfg) {
-        console.warn("GitHub Actions não configurado no modal ⚙️. O robô rodará no agendamento diário.");
-        return;
-      }
+      if (!cfg) return;
 
       const apiUrl = `https://api.github.com/repos/${cfg.github_owner}/${cfg.github_repo}/actions/workflows/leis_bot.yml/dispatches`;
       await fetch(apiUrl, {
