@@ -101,7 +101,7 @@
     /* Layout Principal com Sidebar Retrátil */
     .app-layout {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 315px 1fr;
       min-height: 100vh;
       transition: grid-template-columns 0.22s ease;
     }
@@ -117,19 +117,59 @@
     /* Sidebar */
     .sidebar {
       background: var(--bg-surface); border-right: 1px solid var(--border-color);
-      padding: 18px; display: flex; flex-direction: column; gap: 12px;
+      padding: 16px; display: flex; flex-direction: column; gap: 10px;
       overflow-x: hidden; transition: padding 0.2s ease, opacity 0.15s ease;
     }
     .app-layout.sidebar-collapsed .sidebar {
       padding: 0; opacity: 0; pointer-events: none; border: none;
     }
-    .brand { font-size: 1.12rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-    .brand-actions { display: flex; gap: 6px; align-items: center; }
+    .brand { font-size: 1.08rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .brand-actions { display: flex; gap: 5px; align-items: center; }
+
+    /* Linha compacta de ações na Sidebar */
+    .sidebar-top-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* Seletor limpo de Tags (Matérias) na Sidebar */
+    .materia-select-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .materia-select-wrapper select {
+      padding: 7px 10px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      background: var(--bg-elevated);
+    }
+
+    /* Alerta global no menu quando alguma lei possui atualização */
+    .sidebar-update-alert {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid var(--warning);
+      color: var(--warning);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      transition: background 0.15s ease;
+    }
+    .sidebar-update-alert:hover {
+      background: rgba(245, 158, 11, 0.26);
+    }
 
     /* Dock Flutuante Lateral */
     .floating-dock {
       position: fixed;
-      left: 320px;
+      left: 315px;
       top: 42%;
       transform: translateY(-50%);
       z-index: 45;
@@ -138,81 +178,48 @@
       gap: 6px;
       transition: left 0.22s ease;
     }
-    .app-layout.sidebar-collapsed .floating-dock {
-      left: 0px;
-    }
+    .app-layout.sidebar-collapsed .floating-dock { left: 0px; }
     @media (max-width: 850px) {
       .floating-dock { left: 0px; top: auto; bottom: 18px; transform: none; }
     }
 
-    .dock-item-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
+    .dock-item-wrapper { position: relative; display: flex; align-items: center; }
     .dock-btn {
-      background: var(--bg-surface);
-      color: var(--cyan-accent);
-      border: 1px solid var(--border-color);
-      border-left: none;
-      border-radius: 0 8px 8px 0;
-      width: 34px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
+      background: var(--bg-surface); color: var(--cyan-accent);
+      border: 1px solid var(--border-color); border-left: none;
+      border-radius: 0 8px 8px 0; width: 34px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
       box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
       transition: background 0.15s ease, width 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .dock-btn:hover, .dock-btn.active {
-      background: var(--cobalt-primary);
-      color: #fff;
-      border-color: var(--cyan-accent);
-      width: 38px;
+      background: var(--cobalt-primary); color: #fff; border-color: var(--cyan-accent); width: 38px;
     }
 
     #dock-expand-btn { display: none; }
     .app-layout.sidebar-collapsed #dock-expand-btn { display: flex; }
 
     .dock-flyout {
-      position: absolute;
-      left: 42px;
-      top: 0;
-      background: var(--bg-surface);
-      border: 1px solid var(--cyan-accent);
-      border-radius: 10px;
-      padding: 10px 12px;
+      position: absolute; left: 42px; top: 0;
+      background: var(--bg-surface); border: 1px solid var(--cyan-accent);
+      border-radius: 10px; padding: 10px 12px;
       box-shadow: 0 10px 28px rgba(0,0,0,0.45);
-      display: none;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-      z-index: 50;
+      display: none; align-items: center; gap: 8px;
+      white-space: nowrap; z-index: 50;
     }
     .dock-flyout.open { display: flex; }
 
     .tool-chip {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      border: 2px solid var(--border-color);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 0.85rem;
+      width: 26px; height: 26px; border-radius: 6px;
+      border: 2px solid var(--border-color); cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem;
       transition: transform 0.12s ease, border-color 0.12s ease;
     }
     .tool-chip:hover { transform: scale(1.12); }
     .tool-chip.selected-tool {
-      border-color: var(--cyan-accent);
-      box-shadow: 0 0 0 2px var(--cyan-accent);
-      transform: scale(1.12);
+      border-color: var(--cyan-accent); box-shadow: 0 0 0 2px var(--cyan-accent); transform: scale(1.12);
     }
 
     /* Barra de Pesquisa Rápida Flutuante (Ctrl+F interno) */
@@ -222,49 +229,35 @@
     mark.find-match { background: #fde047; color: #000; border-radius: 2px; padding: 0 1px; }
     mark.find-match.current-match { background: #f97316; color: #fff; outline: 2px solid #fff; }
 
-    /* Filtro de Tags (Matérias) */
-    .tags-bar { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
-    .tag-pill {
-      background: var(--bg-elevated); border: 1px solid var(--border-color);
-      color: var(--text-muted); font-size: 0.74rem; font-weight: 600;
-      padding: 4px 10px; border-radius: 99px; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 5px;
-      transition: all 0.15s ease;
-    }
-    .tag-pill:hover { border-color: var(--cyan-accent); color: var(--text-main); }
-    .tag-pill.active { background: var(--cobalt-primary); border-color: var(--cyan-accent); color: #fff; }
-    .tag-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
     /* Lista de Leis */
     #lista-leis {
-      display: flex; flex-direction: column; gap: 10px;
-      overflow-y: auto; overflow-x: hidden; padding: 4px;
+      display: flex; flex-direction: column; gap: 8px;
+      overflow-y: auto; overflow-x: hidden; padding: 2px;
     }
     .grupo-materia-titulo {
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px; padding-left: 2px;
-      display: flex; align-items: center; gap: 6px;
     }
     .lei-item {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
-      border-radius: 8px; padding: 12px; cursor: pointer;
+      border-radius: 8px; padding: 10px 12px; cursor: pointer;
       transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
     }
-    .lei-item:hover { transform: scale(1.015); border-color: var(--cyan-accent); }
+    .lei-item:hover { transform: scale(1.012); border-color: var(--cyan-accent); }
     .lei-item.active { border-width: 2px; border-color: var(--cyan-accent); }
-    .lei-item-title { font-weight: 600; font-size: 0.94rem; margin-bottom: 6px; line-height: 1.35; }
-    .lei-item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .lei-item-title { font-weight: 600; font-size: 0.91rem; margin-bottom: 5px; line-height: 1.32; }
+    .lei-item-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
     .badge {
-      display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
+      display: inline-block; font-size: 0.68rem; padding: 1px 7px; border-radius: 99px; font-weight: 600;
     }
     .badge-tag { border: 1px solid currentColor; }
-    .badge-update { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-update { background: rgba(245, 158, 11, 0.22); color: var(--warning); border: 1px solid var(--warning); }
     .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     /* Área de Leitura */
-    .main-content { padding: 24px 44px; max-width: 920px; width: 100%; margin: 0 auto; }
+    .main-content { padding: 24px 44px; max-width: 940px; width: 100%; margin: 0 auto; }
     @media (max-width: 600px) { .main-content { padding: 18px 16px; } }
 
     .top-controls {
@@ -273,7 +266,7 @@
     }
     .toolbar {
       display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
-      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
+      margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
     }
 
     /* Banner de Atualização Legislativa */
@@ -310,6 +303,13 @@
       padding: 2px 12px 2px 48px; margin-bottom: 2px;
       color: var(--text-secondary); font-size: 0.95rem;
     }
+    .disp-revogado-nota {
+      padding: 10px 14px; margin: 10px 0;
+      border-left: 4px solid var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
     .disp-paragrafo:hover, .disp-inciso:hover, .disp-alinea:hover {
       background: var(--cyan-soft); border-radius: 4px;
     }
@@ -336,6 +336,25 @@
       border-color: var(--cyan-accent); color: var(--cyan-accent); background: var(--cyan-soft);
     }
 
+    /* Tag de dispositivo alterado e botão inline para ver versão anterior (válido por 5 dias) */
+    .disp-alterado-tag {
+      font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
+      border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
+      font-weight: 600;
+    }
+    .btn-ver-anterior {
+      font-size: 0.7rem; background: rgba(245, 158, 11, 0.16); color: var(--warning);
+      border: 1px solid var(--warning); padding: 1px 7px; border-radius: 4px; margin-left: 6px;
+      cursor: pointer; font-weight: 600;
+    }
+    .btn-ver-anterior:hover { background: rgba(245, 158, 11, 0.28); }
+    .box-texto-anterior {
+      margin-top: 8px; padding: 8px 12px;
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--warning);
+      border-radius: 4px; font-size: 0.88rem; color: var(--text-muted);
+    }
+
     /* Botão de Expansão dos Filhos do Artigo na Pesquisa */
     .btn-expand-filhos {
       margin-top: 8px; display: inline-flex; align-items: center; gap: 6px;
@@ -344,11 +363,6 @@
       padding: 4px 10px; border-radius: 6px; cursor: pointer;
     }
     .btn-expand-filhos:hover { border-color: var(--cyan-accent); background: var(--cyan-soft); }
-
-    .disp-alterado-tag {
-      font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
-      border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
-    }
 
     /* Grifos e Negritos no Texto */
     mark.user-hl { padding: 1px 3px; border-radius: 3px; color: #0f172a; cursor: pointer; }
@@ -416,15 +430,33 @@
       font-style: italic; color: var(--text-muted); font-size: 0.84rem;
       display: flex; align-items: center; gap: 6px;
     }
+    .icon-btn-inline { display: inline-flex; align-items: center; gap: 4px; }
 
-    .icon-btn-inline {
-      display: inline-flex; align-items: center; gap: 4px;
+    /* Histórico de Alterações Legislativas */
+    .log-alteracao-item {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.88rem;
     }
+    .log-badge-tipo {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .log-adicionado { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .log-alterado { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .log-revogado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
-    /* Seletor de Tags Interativo no Modal de Nova Lei */
-    .tag-chips-selector {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
-    }
+    /* Seletor de Tags Interativo no Modal */
+    .tag-chips-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .tag-select-chip {
       font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
       border-radius: 99px; border: 1px solid var(--border-color);
@@ -433,6 +465,7 @@
       transition: transform 0.1s ease, border-color 0.1s ease;
     }
     .tag-select-chip:hover { border-color: var(--cyan-accent); transform: scale(1.03); }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
     /* Editor Rich Text */
     .rich-toolbar {
@@ -456,9 +489,7 @@
       display: grid; grid-template-columns: 1fr 44px auto; gap: 8px; align-items: center;
       padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
     }
-    .tag-manager-list {
-      max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
-    }
+    .tag-manager-list { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
     .tag-manager-row {
       display: grid; grid-template-columns: 1fr 44px auto auto; gap: 8px; align-items: center;
       background: var(--bg-elevated); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color);
@@ -469,18 +500,21 @@
       width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
       color: var(--text-main); padding: 9px 12px; border-radius: 6px; font-size: 0.9rem;
     }
-    input[type="color"] {
-      padding: 2px; height: 36px; cursor: pointer; background: transparent;
-    }
+    input[type="color"] { padding: 2px; height: 36px; cursor: pointer; background: transparent; }
     input:focus, select:focus { outline: none; border-color: var(--cyan-accent); }
     .btn {
-      background: var(--cobalt-primary); color: #fff; border: none; padding: 8px 14px;
-      border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+      background: var(--cobalt-primary); color: #fff; border: none; padding: 8px 12px;
+      border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.83rem;
       transition: transform 0.12s ease, background 0.12s ease;
     }
     .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
+    .btn-active-filter {
+      background: var(--cobalt-primary) !important;
+      border-color: var(--cyan-accent) !important;
+      color: #fff !important;
+    }
     .btn-jurisp-active {
       background: var(--jurisp-accent) !important;
       border-color: var(--jurisp-accent) !important;
@@ -497,7 +531,7 @@
     .modal-backdrop.open { display: flex; }
     .modal {
       background: var(--bg-surface); border: 1px solid var(--border-color);
-      border-radius: 10px; padding: 24px; width: 100%; max-width: 540px;
+      border-radius: 10px; padding: 24px; width: 100%; max-width: 580px;
       display: flex; flex-direction: column; gap: 14px;
     }
     .hidden { display: none !important; }
@@ -562,7 +596,7 @@
       </div>
     </div>
 
-    <!-- BARRA LATERAL -->
+    <!-- BARRA LATERAL LIMPA E COMPACTA -->
     <aside class="sidebar">
       <div class="brand">
         <span>Legislação & Notas</span>
@@ -573,11 +607,23 @@
         </div>
       </div>
 
-      <button class="btn" onclick="abrirModalNovaLei()">+ Cadastrar Lei (Planalto/Senado)</button>
-      <button class="btn btn-outline btn-sm" onclick="dispararWorkflowGitHub('verificar_todas')">🔄 Verificar Alterações Agora</button>
+      <!-- ALERTA NO MENU QUANDO HOUVER ALTERAÇÃO LEGISLATIVA DETECTADA -->
+      <div id="alerta-global-sidebar" class="sidebar-update-alert hidden" onclick="irParaLeiComAlteracao()">
+        <span id="texto-alerta-global-sidebar">⚠️ Alteração legislativa detectada!</span>
+        <span>Ver →</span>
+      </div>
 
-      <!-- FILTRO POR TAG / MATÉRIA -->
-      <div id="filtro-materias" class="tags-bar"></div>
+      <div class="sidebar-top-actions">
+        <button class="btn btn-sm" onclick="abrirModalNovaLei()">+ Nova Lei</button>
+        <button class="btn btn-outline btn-sm" onclick="dispararWorkflowGitHub('verificar_todas')" title="Verificar alterações no Planalto/Senado">🔄 Verificar</button>
+      </div>
+
+      <!-- SELETOR COMPACTO DE MATÉRIAS (SEM POLUIÇÃO VISUAL DE DEZENAS DE CARDS) -->
+      <div class="materia-select-wrapper">
+        <select id="select-filtro-materia" onchange="alterarFiltroMateriaSelect(this.value)" title="Filtrar por Matéria / Tag">
+          <option value="Todas">📁 Todas as Matérias</option>
+        </select>
+      </div>
 
       <!-- LISTA AGRUPADA DE LEIS -->
       <div id="lista-leis"></div>
@@ -606,18 +652,20 @@
             <a id="link-fonte-lei" href="#" target="_blank" style="font-size:0.8rem; color:var(--text-muted);">Abrir texto oficial na fonte ↗</a>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <input type="text" id="busca-artigo" placeholder="Ex: Art. 5 ou palavra..." oninput="filtrarDispositivos()" style="width:200px;" />
-            <button class="btn btn-outline btn-sm" id="btn-filtro-jurisp" onclick="alternarFiltroJurisprudencias()" title="Exibir apenas dispositivos com jurisprudência">⚖️ Jurisprudências</button>
-            <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar Lei/Tag</button>
+            <input type="text" id="busca-artigo" placeholder="Ex: Art. 5 ou palavra..." oninput="filtrarDispositivos()" style="width:190px;" />
+            <button class="btn btn-outline btn-sm" id="btn-filtro-anotacoes" onclick="alternarFiltroAnotacoes()" title="Exibir todas as anotações desta lei">📝 Anotações</button>
+            <button class="btn btn-outline btn-sm" id="btn-filtro-jurisp" onclick="alternarFiltroJurisprudencias()" title="Exibir apenas jurisprudências desta lei">⚖️ Jurisprudências</button>
+            <button class="btn btn-outline btn-sm" id="btn-historico-alteracoes" onclick="abrirModalHistoricoAlteracoes()" title="Visualizar tudo o que foi adicionado ou modificado na lei">🕒 Alterações</button>
+            <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar</button>
             <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
           </div>
         </div>
 
-        <!-- ALERTA DE ALTERAÇÃO LEGISLATIVA -->
+        <!-- ALERTA DE ALTERAÇÃO LEGISLATIVA NA LEI ABERTA -->
         <div id="banner-atualizacao" class="update-banner hidden">
           <div>
             <strong style="color: var(--warning);">⚠️ Alteração legislativa detectada na fonte oficial!</strong>
-            <p style="font-size: 0.85rem; color: var(--text-main);">O texto no Planalto/Senado mudou. Atualize mantendo todas as suas anotações intactas.</p>
+            <p style="font-size: 0.85rem; color: var(--text-main);">A lei não foi alterada automaticamente. Ao confirmar abaixo, todas as suas anotações serão mantidas (inclusive em dispositivos revogados).</p>
           </div>
           <button class="btn btn-warning" onclick="aplicarAtualizacaoSegura()">Atualizar Lei (Preservar Notas)</button>
         </div>
@@ -636,6 +684,18 @@
     <button class="hl-swatch" style="background:#fbcfe8;" title="Rosa" onclick="aplicarMarcacao('hl:#fbcfe8')"></button>
     <button class="hl-swatch" style="background:#fed7aa;" title="Laranja" onclick="aplicarMarcacao('hl:#fed7aa')"></button>
     <button class="hl-swatch" style="background:var(--bg-elevated); color:var(--text-main); font-weight:800; font-size:0.8rem;" title="Negrito" onclick="aplicarMarcacao('bold')">N</button>
+  </div>
+
+  <!-- MODAL: HISTÓRICO DE ALTERAÇÕES E ADIÇÕES DA LEI -->
+  <div id="modal-historico-alteracoes" class="modal-backdrop">
+    <div class="modal" style="max-width: 680px;">
+      <h3 style="color: var(--cyan-accent);">🕒 Histórico de Alterações e Adições na Lei</h3>
+      <p style="font-size:0.84rem; color:var(--text-muted);">Registro consolidado de dispositivos adicionados, modificados ou revogados nas últimas atualizações.</p>
+      <div id="lista-historico-alteracoes" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="fecharModal('modal-historico-alteracoes')">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: CADASTRAR NOVA LEI -->
@@ -805,7 +865,9 @@
     let anotacoesCache = {};
     let grifosCache = {};
     let gruposNotasRecolhidos = {};
+    let textosAnterioresAbertos = {};
     let artigosExpandidosBusca = {};
+    let apenasAnotacoes = false;
     let apenasJurisprudencias = false;
     let selecaoAtualGrifo = null;
     let acaoPendenteLei = null;
@@ -813,6 +875,8 @@
     let toastTimer = null;
     let matchesBuscaRapida = [];
     let indiceMatchAtual = -1;
+
+    const CINCO_DIAS_MS = 5 * 24 * 60 * 60 * 1000;
 
     const SVG_OLHO_ABERTO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     const SVG_OLHO_FECHADO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
@@ -860,14 +924,11 @@
       toast.classList.add("show");
 
       if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        fecharToast();
-      }, 2000);
+      toastTimer = setTimeout(() => fecharToast(), 2000);
     }
 
     function fecharToast() {
-      const toast = document.getElementById("toast-sucesso");
-      toast.classList.remove("show");
+      document.getElementById("toast-sucesso").classList.remove("show");
       if (toastTimer) clearTimeout(toastTimer);
     }
 
@@ -889,11 +950,8 @@
       errEl.textContent = "";
 
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        errEl.textContent = "Falha no login: " + error.message;
-      } else {
-        iniciarApp(data.user);
-      }
+      if (error) errEl.textContent = "Falha no login: " + error.message;
+      else iniciarApp(data.user);
     }
 
     async function sair() {
@@ -909,7 +967,7 @@
     }
 
     // =========================================================================
-    // DOCK FLUTUANTE: CANETA DE GRIFO/NEGRITO CONTÍNUO & BUSCA RÁPIDA (CTRL+F)
+    // DOCK FLUTUANTE: CANETA E BUSCA RÁPIDA (CTRL+F)
     // =========================================================================
     function alternarPainelCaneta() {
       const flyout = document.getElementById("flyout-caneta");
@@ -951,11 +1009,8 @@
 
     function alternarPainelBuscaRapida() {
       const flyout = document.getElementById("flyout-busca");
-      if (flyout.classList.contains("open")) {
-        fecharBuscaRapida();
-      } else {
-        abrirPainelBuscaRapida();
-      }
+      if (flyout.classList.contains("open")) fecharBuscaRapida();
+      else abrirPainelBuscaRapida();
     }
 
     function fecharBuscaRapida() {
@@ -992,9 +1047,7 @@
       const nosTexto = [];
       let no;
       while ((no = walker.nextNode())) {
-        if (no.nodeValue.toLowerCase().includes(termoLower)) {
-          nosTexto.push(no);
-        }
+        if (no.nodeValue.toLowerCase().includes(termoLower)) nosTexto.push(no);
       }
 
       nosTexto.forEach(textNode => {
@@ -1006,9 +1059,7 @@
 
         const frag = document.createDocumentFragment();
         while (idx !== -1) {
-          if (idx > pos) {
-            frag.appendChild(document.createTextNode(valor.slice(pos, idx)));
-          }
+          if (idx > pos) frag.appendChild(document.createTextNode(valor.slice(pos, idx)));
           const mark = document.createElement("mark");
           mark.className = "find-match";
           mark.textContent = valor.slice(idx, idx + termo.length);
@@ -1018,9 +1069,7 @@
           pos = idx + termo.length;
           idx = valorLower.indexOf(termoLower, pos);
         }
-        if (pos < valor.length) {
-          frag.appendChild(document.createTextNode(valor.slice(pos)));
-        }
+        if (pos < valor.length) frag.appendChild(document.createTextNode(valor.slice(pos)));
         textNode.parentNode.replaceChild(frag, textNode);
       });
 
@@ -1041,9 +1090,7 @@
     function destacarMatchAtual() {
       matchesBuscaRapida.forEach((m, i) => m.classList.toggle("current-match", i === indiceMatchAtual));
       const atual = matchesBuscaRapida[indiceMatchAtual];
-      if (atual) {
-        atual.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      if (atual) atual.scrollIntoView({ behavior: "smooth", block: "center" });
       document.getElementById("contador-busca-rapida").textContent = `${indiceMatchAtual + 1}/${matchesBuscaRapida.length}`;
     }
 
@@ -1058,7 +1105,7 @@
     }
 
     // =========================================================================
-    // CONVERSÃO DE COR E TAGS (MATÉRIAS)
+    // CORES, TAGS (SELETOR COMPACTO NO MENU) E LEIS
     // =========================================================================
     function hexParaRgbaSuave(hex, alpha) {
       if (!hex || !hex.startsWith("#") || hex.length < 7) return "";
@@ -1106,11 +1153,35 @@
         atualizarSugestoesMaterias();
       }
 
+      atualizarAlertaGlobalSidebar();
       renderizarFiltroMaterias();
       renderizarSidebar();
 
       if (leisCache.some(l => l.status_extracao === "pendente" || l.status_extracao === "processando")) {
         setTimeout(carregarLeis, 5000);
+      }
+    }
+
+    function atualizarAlertaGlobalSidebar() {
+      const leisAlteradas = leisCache.filter(l => l.tem_atualizacao);
+      const alertaEl = document.getElementById("alerta-global-sidebar");
+      if (leisAlteradas.length > 0) {
+        document.getElementById("texto-alerta-global-sidebar").textContent =
+          leisAlteradas.length === 1
+            ? `⚠️ 1 lei com alteração na fonte`
+            : `⚠️ ${leisAlteradas.length} leis com alteração`;
+        alertaEl.classList.remove("hidden");
+      } else {
+        alertaEl.classList.add("hidden");
+      }
+    }
+
+    function irParaLeiComAlteracao() {
+      const alterada = leisCache.find(l => l.tem_atualizacao);
+      if (alterada) {
+        filtroMateriaAtual = "Todas";
+        renderizarFiltroMaterias();
+        selecionarLei(alterada);
       }
     }
 
@@ -1133,35 +1204,37 @@
         chip.className = "tag-select-chip";
         chip.style.borderColor = t.cor;
         chip.innerHTML = `<span class="tag-dot" style="background:${t.cor};"></span><span>${t.nome}</span>`;
-        chip.onclick = () => {
-          document.getElementById(inputId).value = t.nome;
-        };
+        chip.onclick = () => { document.getElementById(inputId).value = t.nome; };
         container.appendChild(chip);
       });
     }
 
     function renderizarFiltroMaterias() {
-      const bar = document.getElementById("filtro-materias");
+      const selectEl = document.getElementById("select-filtro-materia");
       const materiasOrdenadas = [...new Set(leisCache.map(l => (l.materia || "Geral").trim()))]
         .sort((a, b) => a.localeCompare(b, "pt-BR"));
       const opcoes = ["Todas", ...materiasOrdenadas];
 
       if (!opcoes.includes(filtroMateriaAtual)) filtroMateriaAtual = "Todas";
 
-      bar.innerHTML = "";
+      selectEl.innerHTML = "";
       opcoes.forEach(mat => {
-        const pill = document.createElement("button");
-        pill.className = "tag-pill" + (filtroMateriaAtual === mat ? " active" : "");
-        const cor = mat !== "Todas" ? obterCorTag(mat) : null;
-        const dotHtml = cor ? `<span class="tag-dot" style="background:${cor};"></span>` : "";
-        pill.innerHTML = `${dotHtml}<span>${mat}</span>`;
-        pill.onclick = () => {
-          filtroMateriaAtual = mat;
-          renderizarFiltroMaterias();
-          renderizarSidebar();
-        };
-        bar.appendChild(pill);
+        const opt = document.createElement("option");
+        opt.value = mat;
+        if (mat === "Todas") {
+          opt.textContent = `📁 Todas as Matérias (${leisCache.length})`;
+        } else {
+          const qtd = leisCache.filter(l => (l.materia || "Geral").trim() === mat).length;
+          opt.textContent = `🏷️ ${mat} (${qtd})`;
+        }
+        selectEl.appendChild(opt);
       });
+      selectEl.value = filtroMateriaAtual;
+    }
+
+    function alterarFiltroMateriaSelect(valor) {
+      filtroMateriaAtual = valor;
+      renderizarSidebar();
     }
 
     function renderizarSidebar() {
@@ -1203,7 +1276,7 @@
 
           let statusBadge = "";
           if (lei.tem_atualizacao) {
-            statusBadge = `<span class="badge badge-update">⚠️ Atualização</span>`;
+            statusBadge = `<span class="badge badge-update">⚠️ Alterada</span>`;
           } else if (lei.status_extracao === "pendente" || lei.status_extracao === "processando") {
             statusBadge = `<span class="badge badge-proc">⏳ Extraindo...</span>`;
           } else if (lei.status_extracao === "erro") {
@@ -1401,17 +1474,29 @@
     }
 
     // =========================================================================
-    // LEITURA DA LEI, RECARGA DE ANOTAÇÕES SEM PERDER BUSCA E FILTRO DE ARTIGO
+    // FILTROS DE ANOTAÇÕES, JURISPRUDÊNCIAS E LEITURA DA LEI
     // =========================================================================
     function ehNotaJurisprudencia(nota) {
       return ["STF", "STJ", "Jurisprudência"].includes(nota.tribunal);
     }
 
+    function alternarFiltroAnotacoes() {
+      apenasAnotacoes = !apenasAnotacoes;
+      if (apenasAnotacoes) {
+        apenasJurisprudencias = false;
+        document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
+      }
+      document.getElementById("btn-filtro-anotacoes").classList.toggle("btn-active-filter", apenasAnotacoes);
+      filtrarDispositivos();
+    }
+
     function alternarFiltroJurisprudencias() {
       apenasJurisprudencias = !apenasJurisprudencias;
-      const btn = document.getElementById("btn-filtro-jurisp");
-      if (apenasJurisprudencias) btn.classList.add("btn-jurisp-active");
-      else btn.classList.remove("btn-jurisp-active");
+      if (apenasJurisprudencias) {
+        apenasAnotacoes = false;
+        document.getElementById("btn-filtro-anotacoes").classList.remove("btn-active-filter");
+      }
+      document.getElementById("btn-filtro-jurisp").classList.toggle("btn-jurisp-active", apenasJurisprudencias);
       filtrarDispositivos();
     }
 
@@ -1447,10 +1532,13 @@
 
     async function selecionarLei(lei) {
       leiSelecionada = lei;
+      apenasAnotacoes = false;
       apenasJurisprudencias = false;
       artigosExpandidosBusca = {};
       gruposNotasRecolhidos = {};
+      textosAnterioresAbertos = {};
       document.getElementById("busca-artigo").value = "";
+      document.getElementById("btn-filtro-anotacoes").classList.remove("btn-active-filter");
       document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
       fecharBuscaRapida();
       renderizarSidebar();
@@ -1537,13 +1625,74 @@
       return m ? m[1] : "";
     }
 
+    function dentroDosCincoDias(dataIso) {
+      if (!dataIso) return false;
+      const diff = Date.now() - new Date(dataIso).getTime();
+      return diff >= 0 && diff <= CINCO_DIAS_MS;
+    }
+
     function filtrarDispositivos() {
       const rawBusca = document.getElementById("busca-artigo").value.trim();
       const termo = rawBusca.toLowerCase();
 
+      // Se ativou o botão "Anotações", inclui também eventuais dispositivos revogados que possuíam notas
+      if (apenasAnotacoes) {
+        const slugsVigentes = new Set(dispositivosCache.map(d => d.slug));
+        let listaComNotas = dispositivosCache.filter(d => (anotacoesCache[d.slug] || []).length > 0);
+
+        Object.keys(anotacoesCache).forEach(slugNota => {
+          if (!slugsVigentes.has(slugNota) && (anotacoesCache[slugNota] || []).length > 0) {
+            listaComNotas.push({
+              slug: slugNota,
+              tipo: "revogado-nota",
+              rotulo: `[Dispositivo Revogado - ${slugNota}]`,
+              texto: "Este dispositivo foi revogado ou removido da redação oficial, mas suas anotações foram preservadas abaixo."
+            });
+          }
+        });
+
+        if (termo) {
+          listaComNotas = listaComNotas.filter(d =>
+            (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
+            (d.texto && d.texto.toLowerCase().includes(termo))
+          );
+        }
+
+        renderizarDispositivos(listaComNotas);
+        return;
+      }
+
+      if (apenasJurisprudencias) {
+        const slugsVigentes = new Set(dispositivosCache.map(d => d.slug));
+        let listaJurisp = dispositivosCache.filter(d =>
+          (anotacoesCache[d.slug] || []).some(n => ehNotaJurisprudencia(n))
+        );
+
+        Object.keys(anotacoesCache).forEach(slugNota => {
+          if (!slugsVigentes.has(slugNota) && (anotacoesCache[slugNota] || []).some(n => ehNotaJurisprudencia(n))) {
+            listaJurisp.push({
+              slug: slugNota,
+              tipo: "revogado-nota",
+              rotulo: `[Dispositivo Revogado - ${slugNota}]`,
+              texto: "Este dispositivo foi revogado ou removido da redação oficial, mas sua jurisprudência foi preservada abaixo."
+            });
+          }
+        });
+
+        if (termo) {
+          listaJurisp = listaJurisp.filter(d =>
+            (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
+            (d.texto && d.texto.toLowerCase().includes(termo))
+          );
+        }
+
+        renderizarDispositivos(listaJurisp);
+        return;
+      }
+
       const matchBuscaArtigo = rawBusca.match(/^art\.?\s*(\d*(?:-[a-zA-Z])?)$/i);
 
-      if (matchBuscaArtigo && !apenasJurisprudencias) {
+      if (matchBuscaArtigo) {
         const numBuscado = matchBuscaArtigo[1].toUpperCase();
         const artigosEncontrados = dispositivosCache.filter(d => {
           if (d.tipo !== "artigo") return false;
@@ -1568,14 +1717,6 @@
       }
 
       let lista = dispositivosCache;
-
-      if (apenasJurisprudencias) {
-        lista = lista.filter(d => {
-          const notas = anotacoesCache[d.slug] || [];
-          return notas.some(n => ehNotaJurisprudencia(n));
-        });
-      }
-
       if (termo) {
         lista = lista.filter(d =>
           (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
@@ -1591,14 +1732,19 @@
       filtrarDispositivos();
     }
 
+    function alternarTextoAnterior(slug) {
+      textosAnterioresAbertos[slug] = !textosAnterioresAbertos[slug];
+      filtrarDispositivos();
+    }
+
     function renderizarDispositivos(lista) {
       const container = document.getElementById("container-dispositivos");
       container.innerHTML = "";
 
       if (lista.length === 0) {
-        const msg = apenasJurisprudencias
-          ? "Nenhuma jurisprudência cadastrada nesta lei ainda."
-          : "Nenhum dispositivo encontrado para o filtro atual.";
+        let msg = "Nenhum dispositivo encontrado para o filtro atual.";
+        if (apenasAnotacoes) msg = "Nenhuma anotação cadastrada nesta lei ainda.";
+        else if (apenasJurisprudencias) msg = "Nenhuma jurisprudência cadastrada nesta lei ainda.";
         container.innerHTML = `<p style="color:var(--text-muted);">${msg}</p>`;
         return;
       }
@@ -1622,6 +1768,26 @@
         row.dataset.slug = d.slug;
 
         const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
+
+        // Botão inline para ver versão anterior válido por até 5 dias após a alteração
+        let btnVerAnteriorHtml = "";
+        let boxTextoAnteriorHtml = "";
+        if (d.texto_anterior && dentroDosCincoDias(d.data_alteracao)) {
+          const abertoAnt = !!textosAnterioresAbertos[d.slug];
+          btnVerAnteriorHtml = `
+            <button type="button" class="btn-ver-anterior" onclick="alternarTextoAnterior('${d.slug}')" title="Disponível por até 5 dias após a alteração">
+              ${abertoAnt ? 'Ocultar redação anterior' : 'Ver redação anterior'}
+            </button>
+          `;
+          if (abertoAnt) {
+            boxTextoAnteriorHtml = `
+              <div class="box-texto-anterior">
+                <strong>Redação anterior:</strong> ${escaparHtml(d.texto_anterior)}
+              </div>
+            `;
+          }
+        }
+
         const textoComGrifos = aplicarGrifosNoTexto(d.texto, d.slug);
 
         let botaoExpandirFilhosHtml = "";
@@ -1638,8 +1804,8 @@
 
         let notasHtml = "";
         if (notasDoSlug.length > 0) {
-          // Fechado por padrão (recolhido = true), exceto quando o usuário clicar para abrir ou ativar o filtro de Jurisprudências
-          const recolhido = !apenasJurisprudencias && (gruposNotasRecolhidos[d.slug] !== false);
+          const expandirAutomatico = apenasAnotacoes || apenasJurisprudencias;
+          const recolhido = !expandirAutomatico && (gruposNotasRecolhidos[d.slug] !== false);
           const listaCards = notasDoSlug.map(n => {
             const isJurisp = ehNotaJurisprudencia(n);
             const badgeTipo = isJurisp
@@ -1684,12 +1850,13 @@
         row.innerHTML = `
           <div class="disp-line">
             <div class="disp-text-body" data-slug="${d.slug}">
-              <span class="disp-rotulo">${d.rotulo}</span><span>${textoComGrifos}</span>${tagAlterado}
+              <span class="disp-rotulo">${d.rotulo}</span><span>${textoComGrifos}</span>${tagAlterado}${btnVerAnteriorHtml}
             </div>
             <div class="disp-actions">
               <button type="button" class="btn-add-mini" onclick="abrirModalNota('${d.slug}')" title="Adicionar anotação ou jurisprudência">+</button>
             </div>
           </div>
+          ${boxTextoAnteriorHtml}
           ${botaoExpandirFilhosHtml}
           ${notasHtml}
         `;
@@ -1709,7 +1876,7 @@
     }
 
     // =========================================================================
-    // GRIFOS E NEGRITOS DIRETOS NO TEXTO SELECIONADO (CANETA CONTÍNUA OU POPOVER)
+    // GRIFOS E NEGRITOS DIRETOS NO TEXTO SELECIONADO
     // =========================================================================
     document.addEventListener("mouseup", async (e) => {
       const popover = document.getElementById("highlight-popover");
@@ -1772,11 +1939,11 @@
     }
 
     // =========================================================================
-    // ATUALIZAÇÃO SEGURA E INTEGRAÇÃO GITHUB
+    // ATUALIZAÇÃO SEGURA (PRESERVA NOTAS INCLUSIVE EM REVOGADOS + LOG HISTÓRICO)
     // =========================================================================
     async function aplicarAtualizacaoSegura() {
       if (!leiSelecionada) return;
-      if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações e jurisprudências serão mantidas nos mesmos artigos/incisos.")) return;
+      if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações serão mantidas (inclusive em dispositivos revogados), grifos em trechos inalterados permanecem e você poderá ver a redação anterior por 5 dias.")) return;
 
       const leiId = leiSelecionada.id;
       const { data: pendentes } = await sb
@@ -1787,29 +1954,133 @@
 
       if (!pendentes || pendentes.length === 0) return;
 
+      const agoraIso = new Date().toISOString();
       const mapaAntigo = {};
-      dispositivosCache.forEach(d => { mapaAntigo[d.slug] = d.texto; });
+      dispositivosCache.forEach(d => { mapaAntigo[d.slug] = d; });
 
+      const slugsNovos = new Set(pendentes.map(p => p.slug));
+      const registrosMudancas = [];
+
+      // Identifica dispositivos adicionados e alterados
+      for (const p of pendentes) {
+        const antigo = mapaAntigo[p.slug];
+        if (!antigo) {
+          registrosMudancas.push({
+            tipo: "adicionado",
+            slug: p.slug,
+            rotulo: p.rotulo || p.slug,
+            texto_novo: p.texto,
+            texto_anterior: null,
+            data: agoraIso
+          });
+        } else if (antigo.texto !== p.texto) {
+          registrosMudancas.push({
+            tipo: "alterado",
+            slug: p.slug,
+            rotulo: p.rotulo || p.slug,
+            texto_novo: p.texto,
+            texto_anterior: antigo.texto,
+            data: agoraIso
+          });
+        }
+      }
+
+      // Identifica dispositivos revogados/removidos (se houver anotação, cria card de preservação)
+      for (const dAntigo of dispositivosCache) {
+        if (!slugsNovos.has(dAntigo.slug)) {
+          registrosMudancas.push({
+            tipo: "revogado",
+            slug: dAntigo.slug,
+            rotulo: dAntigo.rotulo || dAntigo.slug,
+            texto_novo: null,
+            texto_anterior: dAntigo.texto,
+            data: agoraIso
+          });
+
+          const temNotasNesteSlug = (anotacoesCache[dAntigo.slug] || []).length > 0;
+          if (temNotasNesteSlug) {
+            await sb.from("anotacoes").insert({
+              lei_id: leiId,
+              user_id: usuarioAtual.id,
+              slug: dAntigo.slug,
+              tribunal: "Nota",
+              conteudo: `<b>[Aviso do Sistema - Dispositivo Revogado em ${new Date().toLocaleDateString("pt-BR")}]:</b> O dispositivo original (<i>${dAntigo.rotulo} ${dAntigo.texto}</i>) foi revogado/removido da fonte oficial, mas sua anotação foi preservada.`,
+              oculta: false
+            });
+          }
+        }
+      }
+
+      // Remove apenas os grifos dos dispositivos que tiveram o texto alterado ou revogado
+      const slugsModificadosOuRevogados = registrosMudancas.map(r => r.slug);
+      if (slugsModificadosOuRevogados.length > 0) {
+        await sb.from("grifos").delete().eq("lei_id", leiId).in("slug", slugsModificadosOuRevogados);
+      }
+
+      // Remove dispositivos vigentes antigos
       await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
 
+      // Promove pendentes para vigentes gravando texto_anterior e data_alteracao quando houve mudança
       for (const p of pendentes) {
-        const mudou = mapaAntigo[p.slug] && mapaAntigo[p.slug] !== p.texto;
+        const antigo = mapaAntigo[p.slug];
+        const mudou = !!(antigo && antigo.texto !== p.texto);
         await sb.from("dispositivos").update({
           versao_status: "vigente",
-          foi_alterado: mudou
+          foi_alterado: mudou,
+          texto_anterior: mudou ? antigo.texto : null,
+          data_alteracao: mudou ? agoraIso : null
         }).eq("id", p.id);
       }
+
+      const logAtual = Array.isArray(leiSelecionada.log_alteracoes) ? leiSelecionada.log_alteracoes : [];
+      const novoLog = [...registrosMudancas, ...logAtual].slice(0, 200);
 
       await sb.from("leis").update({
         hash_atual: leiSelecionada.hash_pendente,
         hash_pendente: null,
-        tem_atualizacao: false
+        tem_atualizacao: false,
+        log_alteracoes: novoLog
       }).eq("id", leiId);
 
-      mostrarToastSucesso("Lei atualizada preservando todas as notas!");
+      mostrarToastSucesso("Lei atualizada preservando todas as anotações!");
       await carregarLeis();
       const atualizada = leisCache.find(l => l.id === leiId);
       if (atualizada) selecionarLei(atualizada);
+    }
+
+    function abrirModalHistoricoAlteracoes() {
+      if (!leiSelecionada) return;
+      const listaEl = document.getElementById("lista-historico-alteracoes");
+      listaEl.innerHTML = "";
+
+      const logs = Array.isArray(leiSelecionada.log_alteracoes) ? leiSelecionada.log_alteracoes : [];
+      if (logs.length === 0) {
+        listaEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">Nenhuma alteração legislativa registrada para esta lei até o momento.</p>`;
+      } else {
+        logs.forEach(item => {
+          const dataFmt = item.data ? new Date(item.data).toLocaleDateString("pt-BR") : "";
+          const badgeClass = item.tipo === "adicionado"
+            ? "log-adicionado"
+            : (item.tipo === "revogado" ? "log-revogado" : "log-alterado");
+
+          const card = document.createElement("div");
+          card.className = "log-alteracao-item";
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span class="log-badge-tipo ${badgeClass}">${item.tipo}</span>
+                <strong style="margin-left:8px; color:var(--cyan-accent);">${item.rotulo}</strong>
+              </div>
+              <span style="font-size:0.75rem; color:var(--text-muted);">${dataFmt}</span>
+            </div>
+            ${item.texto_novo ? `<div><strong>Redação atual/adicionada:</strong> ${escaparHtml(item.texto_novo)}</div>` : ""}
+            ${item.texto_anterior ? `<div style="color:var(--text-muted); font-size:0.83rem;"><strong>Redação anterior:</strong> ${escaparHtml(item.texto_anterior)}</div>` : ""}
+          `;
+          listaEl.appendChild(card);
+        });
+      }
+
+      document.getElementById("modal-historico-alteracoes").classList.add("open");
     }
 
     function abrirModalEditarLei() {
@@ -1880,11 +2151,8 @@
 
       const isJurisp = ehNotaJurisprudencia(nota);
       document.getElementById("nota-is-jurisp").checked = isJurisp;
-      if (isJurisp) {
-        document.getElementById("nota-tribunal").value = nota.tribunal;
-      } else {
-        document.getElementById("nota-categoria").value = nota.tribunal || "Nota";
-      }
+      if (isJurisp) document.getElementById("nota-tribunal").value = nota.tribunal;
+      else document.getElementById("nota-categoria").value = nota.tribunal || "Nota";
       alternarCamposJurisprudencia();
 
       document.getElementById("nota-editor").innerHTML = nota.conteudo;
