@@ -9,21 +9,13 @@ on:
         description: 'Modo de execução'
         required: false
         default: 'verificar_todas'
-        type: choice
-        options:
-          - verificar_todas
-          - extrair_pendentes
-          - verificar_lei
-          - reprocessar_indice_lei
-          - reprocessar_todos_indices
       lei_id:
         description: 'ID específico da lei (opcional)'
         required: false
         default: ''
-        type: string
 
 jobs:
-  executar-extrator:
+  executar-parser:
     runs-on: ubuntu-latest
     steps:
       - name: Baixar código do repositório
@@ -34,10 +26,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar dependências
-        run: pip install -r scripts/requirements.txt
+      - name: Instalar dependências e navegador de reserva
+        run: |
+          pip install -r scripts/requirements.txt
+          playwright install chromium
 
-      - name: Executar robô extrator e verificador
+      - name: Executar robô extrator
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
