@@ -22,6 +22,8 @@
       --warning: #f59e0b;
       --success: #10b981;
       --danger: #ef4444;
+      --jurisp-accent: #a855f7;
+      --jurisp-bg: rgba(168, 85, 247, 0.12);
     }
 
     body.light-mode {
@@ -40,6 +42,8 @@
       --warning: #d97706;
       --success: #059669;
       --danger: #dc2626;
+      --jurisp-accent: #7e22ce;
+      --jurisp-bg: rgba(126, 34, 206, 0.08);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -206,15 +210,47 @@
       background: var(--cyan-soft); border-radius: 4px;
     }
 
-    .disp-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .disp-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .disp-text-body { flex: 1; text-align: justify; }
     .disp-rotulo { font-weight: 700; color: var(--cyan-accent); margin-right: 6px; }
     .disp-paragrafo .disp-rotulo, .disp-inciso .disp-rotulo, .disp-alinea .disp-rotulo {
       color: var(--text-main); font-weight: 600;
     }
 
-    .disp-actions { opacity: 0.25; transition: opacity 0.15s ease; flex-shrink: 0; }
+    /* Botão Minimalista '+' para Adicionar Nota */
+    .disp-actions { opacity: 0.35; transition: opacity 0.15s ease; flex-shrink: 0; margin-top: 2px; }
     .disp-row:hover .disp-actions, .disp-row.has-notes .disp-actions { opacity: 1; }
+    .btn-add-mini {
+      width: 22px; height: 22px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 700; line-height: 1;
+      border-radius: 5px; background: transparent;
+      border: 1px solid var(--border-color); color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-add-mini:hover {
+      border-color: var(--cyan-accent); color: var(--cyan-accent); background: var(--cyan-soft);
+    }
+
+    /* Botão de Expansão dos Filhos do Artigo na Pesquisa */
+    .btn-expand-filhos {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--cyan-accent);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-expand-filhos:hover {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-soft);
+    }
 
     .disp-alterado-tag {
       font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
@@ -236,7 +272,7 @@
     }
     .hl-swatch:hover { transform: scale(1.18); }
 
-    /* Anotações Retráteis & Rich Text */
+    /* Anotações Retráteis & Jurisprudência Destacada */
     .notas-wrapper { margin-top: 8px; margin-bottom: 8px; }
     .notas-toggle-bar {
       display: inline-flex; align-items: center; gap: 6px;
@@ -249,12 +285,21 @@
       background: var(--bg-surface); border: 1px solid var(--border-color);
       border-left: 4px solid var(--warning); padding: 10px 14px; border-radius: 6px; font-size: 0.92rem;
     }
-    .nota-box.STF { border-left-color: #0284c7; }
-    .nota-box.STJ { border-left-color: #7c3aed; }
+    .nota-box.is-jurisp {
+      background: var(--jurisp-bg);
+      border-color: rgba(168, 85, 247, 0.35);
+      border-left: 4px solid var(--jurisp-accent);
+    }
     .nota-box.Doutrina { border-left-color: #10b981; }
     .nota-meta {
       display: flex; justify-content: space-between; align-items: center;
       font-size: 0.76rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;
+    }
+    .jurisp-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(168, 85, 247, 0.2); color: var(--jurisp-accent);
+      border: 1px solid var(--jurisp-accent);
+      padding: 1px 7px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
     }
     .nota-conteudo-oculto { font-style: italic; color: var(--text-muted); font-size: 0.84rem; }
 
@@ -275,9 +320,13 @@
     }
     .rich-editor:focus { outline: none; border-color: var(--cyan-accent); }
 
-    /* Lista de Gerenciamento de Tags no Modal */
+    /* Lista e Criação de Tags no Modal */
+    .tag-create-box {
+      display: grid; grid-template-columns: 1fr 44px auto; gap: 8px; align-items: center;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
+    }
     .tag-manager-list {
-      max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+      max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
     }
     .tag-manager-row {
       display: grid; grid-template-columns: 1fr 44px auto auto; gap: 8px; align-items: center;
@@ -301,6 +350,11 @@
     .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
+    .btn-jurisp-active {
+      background: var(--jurisp-accent) !important;
+      border-color: var(--jurisp-accent) !important;
+      color: #fff !important;
+    }
     .btn-sm { padding: 4px 9px; font-size: 0.76rem; }
     .btn-warning { background: var(--warning); color: #000; }
 
@@ -344,7 +398,7 @@
       <div class="brand">
         <span>Legislação & Notas</span>
         <div class="brand-actions">
-          <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar Tags / Matérias">🏷️</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar e Criar Tags">🏷️</button>
           <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
           <button class="btn btn-outline btn-sm" onclick="alternarSidebar()" title="Recolher menu lateral">◀</button>
         </div>
@@ -383,7 +437,8 @@
             <a id="link-fonte-lei" href="#" target="_blank" style="font-size:0.8rem; color:var(--text-muted);">Abrir texto oficial na fonte ↗</a>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <input type="text" id="busca-artigo" placeholder="Filtrar artigo ou palavra..." oninput="filtrarDispositivos()" style="width:200px;" />
+            <input type="text" id="busca-artigo" placeholder="Ex: Art. 5 ou palavra..." oninput="filtrarDispositivos()" style="width:200px;" />
+            <button class="btn btn-outline btn-sm" id="btn-filtro-jurisp" onclick="alternarFiltroJurisprudencias()" title="Exibir apenas dispositivos com jurisprudência">⚖️ Jurisprudências</button>
             <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar Lei/Tag</button>
             <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
           </div>
@@ -472,11 +527,19 @@
     </div>
   </div>
 
-  <!-- MODAL: GERENCIAR / EDITAR TAGS CADASTRADAS -->
+  <!-- MODAL: GERENCIAR / CRIAR / EDITAR TAGS -->
   <div id="modal-gerenciar-tags" class="modal-backdrop">
     <div class="modal">
       <h3>🏷️ Gerenciar Tags (Matérias)</h3>
-      <p style="font-size:0.82rem; color:var(--text-muted);">Edite o nome ou a cor de qualquer matéria. As alterações refletem imediatamente em todas as leis vinculadas.</p>
+      <p style="font-size:0.82rem; color:var(--text-muted);">Crie novas tags ou edite o nome e a cor das matérias existentes.</p>
+
+      <!-- Criar nova tag diretamente aqui -->
+      <div class="tag-create-box">
+        <input type="text" id="nova-tag-direta-nome" placeholder="Nome da nova tag (ex: Direito Tributário)" />
+        <input type="color" id="nova-tag-direta-cor" value="#0284c7" />
+        <button class="btn btn-sm" onclick="criarTagDireta()">+ Criar</button>
+      </div>
+
       <div id="lista-gerenciar-tags" class="tag-manager-list"></div>
       <div style="display:flex; justify-content:flex-end;">
         <button class="btn btn-outline" onclick="fecharModal('modal-gerenciar-tags')">Fechar</button>
@@ -484,18 +547,35 @@
     </div>
   </div>
 
-  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM FORMATAÇÃO RICA -->
+  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM MARCAÇÃO DE JURISPRUDÊNCIA -->
   <div id="modal-nota" class="modal-backdrop">
     <div class="modal">
       <h3 id="modal-nota-titulo">Anotação / Jurisprudência</h3>
       <input type="hidden" id="nota-slug" />
       <input type="hidden" id="nota-id" />
-      <select id="nota-tribunal">
-        <option value="Nota">📝 Anotação Pessoal / Resumo</option>
-        <option value="STF">⚖️ Jurisprudência STF</option>
-        <option value="STJ">⚖️ Jurisprudência STJ</option>
-        <option value="Doutrina">📚 Doutrina / Pegadinha de Prova</option>
-      </select>
+
+      <!-- Checkbox para marcar se é Jurisprudência -->
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; font-weight:600; color:var(--jurisp-accent); cursor:pointer; background:var(--jurisp-bg); padding:8px 12px; border-radius:6px; border:1px solid rgba(168, 85, 247, 0.35);">
+        <input type="checkbox" id="nota-is-jurisp" onchange="alternarCamposJurisprudencia()" style="width:auto;" />
+        <span>⚖️ Esta anotação é uma Jurisprudência (destaque especial)</span>
+      </label>
+
+      <div id="grupo-tribunal-jurisp" class="hidden">
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Órgão / Tribunal:</label>
+        <select id="nota-tribunal">
+          <option value="STF">⚖️ Supremo Tribunal Federal (STF)</option>
+          <option value="STJ">⚖️ Superior Tribunal de Justiça (STJ)</option>
+          <option value="Jurisprudência">⚖️ Outro Tribunal / Súmula</option>
+        </select>
+      </div>
+
+      <div id="grupo-tipo-nota">
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Categoria da Nota:</label>
+        <select id="nota-categoria">
+          <option value="Nota">📝 Anotação Pessoal / Resumo</option>
+          <option value="Doutrina">📚 Doutrina / Pegadinha de Prova</option>
+        </select>
+      </div>
 
       <div class="rich-toolbar">
         <button type="button" class="rich-btn" onclick="formatarNota('bold')" title="Negrito"><b>B</b></button>
@@ -511,7 +591,7 @@
         <button type="button" class="hl-swatch" style="background:#f87171; width:18px; height:18px;" onclick="formatarNota('foreColor', '#f87171')" title="Vermelho"></button>
       </div>
 
-      <div id="nota-editor" class="rich-editor" contenteditable="true" placeholder="Digite sua anotação formatada aqui..."></div>
+      <div id="nota-editor" class="rich-editor" contenteditable="true" placeholder="Digite sua anotação ou entendimento jurisprudencial..."></div>
 
       <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
         <input type="checkbox" id="nota-oculta" style="width:auto;" />
@@ -520,7 +600,7 @@
 
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-nota')">Cancelar</button>
-        <button class="btn" onclick="salvarNota()">Salvar Nota</button>
+        <button class="btn" onclick="salvarNota()">Salvar</button>
       </div>
     </div>
   </div>
@@ -555,6 +635,8 @@
     let anotacoesCache = {};
     let grifosCache = {};
     let gruposNotasRecolhidos = {};
+    let artigosExpandidosBusca = {};
+    let apenasJurisprudencias = false;
     let selecaoAtualGrifo = null;
     let acaoPendenteLei = null;
 
@@ -606,7 +688,7 @@
     }
 
     // =========================================================================
-    // CONVERSÃO DE COR PARA FUNDO SUAVE DO CARD (VÁRIAS VEZES MAIS CLARO)
+    // CONVERSÃO DE COR E TAGS (MATÉRIAS)
     // =========================================================================
     function hexParaRgbaSuave(hex, alpha) {
       if (!hex || !hex.startsWith("#") || hex.length < 7) return "";
@@ -621,9 +703,6 @@
       return encontrada ? encontrada.cor : null;
     }
 
-    // =========================================================================
-    // GERENCIAMENTO DE TAGS (MATÉRIAS) E LEIS
-    // =========================================================================
     async function carregarDadosIniciais() {
       await carregarTags();
       await carregarLeis();
@@ -640,7 +719,6 @@
       if (error) return console.error(error);
       leisCache = data || [];
 
-      // Sincroniza tags existentes nas leis que ainda não estejam em tags_materias
       const nomesTagsSalvas = new Set(tagsCache.map(t => t.nome.toLowerCase()));
       const tagsFaltantes = [...new Set(leisCache.map(l => (l.materia || "Geral").trim()))]
         .filter(nome => nome && !nomesTagsSalvas.has(nome.toLowerCase()));
@@ -728,7 +806,6 @@
           div.className = "lei-item" + (leiSelecionada && leiSelecionada.id === lei.id ? " active" : "");
           div.onclick = () => selecionarLei(lei);
 
-          // Aplica fundo em tom várias vezes mais claro baseado na cor da tag
           if (corTag) {
             div.style.backgroundColor = hexParaRgbaSuave(corTag, isLight ? 0.13 : 0.18);
             div.style.borderColor = hexParaRgbaSuave(corTag, 0.55);
@@ -760,7 +837,7 @@
     }
 
     // =========================================================================
-    // FLUXO DE CADASTRO / EDIÇÃO COM DETECÇÃO DE NOVA TAG E ESCOLHA DE COR
+    // FLUXO DE CADASTRO / EDIÇÃO E GERENCIADOR DE TAGS
     // =========================================================================
     function iniciarFluxoSalvarLei(origem) {
       if (origem === "nova") {
@@ -849,12 +926,10 @@
       }
     }
 
-    // =========================================================================
-    // MODAL DE EDIÇÃO / GERENCIAMENTO DE TAGS EXISTENTES
-    // =========================================================================
     function abrirModalGerenciarTags() {
       const lista = document.getElementById("lista-gerenciar-tags");
       lista.innerHTML = "";
+      document.getElementById("nova-tag-direta-nome").value = "";
 
       const ordenadas = [...tagsCache].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
       if (ordenadas.length === 0) {
@@ -874,6 +949,28 @@
       });
 
       document.getElementById("modal-gerenciar-tags").classList.add("open");
+    }
+
+    async function criarTagDireta() {
+      const nome = document.getElementById("nova-tag-direta-nome").value.trim();
+      const cor = document.getElementById("nova-tag-direta-cor").value;
+      if (!nome) return alert("Digite o nome da nova tag.");
+
+      if (tagsCache.some(t => t.nome.toLowerCase() === nome.toLowerCase())) {
+        return alert("Essa tag já está cadastrada.");
+      }
+
+      const { error } = await sb.from("tags_materias").insert({
+        user_id: usuarioAtual.id,
+        nome,
+        cor
+      });
+
+      if (error) return alert("Erro ao criar tag: " + error.message);
+
+      await carregarTags();
+      renderizarFiltroMaterias();
+      abrirModalGerenciarTags();
     }
 
     async function salvarAlteracaoTag(tagId, nomeAntigo) {
@@ -911,10 +1008,26 @@
     }
 
     // =========================================================================
-    // LEITURA DA LEI, TEXTO CORRIDO, GRIFOS E ANOTAÇÕES
+    // LEITURA DA LEI, FILTRO DE JURISPRUDÊNCIAS E PESQUISA INTELIGENTE DE ARTIGO
     // =========================================================================
+    function ehNotaJurisprudencia(nota) {
+      return ["STF", "STJ", "Jurisprudência"].includes(nota.tribunal);
+    }
+
+    function alternarFiltroJurisprudencias() {
+      apenasJurisprudencias = !apenasJurisprudencias;
+      const btn = document.getElementById("btn-filtro-jurisp");
+      if (apenasJurisprudencias) btn.classList.add("btn-jurisp-active");
+      else btn.classList.remove("btn-jurisp-active");
+      filtrarDispositivos();
+    }
+
     async function selecionarLei(lei) {
       leiSelecionada = lei;
+      apenasJurisprudencias = false;
+      artigosExpandidosBusca = {};
+      document.getElementById("busca-artigo").value = "";
+      document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
       renderizarSidebar();
 
       document.getElementById("estado-vazio").classList.add("hidden");
@@ -1005,12 +1118,83 @@
       return html;
     }
 
+    function extrairNumeroArtigo(rotulo) {
+      if (!rotulo) return "";
+      const m = rotulo.match(/Art\.?\s*(\d+(?:-[A-Za-z])?)/i);
+      return m ? m[1].toUpperCase() : "";
+    }
+
+    function obterSlugArtigoPai(slug) {
+      if (!slug) return "";
+      const m = slug.match(/^(ART_[0-9A-Z-]+)/i);
+      return m ? m[1] : "";
+    }
+
+    function filtrarDispositivos() {
+      const rawBusca = document.getElementById("busca-artigo").value.trim();
+      const termo = rawBusca.toLowerCase();
+
+      // Identifica se o usuário digitou "Art." ou "Art" (com ou sem número)
+      const matchBuscaArtigo = rawBusca.match(/^art\.?\s*(\d*(?:-[a-zA-Z])?)$/i);
+
+      if (matchBuscaArtigo && !apenasJurisprudencias) {
+        const numBuscado = matchBuscaArtigo[1].toUpperCase();
+        const artigosEncontrados = dispositivosCache.filter(d => {
+          if (d.tipo !== "artigo") return false;
+          if (!numBuscado) return true;
+          return extrairNumeroArtigo(d.rotulo) === numBuscado;
+        });
+
+        const listaFinal = [];
+        artigosEncontrados.forEach(art => {
+          const filhos = dispositivosCache.filter(
+            d => d.tipo !== "artigo" && d.tipo !== "estrutura" && obterSlugArtigoPai(d.slug) === art.slug
+          );
+          listaFinal.push({ ...art, _qtdFilhos: filhos.length, _modoBuscaArtigo: true });
+
+          if (artigosExpandidosBusca[art.slug]) {
+            filhos.forEach(f => listaFinal.push(f));
+          }
+        });
+
+        renderizarDispositivos(listaFinal);
+        return;
+      }
+
+      // Filtro padrão por palavra-chave e/ou botão "Jurisprudências"
+      let lista = dispositivosCache;
+
+      if (apenasJurisprudencias) {
+        lista = lista.filter(d => {
+          const notas = anotacoesCache[d.slug] || [];
+          return notas.some(n => ehNotaJurisprudencia(n));
+        });
+      }
+
+      if (termo) {
+        lista = lista.filter(d =>
+          (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
+          (d.texto && d.texto.toLowerCase().includes(termo))
+        );
+      }
+
+      renderizarDispositivos(lista);
+    }
+
+    function alternarFilhosArtigoBusca(slugArtigo) {
+      artigosExpandidosBusca[slugArtigo] = !artigosExpandidosBusca[slugArtigo];
+      filtrarDispositivos();
+    }
+
     function renderizarDispositivos(lista) {
       const container = document.getElementById("container-dispositivos");
       container.innerHTML = "";
 
       if (lista.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted);">Aguardando processamento do extrator ou nenhum dispositivo encontrado.</p>`;
+        const msg = apenasJurisprudencias
+          ? "Nenhuma jurisprudência cadastrada nesta lei ainda."
+          : "Nenhum dispositivo encontrado para o filtro atual.";
+        container.innerHTML = `<p style="color:var(--text-muted);">${msg}</p>`;
         return;
       }
 
@@ -1023,7 +1207,11 @@
           return;
         }
 
-        const notasDoSlug = anotacoesCache[d.slug] || [];
+        let notasDoSlug = anotacoesCache[d.slug] || [];
+        if (apenasJurisprudencias) {
+          notasDoSlug = notasDoSlug.filter(n => ehNotaJurisprudencia(n));
+        }
+
         const row = document.createElement("div");
         row.className = `disp-row disp-${d.tipo}` + (notasDoSlug.length > 0 ? " has-notes" : "");
         row.dataset.slug = d.slug;
@@ -1031,18 +1219,36 @@
         const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
         const textoComGrifos = aplicarGrifosNoTexto(d.texto, d.slug);
 
+        // Botão para expandir parágrafos, incisos e alíneas na busca por "Art."
+        let botaoExpandirFilhosHtml = "";
+        if (d._modoBuscaArtigo && d._qtdFilhos > 0) {
+          const aberto = !!artigosExpandidosBusca[d.slug];
+          botaoExpandirFilhosHtml = `
+            <div>
+              <button type="button" class="btn-expand-filhos" onclick="alternarFilhosArtigoBusca('${d.slug}')">
+                ${aberto ? '▲ Ocultar' : '▼ Exibir'} parágrafos, incisos e alíneas (${d._qtdFilhos})
+              </button>
+            </div>
+          `;
+        }
+
         let notasHtml = "";
         if (notasDoSlug.length > 0) {
-          const recolhido = !!gruposNotasRecolhidos[d.slug];
+          const recolhido = !apenasJurisprudencias && !!gruposNotasRecolhidos[d.slug];
           const listaCards = notasDoSlug.map(n => {
+            const isJurisp = ehNotaJurisprudencia(n);
+            const badgeTipo = isJurisp
+              ? `<span class="jurisp-pill">⚖️ ${n.tribunal}</span>`
+              : `<span>${n.tribunal}</span>`;
+
             const corpoHtml = n.oculta
               ? `<div class="nota-conteudo-oculto">🙈 Anotação oculta — <a href="#" onclick="event.preventDefault(); alternarVisibilidadeNota('${n.id}', false)" style="color:var(--cyan-accent);">Revelar conteúdo</a></div>`
               : `<div style="white-space: pre-wrap;">${n.conteudo}</div>`;
 
             return `
-              <div class="nota-box ${n.tribunal}">
+              <div class="nota-box ${isJurisp ? 'is-jurisp' : n.tribunal}">
                 <div class="nota-meta">
-                  <span>${n.tribunal}</span>
+                  ${badgeTipo}
                   <div style="display:flex; gap:6px;">
                     <button class="btn btn-outline btn-sm" onclick="alternarVisibilidadeNota('${n.id}', ${!n.oculta})" title="${n.oculta ? 'Mostrar' : 'Ocultar'}">
                       ${n.oculta ? '👁️ Mostrar' : '🙈 Ocultar'}
@@ -1074,9 +1280,10 @@
               <span class="disp-rotulo">${d.rotulo}</span><span>${textoComGrifos}</span>${tagAlterado}
             </div>
             <div class="disp-actions">
-              <button class="btn btn-outline btn-sm" onclick="abrirModalNota('${d.slug}')">+ Nota</button>
+              <button type="button" class="btn-add-mini" onclick="abrirModalNota('${d.slug}')" title="Adicionar anotação ou jurisprudência">+</button>
             </div>
           </div>
+          ${botaoExpandirFilhosHtml}
           ${notasHtml}
         `;
         container.appendChild(row);
@@ -1085,23 +1292,12 @@
 
     function alternarGrupoNotas(slug) {
       gruposNotasRecolhidos[slug] = !gruposNotasRecolhidos[slug];
-      renderizarDispositivos(dispositivosCache);
+      filtrarDispositivos();
     }
 
     async function alternarVisibilidadeNota(notaId, novoEstadoOculta) {
       await sb.from("anotacoes").update({ oculta: novoEstadoOculta }).eq("id", notaId);
       selecionarLei(leiSelecionada);
-    }
-
-    function filtrarDispositivos() {
-      const termo = document.getElementById("busca-artigo").value.toLowerCase().trim();
-      if (!termo) return renderizarDispositivos(dispositivosCache);
-
-      const filtrados = dispositivosCache.filter(d =>
-        (d.rotulo && d.rotulo.toLowerCase().includes(termo)) ||
-        (d.texto && d.texto.toLowerCase().includes(termo))
-      );
-      renderizarDispositivos(filtrados);
     }
 
     // =========================================================================
@@ -1231,8 +1427,14 @@
     }
 
     // =========================================================================
-    // CRUD DE ANOTAÇÕES COM EDITOR RICH-TEXT E OCULTAÇÃO INDIVIDUAL
+    // CRUD DE ANOTAÇÕES E JURISPRUDÊNCIAS
     // =========================================================================
+    function alternarCamposJurisprudencia() {
+      const isJurisp = document.getElementById("nota-is-jurisp").checked;
+      document.getElementById("grupo-tribunal-jurisp").classList.toggle("hidden", !isJurisp);
+      document.getElementById("grupo-tipo-nota").classList.toggle("hidden", isJurisp);
+    }
+
     function formatarNota(comando, valor = null) {
       document.getElementById("nota-editor").focus();
       document.execCommand(comando, false, valor);
@@ -1241,7 +1443,10 @@
     function abrirModalNota(slug) {
       document.getElementById("nota-slug").value = slug;
       document.getElementById("nota-id").value = "";
-      document.getElementById("nota-tribunal").value = "Nota";
+      document.getElementById("nota-is-jurisp").checked = false;
+      document.getElementById("nota-tribunal").value = "STF";
+      document.getElementById("nota-categoria").value = "Nota";
+      alternarCamposJurisprudencia();
       document.getElementById("nota-editor").innerHTML = "";
       document.getElementById("nota-oculta").checked = false;
       document.getElementById("modal-nota").classList.add("open");
@@ -1252,7 +1457,16 @@
       if (!nota) return;
       document.getElementById("nota-slug").value = slug;
       document.getElementById("nota-id").value = nota.id;
-      document.getElementById("nota-tribunal").value = nota.tribunal;
+
+      const isJurisp = ehNotaJurisprudencia(nota);
+      document.getElementById("nota-is-jurisp").checked = isJurisp;
+      if (isJurisp) {
+        document.getElementById("nota-tribunal").value = nota.tribunal;
+      } else {
+        document.getElementById("nota-categoria").value = nota.tribunal || "Nota";
+      }
+      alternarCamposJurisprudencia();
+
       document.getElementById("nota-editor").innerHTML = nota.conteudo;
       document.getElementById("nota-oculta").checked = !!nota.oculta;
       document.getElementById("modal-nota").classList.add("open");
@@ -1261,7 +1475,10 @@
     async function salvarNota() {
       const slug = document.getElementById("nota-slug").value;
       const notaId = document.getElementById("nota-id").value;
-      const tribunal = document.getElementById("nota-tribunal").value;
+      const isJurisp = document.getElementById("nota-is-jurisp").checked;
+      const tribunal = isJurisp
+        ? document.getElementById("nota-tribunal").value
+        : document.getElementById("nota-categoria").value;
       const conteudo = document.getElementById("nota-editor").innerHTML.trim();
       const oculta = document.getElementById("nota-oculta").checked;
       if (!conteudo || conteudo === "<br>") return;
