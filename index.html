@@ -7,14 +7,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
+      /* Tema Escuro (Padrão: Azul Cobalto Profundo & Ciano Elétrico) */
       --bg-base: #060b19;
       --bg-surface: #0d162c;
       --bg-elevated: #13203f;
+      --bg-caput: rgba(29, 78, 216, 0.14);
       --cobalt-primary: #1d4ed8;
       --cobalt-hover: #2563eb;
       --cyan-accent: #00e5ff;
       --cyan-soft: rgba(0, 229, 255, 0.12);
       --text-main: #f1f5f9;
+      --text-secondary: #cbd5e1;
       --text-muted: #94a3b8;
       --border-color: #1e325c;
       --warning: #f59e0b;
@@ -22,8 +25,27 @@
       --danger: #ef4444;
     }
 
+    body.light-mode {
+      /* Tema Claro (Fundo limpo de alta legibilidade para leitura prolongada) */
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --bg-caput: rgba(29, 78, 216, 0.06);
+      --cobalt-primary: #1d4ed8;
+      --cobalt-hover: #1e40af;
+      --cyan-accent: #0369a1;
+      --cyan-soft: rgba(3, 105, 161, 0.1);
+      --text-main: #0f172a;
+      --text-secondary: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --warning: #d97706;
+      --success: #059669;
+      --danger: #dc2626;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; }
+    body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.75; transition: background-color 0.2s ease, color 0.2s ease; }
 
     /* Login */
     .auth-container {
@@ -36,10 +58,19 @@
     .auth-card h1 { color: var(--cyan-accent); font-size: 1.5rem; margin-bottom: 8px; }
     .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
 
-    /* Layout Principal */
-    .app-layout { display: grid; grid-template-columns: 315px 1fr; min-height: 100vh; }
+    /* Layout Principal com Sidebar Retrátil */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 315px 1fr;
+      min-height: 100vh;
+      transition: grid-template-columns 0.22s ease;
+    }
+    .app-layout.sidebar-collapsed {
+      grid-template-columns: 0px 1fr;
+    }
     @media (max-width: 850px) {
       .app-layout { grid-template-columns: 1fr; }
+      .app-layout.sidebar-collapsed .sidebar { display: none; }
       .sidebar { border-right: none; border-bottom: 1px solid var(--border-color); }
     }
 
@@ -47,14 +78,15 @@
     .sidebar {
       background: var(--bg-surface); border-right: 1px solid var(--border-color);
       padding: 20px; display: flex; flex-direction: column; gap: 14px;
-      overflow-x: hidden;
+      overflow-x: hidden; transition: padding 0.2s ease, opacity 0.15s ease;
     }
-    .brand { font-size: 1.2rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; }
+    .app-layout.sidebar-collapsed .sidebar {
+      padding: 0; opacity: 0; pointer-events: none; border: none;
+    }
+    .brand { font-size: 1.15rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; }
 
     /* Filtro de Tags (Matérias) */
-    .tags-bar {
-      display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px;
-    }
+    .tags-bar { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
     .tag-pill {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
       color: var(--text-muted); font-size: 0.74rem; font-weight: 600;
@@ -62,19 +94,16 @@
       transition: all 0.15s ease;
     }
     .tag-pill:hover { border-color: var(--cyan-accent); color: var(--text-main); }
-    .tag-pill.active {
-      background: var(--cobalt-primary); border-color: var(--cyan-accent); color: #fff;
-    }
+    .tag-pill.active { background: var(--cobalt-primary); border-color: var(--cyan-accent); color: #fff; }
 
-    /* Lista de Leis (Sem barra de rolagem horizontal no hover) */
+    /* Lista de Leis */
     #lista-leis {
       display: flex; flex-direction: column; gap: 10px;
       overflow-y: auto; overflow-x: hidden; padding: 4px;
     }
     .grupo-materia-titulo {
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px;
-      padding-left: 2px;
+      letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px; padding-left: 2px;
     }
     .lei-item {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
@@ -82,20 +111,26 @@
       transition: transform 0.15s ease, border-color 0.15s ease;
     }
     .lei-item:hover { transform: scale(1.015); border-color: var(--cyan-accent); }
-    .lei-item.active { border-color: var(--cyan-accent); background: rgba(29, 78, 216, 0.25); }
-    .lei-item-title { font-weight: 600; font-size: 0.94rem; margin-bottom: 6px; }
+    .lei-item.active { border-color: var(--cyan-accent); background: rgba(29, 78, 216, 0.22); }
+    .lei-item-title { font-weight: 600; font-size: 0.94rem; margin-bottom: 6px; line-height: 1.35; }
     .lei-item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
     .badge {
       display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
     }
-    .badge-tag { background: rgba(29, 78, 216, 0.35); color: #93c5fd; border: 1px solid var(--cobalt-primary); }
+    .badge-tag { background: rgba(29, 78, 216, 0.25); color: var(--cyan-accent); border: 1px solid var(--cobalt-primary); }
     .badge-update { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     /* Área de Leitura */
-    .main-content { padding: 28px; max-width: 960px; width: 100%; margin: 0 auto; }
+    .main-content { padding: 24px 36px; max-width: 920px; width: 100%; margin: 0 auto; }
+    @media (max-width: 600px) { .main-content { padding: 18px 16px; } }
+
+    .top-controls {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      margin-bottom: 18px;
+    }
     .toolbar {
       display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
       margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
@@ -108,58 +143,199 @@
       display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
     }
 
-    /* Dispositivos da Lei */
+    /* =====================================================================
+       FORMATO VADE MECUM: TEXTO CORRIDO + CAPUT EM BLOCO + ESTRUTURA CENTRAL
+       ===================================================================== */
     .disp-estrutura {
-      margin-top: 28px; margin-bottom: 12px; color: var(--cyan-accent);
-      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border-color); padding-bottom: 6px;
+      margin-top: 38px;
+      margin-bottom: 18px;
+      padding: 12px 16px;
+      text-align: center;
+      color: var(--cyan-accent);
+      font-weight: 700;
+      font-size: 0.96rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-elevated);
+      border-radius: 6px;
     }
-    .disp-card {
-      background: var(--bg-surface); border: 1px solid transparent;
-      border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
-      transition: border-color 0.15s ease;
-    }
-    .disp-card:hover { border-color: var(--border-color); }
-    .disp-artigo { border-left: 3px solid var(--cyan-accent); }
-    .disp-paragrafo { margin-left: 16px; border-left: 2px solid var(--cobalt-primary); }
-    .disp-inciso { margin-left: 32px; }
-    .disp-alinea { margin-left: 48px; }
 
-    .disp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .disp-rotulo { font-weight: 700; color: var(--cyan-accent); margin-right: 6px; }
+    .disp-row {
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    /* Caput (Artigo) em Bloco Destacado */
+    .disp-artigo {
+      background: var(--bg-caput);
+      border-left: 4px solid var(--cyan-accent);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 22px;
+      margin-bottom: 8px;
+      font-size: 1.01rem;
+    }
+
+    /* Parágrafos, Incisos e Alíneas em Texto Corrido Sutil */
+    .disp-paragrafo {
+      padding: 4px 12px 4px 18px;
+      margin-bottom: 4px;
+      border-left: 2px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+    }
+    .disp-inciso {
+      padding: 3px 12px 3px 32px;
+      margin-bottom: 2px;
+      color: var(--text-secondary);
+      font-size: 0.96rem;
+    }
+    .disp-alinea {
+      padding: 2px 12px 2px 48px;
+      margin-bottom: 2px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .disp-paragrafo:hover, .disp-inciso:hover, .disp-alinea:hover {
+      background: var(--cyan-soft);
+      border-radius: 4px;
+    }
+
+    .disp-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .disp-text-body {
+      flex: 1;
+      text-align: justify;
+    }
+    .disp-rotulo {
+      font-weight: 700;
+      color: var(--cyan-accent);
+      margin-right: 6px;
+    }
+    .disp-paragrafo .disp-rotulo,
+    .disp-inciso .disp-rotulo,
+    .disp-alinea .disp-rotulo {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .disp-actions {
+      opacity: 0.25;
+      transition: opacity 0.15s ease;
+      flex-shrink: 0;
+    }
+    .disp-row:hover .disp-actions,
+    .disp-row.has-notes .disp-actions {
+      opacity: 1;
+    }
+
     .disp-alterado-tag {
       font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
       border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
     }
 
-    /* Anotações & STF/STJ */
-    .notas-lista { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .nota-box {
-      background: var(--bg-elevated); border-left: 3px solid var(--warning);
-      padding: 10px 12px; border-radius: 6px; font-size: 0.9rem;
-    }
-    .nota-box.STF { border-left-color: #38bdf8; }
-    .nota-box.STJ { border-left-color: #a78bfa; }
-    .nota-meta {
-      display: flex; justify-content: space-between; font-size: 0.75rem;
-      color: var(--text-muted); margin-bottom: 4px; font-weight: 600;
+    /* Grifos no Texto */
+    mark.user-hl {
+      padding: 1px 3px;
+      border-radius: 3px;
+      color: #0f172a;
+      cursor: pointer;
     }
 
-    /* Inputs e Botões */
-    input, select, textarea {
-      width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
-      color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-size: 0.9rem;
+    /* Barra Flutuante de Grifo ao Selecionar Texto */
+    .highlight-popover {
+      position: fixed;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--cyan-accent);
+      padding: 8px 12px;
+      border-radius: 99px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      z-index: 100;
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan-accent); }
+    .highlight-popover.open { display: flex; }
+    .hl-swatch {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
+      cursor: pointer; transition: transform 0.12s ease;
+    }
+    .hl-swatch:hover { transform: scale(1.18); }
+
+    /* Anotações Retráteis & Rich Text */
+    .notas-wrapper {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .notas-toggle-bar {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; color: var(--cyan-accent);
+      background: var(--bg-elevated); border: 1px solid var(--border-color);
+      padding: 3px 10px; border-radius: 6px; cursor: pointer;
+    }
+    .notas-lista {
+      margin-top: 6px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .nota-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--warning);
+      padding: 10px 14px; border-radius: 6px; font-size: 0.92rem;
+    }
+    .nota-box.STF { border-left-color: #0284c7; }
+    .nota-box.STJ { border-left-color: #7c3aed; }
+    .nota-box.Doutrina { border-left-color: #10b981; }
+
+    .nota-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.76rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;
+    }
+    .nota-conteudo-oculto {
+      font-style: italic; color: var(--text-muted); font-size: 0.84rem;
+    }
+
+    /* Editor Rich Text no Modal de Anotação */
+    .rich-toolbar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      background: var(--bg-elevated); padding: 8px; border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    .rich-btn {
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 4px 10px; border-radius: 4px;
+      cursor: pointer; font-size: 0.85rem;
+    }
+    .rich-btn:hover { border-color: var(--cyan-accent); }
+    .rich-editor {
+      min-height: 140px; max-height: 300px; overflow-y: auto;
+      background: var(--bg-base); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 12px; border-radius: 6px;
+      font-size: 0.95rem; line-height: 1.6;
+    }
+    .rich-editor:focus { outline: none; border-color: var(--cyan-accent); }
+
+    /* Inputs e Botões */
+    input, select {
+      width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 9px 12px; border-radius: 6px; font-size: 0.9rem;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--cyan-accent); }
     .btn {
-      background: var(--cobalt-primary); color: #fff; border: none; padding: 9px 14px;
+      background: var(--cobalt-primary); color: #fff; border: none; padding: 8px 14px;
       border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
       transition: transform 0.12s ease, background 0.12s ease;
     }
     .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
-    .btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+    .btn-sm { padding: 3px 9px; font-size: 0.76rem; }
     .btn-warning { background: var(--warning); color: #000; }
 
     /* Modal */
@@ -170,7 +346,7 @@
     .modal-backdrop.open { display: flex; }
     .modal {
       background: var(--bg-surface); border: 1px solid var(--border-color);
-      border-radius: 10px; padding: 24px; width: 100%; max-width: 520px;
+      border-radius: 10px; padding: 24px; width: 100%; max-width: 540px;
       display: flex; flex-direction: column; gap: 14px;
     }
     .hidden { display: none !important; }
@@ -215,6 +391,12 @@
 
     <!-- CONTEÚDO DA LEI -->
     <main class="main-content">
+      <!-- BARRA SUPERIOR DE LEITURA (RETRAIR MENU & MODO CLARO/ESCURO) -->
+      <div class="top-controls">
+        <button class="btn btn-outline btn-sm" id="btn-toggle-sidebar" onclick="alternarSidebar()">◀ Recolher Menu</button>
+        <button class="btn btn-outline btn-sm" id="btn-toggle-theme" onclick="alternarTema()">☀️ Modo Claro</button>
+      </div>
+
       <div id="estado-vazio" style="text-align:center; padding:60px 20px; color:var(--text-muted);">
         <h2>Selecione ou cadastre uma lei ao lado</h2>
         <p>Cole o link do Planalto ou do Senado Federal para estruturar artigos, incisos e alíneas automaticamente.</p>
@@ -250,6 +432,16 @@
     </main>
   </div>
 
+  <!-- POPOVER FLUTUANTE PARA GRIFAR TEXTO SELECIONADO -->
+  <div id="highlight-popover" class="highlight-popover">
+    <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Grifar:</span>
+    <button class="hl-swatch" style="background:#fef08a;" title="Amarelo" onclick="aplicarGrifo('#fef08a')"></button>
+    <button class="hl-swatch" style="background:#bbf7d0;" title="Verde" onclick="aplicarGrifo('#bbf7d0')"></button>
+    <button class="hl-swatch" style="background:#bae6fd;" title="Azul" onclick="aplicarGrifo('#bae6fd')"></button>
+    <button class="hl-swatch" style="background:#fbcfe8;" title="Rosa" onclick="aplicarGrifo('#fbcfe8')"></button>
+    <button class="hl-swatch" style="background:#fed7aa;" title="Laranja" onclick="aplicarGrifo('#fed7aa')"></button>
+  </div>
+
   <!-- MODAL: CADASTRAR NOVA LEI -->
   <div id="modal-nova-lei" class="modal-backdrop">
     <div class="modal">
@@ -257,16 +449,7 @@
       <input type="text" id="nova-lei-titulo" placeholder="Nome curto (ex: Lei 14.133/21 - Licitações)" />
       <div>
         <input type="text" id="nova-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag (ex: Direito Administrativo)" />
-        <datalist id="sugestoes-materias">
-          <option value="Direito Administrativo">
-          <option value="Direito Tributário">
-          <option value="Direito Constitucional">
-          <option value="Legislação Tributária">
-          <option value="AFO / LRF">
-          <option value="Direito Civil">
-          <option value="Direito Empresarial">
-          <option value="Direito Penal">
-        </datalist>
+        <datalist id="sugestoes-materias"></datalist>
       </div>
       <input type="url" id="nova-lei-url" placeholder="URL do Planalto ou Senado (ex: https://www.planalto.gov.br/...)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -289,10 +472,10 @@
     </div>
   </div>
 
-  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO -->
+  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM FORMATAÇÃO RICA -->
   <div id="modal-nota" class="modal-backdrop">
     <div class="modal">
-      <h3 id="modal-nota-titulo">Nova Anotação / Jurisprudência</h3>
+      <h3 id="modal-nota-titulo">Anotação / Jurisprudência</h3>
       <input type="hidden" id="nota-slug" />
       <input type="hidden" id="nota-id" />
       <select id="nota-tribunal">
@@ -301,7 +484,29 @@
         <option value="STJ">⚖️ Jurisprudência STJ</option>
         <option value="Doutrina">📚 Doutrina / Pegadinha de Prova</option>
       </select>
-      <textarea id="nota-conteudo" rows="6" placeholder="Digite o entendimento, súmula, informativo ou observação..."></textarea>
+
+      <!-- Barra de Formatação: Negrito, Itálico, Sublinhado e Cor do Texto -->
+      <div class="rich-toolbar">
+        <button type="button" class="rich-btn" onclick="formatarNota('bold')" title="Negrito"><b>B</b></button>
+        <button type="button" class="rich-btn" onclick="formatarNota('italic')" title="Itálico"><i>I</i></button>
+        <button type="button" class="rich-btn" onclick="formatarNota('underline')" title="Sublinhado"><u>U</u></button>
+        <span style="color:var(--border-color);">|</span>
+        <span style="font-size:0.78rem; color:var(--text-muted);">Cor:</span>
+        <button type="button" class="hl-swatch" style="background:#f1f5f9; width:18px; height:18px;" onclick="formatarNota('foreColor', '#f1f5f9')" title="Branco/Padrão"></button>
+        <button type="button" class="hl-swatch" style="background:#0f172a; width:18px; height:18px;" onclick="formatarNota('foreColor', '#0f172a')" title="Preto"></button>
+        <button type="button" class="hl-swatch" style="background:#38bdf8; width:18px; height:18px;" onclick="formatarNota('foreColor', '#38bdf8')" title="Azul Ciano"></button>
+        <button type="button" class="hl-swatch" style="background:#facc15; width:18px; height:18px;" onclick="formatarNota('foreColor', '#facc15')" title="Amarelo"></button>
+        <button type="button" class="hl-swatch" style="background:#4ade80; width:18px; height:18px;" onclick="formatarNota('foreColor', '#4ade80')" title="Verde"></button>
+        <button type="button" class="hl-swatch" style="background:#f87171; width:18px; height:18px;" onclick="formatarNota('foreColor', '#f87171')" title="Vermelho"></button>
+      </div>
+
+      <div id="nota-editor" class="rich-editor" contenteditable="true" placeholder="Digite sua anotação formatada aqui..."></div>
+
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
+        <input type="checkbox" id="nota-oculta" style="width:auto;" />
+        <span>Manter esta anotação oculta por padrão (modo revisão ativa)</span>
+      </label>
+
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-nota')">Cancelar</button>
         <button class="btn" onclick="salvarNota()">Salvar Nota</button>
@@ -314,7 +519,7 @@
     <div class="modal">
       <h3>Integração GitHub Actions</h3>
       <p style="font-size:0.82rem; color:var(--text-muted);">Permite que o site acione o robô extrator imediatamente ao cadastrar uma lei nova.</p>
-      <input type="text" id="cfg-owner" placeholder="Seu usuário do GitHub (ex: mxwbr)" />
+      <input type="text" id="cfg-owner" placeholder="Seu usuário do GitHub (ex: promxhbr)" />
       <input type="text" id="cfg-repo" placeholder="Nome do repositório (ex: vade-mecum)" />
       <input type="password" id="cfg-token" placeholder="Token do GitHub (permissão workflow / Actions)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -336,11 +541,35 @@
     let filtroMateriaAtual = "Todas";
     let dispositivosCache = [];
     let anotacoesCache = {};
+    let grifosCache = {};
+    let gruposNotasRecolhidos = {};
+    let selecaoAtualGrifo = null;
 
     window.addEventListener("DOMContentLoaded", async () => {
+      // Restaura preferência de tema claro/escuro
+      if (localStorage.getItem("vm_theme") === "light") {
+        document.body.classList.add("light-mode");
+        document.getElementById("btn-toggle-theme").textContent = "🌙 Modo Escuro";
+      }
+
       const { data: { session } } = await sb.auth.getSession();
       if (session) iniciarApp(session.user);
     });
+
+    // =========================================================================
+    // CONTROLES DE LEITURA (TEMA CLARO/ESCURO & RETRAIR SIDEBAR)
+    // =========================================================================
+    function alternarTema() {
+      const isLight = document.body.classList.toggle("light-mode");
+      localStorage.setItem("vm_theme", isLight ? "light" : "dark");
+      document.getElementById("btn-toggle-theme").textContent = isLight ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+    }
+
+    function alternarSidebar() {
+      const layout = document.getElementById("app-view");
+      const collapsed = layout.classList.toggle("sidebar-collapsed");
+      document.getElementById("btn-toggle-sidebar").textContent = collapsed ? "▶ Expandir Menu" : "◀ Recolher Menu";
+    }
 
     async function fazerLogin() {
       const email = document.getElementById("login-email").value.trim();
@@ -424,7 +653,6 @@
         ? leisCache
         : leisCache.filter(l => (l.materia || "Geral").trim() === filtroMateriaAtual);
 
-      // Agrupa visualmente por Matéria
       const grupos = {};
       filtradas.forEach(lei => {
         const mat = (lei.materia || "Geral").trim();
@@ -501,7 +729,41 @@
         anotacoesCache[n.slug].push(n);
       });
 
+      const { data: grifos } = await sb
+        .from("grifos")
+        .select("*")
+        .eq("lei_id", lei.id)
+        .order("created_at", { ascending: true });
+
+      grifosCache = {};
+      (grifos || []).forEach(g => {
+        if (!grifosCache[g.slug]) grifosCache[g.slug] = [];
+        grifosCache[g.slug].push(g);
+      });
+
       renderizarDispositivos(dispositivosCache);
+    }
+
+    // =========================================================================
+    // RENDERIZAÇÃO EM TEXTO CORRIDO, CAPUT EM BLOCO, GRIFOS E NOTAS RETRÁTEIS
+    // =========================================================================
+    function escaparHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function aplicarGrifosNoTexto(textoPlano, slug) {
+      let html = escaparHtml(textoPlano);
+      const listaGrifos = grifosCache[slug] || [];
+      listaGrifos.forEach(g => {
+        const trechoEscapado = escaparHtml(g.trecho);
+        if (trechoEscapado && html.includes(trechoEscapado)) {
+          html = html.replace(
+            trechoEscapado,
+            `<mark class="user-hl" style="background:${g.cor};" title="Clique para remover grifo" onclick="removerGrifo('${g.id}')">${trechoEscapado}</mark>`
+          );
+        }
+      });
+      return html;
     }
 
     function renderizarDispositivos(lista) {
@@ -522,41 +784,74 @@
           return;
         }
 
-        const card = document.createElement("div");
-        card.className = `disp-card disp-${d.tipo}`;
+        const notasDoSlug = anotacoesCache[d.slug] || [];
+        const row = document.createElement("div");
+        row.className = `disp-row disp-${d.tipo}` + (notasDoSlug.length > 0 ? " has-notes" : "");
+        row.dataset.slug = d.slug;
 
         const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
-        const notasDoSlug = anotacoesCache[d.slug] || [];
+        const textoComGrifos = aplicarGrifosNoTexto(d.texto, d.slug);
 
         let notasHtml = "";
         if (notasDoSlug.length > 0) {
-          notasHtml = `<div class="notas-lista">` + notasDoSlug.map(n => `
-            <div class="nota-box ${n.tribunal}">
-              <div class="nota-meta">
-                <span>${n.tribunal}</span>
-                <div>
-                  <button class="btn btn-outline btn-sm" onclick="editarNota('${n.id}', '${d.slug}')">Editar</button>
-                  <button class="btn btn-outline btn-sm" onclick="excluirNota('${n.id}')" style="color:var(--danger);">×</button>
+          const recolhido = !!gruposNotasRecolhidos[d.slug];
+          const listaCards = notasDoSlug.map(n => {
+            const corpoHtml = n.oculta
+              ? `<div class="nota-conteudo-oculto">🙈 Anotação oculta — <a href="#" onclick="event.preventDefault(); alternarVisibilidadeNota('${n.id}', false)" style="color:var(--cyan-accent);">Revelar conteúdo</a></div>`
+              : `<div style="white-space: pre-wrap;">${n.conteudo}</div>`;
+
+            return `
+              <div class="nota-box ${n.tribunal}">
+                <div class="nota-meta">
+                  <span>${n.tribunal}</span>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="alternarVisibilidadeNota('${n.id}', ${!n.oculta})" title="${n.oculta ? 'Mostrar' : 'Ocultar'}">
+                      ${n.oculta ? '👁️ Mostrar' : '🙈 Ocultar'}
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="editarNota('${n.id}', '${d.slug}')">Editar</button>
+                    <button class="btn btn-outline btn-sm" onclick="excluirNota('${n.id}')" style="color:var(--danger);">×</button>
+                  </div>
                 </div>
+                ${corpoHtml}
               </div>
-              <div style="white-space: pre-wrap;">${n.conteudo}</div>
+            `;
+          }).join("");
+
+          notasHtml = `
+            <div class="notas-wrapper">
+              <button type="button" class="notas-toggle-bar" onclick="alternarGrupoNotas('${d.slug}')">
+                ${recolhido ? '▶' : '▼'} ${notasDoSlug.length} ${notasDoSlug.length === 1 ? 'Anotação' : 'Anotações'}
+              </button>
+              <div class="notas-lista ${recolhido ? 'hidden' : ''}">
+                ${listaCards}
+              </div>
             </div>
-          `).join("") + `</div>`;
+          `;
         }
 
-        card.innerHTML = `
-          <div class="disp-header">
-            <div>
-              <span class="disp-rotulo">${d.rotulo}</span>
-              <span>${d.texto}</span>
-              ${tagAlterado}
+        row.innerHTML = `
+          <div class="disp-line">
+            <div class="disp-text-body" data-slug="${d.slug}">
+              <span class="disp-rotulo">${d.rotulo}</span><span>${textoComGrifos}</span>${tagAlterado}
             </div>
-            <button class="btn btn-outline btn-sm" onclick="abrirModalNota('${d.slug}')">+ Nota</button>
+            <div class="disp-actions">
+              <button class="btn btn-outline btn-sm" onclick="abrirModalNota('${d.slug}')">+ Nota</button>
+            </div>
           </div>
           ${notasHtml}
         `;
-        container.appendChild(card);
+        container.appendChild(row);
       });
+    }
+
+    function alternarGrupoNotas(slug) {
+      gruposNotasRecolhidos[slug] = !gruposNotasRecolhidos[slug];
+      renderizarDispositivos(dispositivosCache);
+    }
+
+    async function alternarVisibilidadeNota(notaId, novoEstadoOculta) {
+      await sb.from("anotacoes").update({ oculta: novoEstadoOculta }).eq("id", notaId);
+      selecionarLei(leiSelecionada);
     }
 
     function filtrarDispositivos() {
@@ -571,6 +866,58 @@
     }
 
     // =========================================================================
+    // GRIFOS DIRETOS NO TEXTO SELECIONADO
+    // =========================================================================
+    document.addEventListener("mouseup", (e) => {
+      const popover = document.getElementById("highlight-popover");
+      if (popover.contains(e.target)) return;
+
+      const sel = window.getSelection();
+      const texto = sel ? sel.toString().trim() : "";
+
+      if (texto.length >= 2 && leiSelecionada) {
+        const anchorEl = sel.anchorNode && sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+        const bodyEl = anchorEl ? anchorEl.closest(".disp-text-body") : null;
+
+        if (bodyEl && bodyEl.dataset.slug) {
+          const rect = sel.getRangeAt(0).getBoundingClientRect();
+          selecaoAtualGrifo = { slug: bodyEl.dataset.slug, trecho: texto };
+          popover.style.top = Math.max(10, rect.top - 48) + "px";
+          popover.style.left = Math.max(10, rect.left) + "px";
+          popover.classList.add("open");
+          return;
+        }
+      }
+      popover.classList.remove("open");
+      selecaoAtualGrifo = null;
+    });
+
+    async function aplicarGrifo(cor) {
+      if (!selecaoAtualGrifo || !leiSelecionada) return;
+      const { slug, trecho } = selecaoAtualGrifo;
+
+      document.getElementById("highlight-popover").classList.remove("open");
+      window.getSelection().removeAllRanges();
+
+      await sb.from("grifos").insert({
+        lei_id: leiSelecionada.id,
+        user_id: usuarioAtual.id,
+        slug,
+        trecho,
+        cor
+      });
+
+      selecaoAtualGrifo = null;
+      selecionarLei(leiSelecionada);
+    }
+
+    async function removerGrifo(grifoId) {
+      if (!confirm("Remover este grifo?")) return;
+      await sb.from("grifos").delete().eq("id", grifoId);
+      selecionarLei(leiSelecionada);
+    }
+
+    // =========================================================================
     // ATUALIZAÇÃO SEGURA (PRESERVANDO ANOTAÇÕES POR SLUG)
     // =========================================================================
     async function aplicarAtualizacaoSegura() {
@@ -578,7 +925,6 @@
       if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações e jurisprudências serão mantidas nos mesmos artigos/incisos.")) return;
 
       const leiId = leiSelecionada.id;
-
       const { data: pendentes } = await sb
         .from("dispositivos")
         .select("*")
@@ -689,13 +1035,19 @@
     }
 
     // =========================================================================
-    // CRUD DE ANOTAÇÕES (STF / STJ / NOTAS)
+    // CRUD DE ANOTAÇÕES COM EDITOR RICH-TEXT E OCULTAÇÃO INDIVIDUAL
     // =========================================================================
+    function formatarNota(comando, valor = null) {
+      document.getElementById("nota-editor").focus();
+      document.execCommand(comando, false, valor);
+    }
+
     function abrirModalNota(slug) {
       document.getElementById("nota-slug").value = slug;
       document.getElementById("nota-id").value = "";
       document.getElementById("nota-tribunal").value = "Nota";
-      document.getElementById("nota-conteudo").value = "";
+      document.getElementById("nota-editor").innerHTML = "";
+      document.getElementById("nota-oculta").checked = false;
       document.getElementById("modal-nota").classList.add("open");
     }
 
@@ -705,7 +1057,8 @@
       document.getElementById("nota-slug").value = slug;
       document.getElementById("nota-id").value = nota.id;
       document.getElementById("nota-tribunal").value = nota.tribunal;
-      document.getElementById("nota-conteudo").value = nota.conteudo;
+      document.getElementById("nota-editor").innerHTML = nota.conteudo;
+      document.getElementById("nota-oculta").checked = !!nota.oculta;
       document.getElementById("modal-nota").classList.add("open");
     }
 
@@ -713,18 +1066,22 @@
       const slug = document.getElementById("nota-slug").value;
       const notaId = document.getElementById("nota-id").value;
       const tribunal = document.getElementById("nota-tribunal").value;
-      const conteudo = document.getElementById("nota-conteudo").value.trim();
-      if (!conteudo) return;
+      const conteudo = document.getElementById("nota-editor").innerHTML.trim();
+      const oculta = document.getElementById("nota-oculta").checked;
+      if (!conteudo || conteudo === "<br>") return;
 
       if (notaId) {
-        await sb.from("anotacoes").update({ tribunal, conteudo, updated_at: new Date().toISOString() }).eq("id", notaId);
+        await sb.from("anotacoes").update({
+          tribunal, conteudo, oculta, updated_at: new Date().toISOString()
+        }).eq("id", notaId);
       } else {
         await sb.from("anotacoes").insert({
           lei_id: leiSelecionada.id,
           user_id: usuarioAtual.id,
           slug,
           tribunal,
-          conteudo
+          conteudo,
+          oculta
         });
       }
 
