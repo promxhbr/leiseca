@@ -102,7 +102,7 @@
     }
     .sidebar-update-alert:hover { background: rgba(245, 158, 11, 0.26); }
 
-    /* Dock Flutuante Lateral */
+    /* Dock Flutuante Lateral Unificado */
     .floating-dock {
       position: fixed; left: 315px; top: 42%; transform: translateY(-50%);
       z-index: 45; display: flex; flex-direction: column; gap: 6px; transition: left 0.22s ease;
@@ -124,9 +124,6 @@
       background: var(--cobalt-primary); color: #fff; border-color: var(--cyan-accent); width: 38px;
     }
 
-    #dock-expand-btn { display: none; }
-    .app-layout.sidebar-collapsed #dock-expand-btn { display: flex; }
-
     .dock-flyout {
       position: absolute; left: 42px; top: 0;
       background: var(--bg-surface); border: 1px solid var(--cyan-accent);
@@ -137,13 +134,14 @@
     }
     .dock-flyout.open { display: flex; }
 
-    /* Flyout do Índice Estrutural (Títulos, Capítulos, Seções) */
+    /* Flyout do Índice Estrutural (Títulos, Capítulos, Seções com seus Textos) */
     .toc-flyout {
       flex-direction: column;
       align-items: stretch;
       white-space: normal;
-      width: 340px;
-      max-height: 68vh;
+      width: 390px;
+      max-width: calc(100vw - 60px);
+      max-height: 70vh;
       top: -120px;
       padding: 12px;
     }
@@ -160,21 +158,30 @@
       background: var(--bg-elevated);
       border: 1px solid transparent;
       color: var(--text-main);
-      padding: 6px 9px;
+      padding: 7px 10px;
       border-radius: 6px;
       font-size: 0.8rem;
       cursor: pointer;
-      line-height: 1.35;
+      line-height: 1.38;
       transition: border-color 0.12s ease, background 0.12s ease;
     }
     .toc-item:hover {
       border-color: var(--cyan-accent);
       background: var(--cyan-soft);
     }
-    .toc-lvl-1 { font-weight: 800; color: var(--cyan-accent); text-transform: uppercase; font-size: 0.78rem; }
-    .toc-lvl-2 { font-weight: 700; padding-left: 14px; }
-    .toc-lvl-3 { font-weight: 600; padding-left: 24px; color: var(--text-secondary); }
-    .toc-lvl-4 { font-weight: 500; padding-left: 34px; color: var(--text-muted); font-size: 0.76rem; }
+    .toc-item-code {
+      color: var(--cyan-accent);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .toc-item-desc {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .toc-lvl-1 { border-left: 3px solid var(--cyan-accent); }
+    .toc-lvl-2 { padding-left: 14px; }
+    .toc-lvl-3 { padding-left: 22px; }
+    .toc-lvl-4 { padding-left: 30px; font-size: 0.77rem; }
 
     .tool-chip {
       width: 24px; height: 24px; border-radius: 6px;
@@ -241,7 +248,7 @@
       scroll-margin-top: 24px;
     }
     .disp-row { position: relative; transition: background-color 0.2s ease; scroll-margin-top: 28px; }
-    .disp-row.flash-target { outline: 2px solid var(--cyan-accent); background: var(--cyan-soft); border-radius: 6px; }
+    .disp-row.flash-target, .disp-estrutura.flash-target { outline: 2px solid var(--cyan-accent); background: var(--cyan-soft); border-radius: 6px; }
 
     .disp-artigo {
       background: var(--bg-caput); border-left: 4px solid var(--cyan-accent);
@@ -284,39 +291,21 @@
 
     /* Painel Flutuante de Consulta de Remissão */
     .remissao-drawer {
-      position: fixed;
-      right: 22px;
-      bottom: 22px;
-      width: 440px;
-      max-width: calc(100vw - 32px);
-      max-height: 62vh;
-      background: var(--bg-surface);
-      border: 2px solid var(--cyan-accent);
-      border-radius: 12px;
-      box-shadow: 0 14px 36px rgba(0,0,0,0.55);
-      z-index: 120;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
+      position: fixed; right: 22px; bottom: 22px;
+      width: 440px; max-width: calc(100vw - 32px); max-height: 62vh;
+      background: var(--bg-surface); border: 2px solid var(--cyan-accent);
+      border-radius: 12px; box-shadow: 0 14px 36px rgba(0,0,0,0.55);
+      z-index: 120; display: none; flex-direction: column; overflow: hidden;
     }
     .remissao-drawer.open { display: flex; }
     .remissao-header {
-      background: var(--bg-elevated);
-      padding: 10px 14px;
+      background: var(--bg-elevated); padding: 10px 14px;
       border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
     .remissao-body {
-      padding: 14px;
-      overflow-y: auto;
-      font-size: 0.92rem;
-      line-height: 1.65;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      padding: 14px; overflow-y: auto; font-size: 0.92rem; line-height: 1.65;
+      display: flex; flex-direction: column; gap: 8px;
     }
 
     /* Botão Minimalista '+' para Adicionar Nota */
@@ -363,7 +352,6 @@
     strong.user-bold { font-weight: 800; color: var(--text-main); cursor: pointer; }
     span.user-color { font-weight: 600; cursor: pointer; }
 
-    /* Adaptação de alto contraste para as 5 cores de texto no modo escuro vs claro */
     span.user-color[data-color="red"] { color: #f87171; }
     body.light-mode span.user-color[data-color="red"] { color: #dc2626; }
 
@@ -436,31 +424,19 @@
 
     /* Marcadores Estilo OneNote nas Anotações (Bolinha Nível 1 -> Seta Nível 2+ com Tab) */
     .nota-conteudo-render ul, .rich-editor ul {
-      list-style: none;
-      padding-left: 20px;
-      margin: 4px 0;
+      list-style: none; padding-left: 20px; margin: 4px 0;
     }
     .nota-conteudo-render ul > li, .rich-editor ul > li {
-      position: relative;
-      margin-bottom: 2px;
+      position: relative; margin-bottom: 2px;
     }
     .nota-conteudo-render ul > li::before, .rich-editor ul > li::before {
-      content: "•";
-      position: absolute;
-      left: -15px;
-      font-weight: 900;
-      color: var(--cyan-accent);
+      content: "•"; position: absolute; left: -15px; font-weight: 900; color: var(--cyan-accent);
     }
-    /* Subnível após pressionar TAB: recuo maior e troca bolinha por pequena seta */
     .nota-conteudo-render ul ul, .rich-editor ul ul {
-      padding-left: 24px;
-      margin: 2px 0;
+      padding-left: 24px; margin: 2px 0;
     }
     .nota-conteudo-render ul ul > li::before, .rich-editor ul ul > li::before {
-      content: "▸";
-      left: -16px;
-      font-size: 0.92em;
-      color: var(--warning);
+      content: "▸"; left: -16px; font-size: 0.92em; color: var(--warning);
     }
 
     /* Histórico de Alterações Legislativas */
@@ -570,26 +546,31 @@
 
   <!-- APLICAÇÃO PRINCIPAL -->
   <div id="app-view" class="app-layout hidden">
-    <!-- DOCK FLUTUANTE QUE ACOMPANHA A ROLAGEM -->
+    <!-- DOCK FLUTUANTE UNIFICADO QUE ACOMPANHA A ROLAGEM -->
     <div class="floating-dock">
+      <!-- 1. BOTÃO RETRAIR / EXPANDIR MENU LATERAL -->
       <div class="dock-item-wrapper">
-        <button id="dock-expand-btn" class="dock-btn" onclick="alternarSidebar()" title="Expandir menu lateral (Alt+M)">▶</button>
+        <button id="dock-sidebar-btn" class="dock-btn" onclick="alternarSidebar()" title="Recolher ou expandir menu lateral (Alt+M)">
+          <svg id="icon-sidebar-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
       </div>
 
-      <!-- ÍNDICE ESTRUTURAL CLICÁVEL (TÍTULOS, CAPÍTULOS, SEÇÕES) -->
+      <!-- 2. ÍNDICE ESTRUTURAL MINIMALISTA (TÍTULOS, CAPÍTULOS, SEÇÕES + DESCRIÇÕES) -->
       <div class="dock-item-wrapper" id="dock-toc-wrapper">
-        <button id="dock-toc-btn" class="dock-btn" onclick="alternarPainelIndice()" title="Índice de Títulos e Capítulos (Alt+I)">📑</button>
+        <button id="dock-toc-btn" class="dock-btn" onclick="alternarPainelIndice()" title="Índice de Títulos e Capítulos (Alt+I)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
         <div id="flyout-indice" class="dock-flyout toc-flyout">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <strong style="font-size:0.84rem; color:var(--cyan-accent);">📑 Índice Estrutural</strong>
+            <strong style="font-size:0.84rem; color:var(--cyan-accent);">Índice Estrutural</strong>
             <button type="button" class="btn btn-outline btn-sm" onclick="fecharPainelIndice()">×</button>
           </div>
-          <input type="text" id="filtro-indice-input" placeholder="Filtrar capítulo ou título..." oninput="filtrarIndiceEstrutural()" style="padding:6px 10px; font-size:0.82rem; margin-top:6px;" />
+          <input type="text" id="filtro-indice-input" placeholder="Filtrar título, capítulo ou assunto..." oninput="filtrarIndiceEstrutural()" style="padding:6px 10px; font-size:0.82rem; margin-top:6px;" />
           <div id="lista-indice-estrutural" class="toc-list"></div>
         </div>
       </div>
 
-      <!-- CANETA CONTÍNUA (GRIFOS, NEGRITO E CORES DE TEXTO) -->
+      <!-- 3. CANETA CONTÍNUA (GRIFOS, NEGRITO E CORES DE TEXTO) -->
       <div class="dock-item-wrapper" id="dock-pen-wrapper">
         <button id="dock-pen-btn" class="dock-btn" onclick="alternarPainelCaneta()" title="Ferramentas de marcação e cor de texto (Alt+G)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -612,7 +593,7 @@
         </div>
       </div>
 
-      <!-- BUSCA RÁPIDA INTERNA (CTRL+F) -->
+      <!-- 4. BUSCA RÁPIDA INTERNA (CTRL+F) -->
       <div class="dock-item-wrapper" id="dock-find-wrapper">
         <button id="dock-find-btn" class="dock-btn" onclick="alternarPainelBuscaRapida()" title="Pesquisar texto na lei (Alt+F)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -634,7 +615,6 @@
         <div class="brand-actions">
           <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar e Criar Tags">🏷️</button>
           <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
-          <button class="btn btn-outline btn-sm" onclick="alternarSidebar()" title="Recolher menu lateral (Alt+M)">◀</button>
         </div>
       </div>
 
@@ -932,6 +912,8 @@
 
     const SVG_OLHO_ABERTO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     const SVG_OLHO_FECHADO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    const SVG_SETA_ESQUERDA = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const SVG_SETA_DIREITA = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
     window.addEventListener("DOMContentLoaded", async () => {
       if (localStorage.getItem("vm_theme") === "light") {
@@ -997,7 +979,10 @@
     }
 
     function alternarSidebar() {
-      document.getElementById("app-view").classList.toggle("sidebar-collapsed");
+      const appEl = document.getElementById("app-view");
+      const recolhida = appEl.classList.toggle("sidebar-collapsed");
+      const btn = document.getElementById("dock-sidebar-btn");
+      btn.innerHTML = recolhida ? SVG_SETA_DIREITA : SVG_SETA_ESQUERDA;
     }
 
     async function fazerLogin() {
@@ -1024,7 +1009,7 @@
     }
 
     // =========================================================================
-    // DOCK FLUTUANTE: ÍNDICE ESTRUTURAL, CANETA E BUSCA RÁPIDA
+    // DOCK FLUTUANTE: ÍNDICE ESTRUTURAL COM DESCRIÇÕES, CANETA E BUSCA RÁPIDA
     // =========================================================================
     function nivelHierarquicoEstrutura(texto) {
       const t = (texto || "").trim().toUpperCase();
@@ -1032,6 +1017,44 @@
       if (/^T[ÍI]TULO\b/.test(t)) return 2;
       if (/^CAP[ÍI]TULO\b/.test(t)) return 3;
       return 4;
+    }
+
+    function construirItensIndiceEstrutural() {
+      const itens = [];
+      for (let i = 0; i < dispositivosCache.length; i++) {
+        const d = dispositivosCache[i];
+        if (d.tipo !== "estrutura") continue;
+
+        const textoLimpo = (d.texto || "").replace(/\s+/g, " ").trim();
+        let codigo = textoLimpo;
+        let descricao = "";
+
+        // Caso 1: O próprio bloco já possui separador (ex: "TÍTULO I - Dos Princípios Fundamentais")
+        const matchInline = textoLimpo.match(/^((?:LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+[IVXLCDM0-9A-Z-]+(?:\s+ÚNICO)?)\s*(?:[-–—:]|\n)\s*(.+)$/i);
+        if (matchInline) {
+          codigo = matchInline[1].trim();
+          descricao = matchInline[2].trim();
+        } else {
+          // Caso 2: A descrição do Título/Capítulo foi extraída como o dispositivo estrutural imediatamente seguinte
+          const proximo = dispositivosCache[i + 1];
+          if (
+            proximo &&
+            proximo.tipo === "estrutura" &&
+            !/^(LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\b/i.test((proximo.texto || "").trim())
+          ) {
+            descricao = (proximo.texto || "").replace(/\s+/g, " ").trim();
+            i++; // Avança o índice para não duplicar a linha de descrição
+          }
+        }
+
+        itens.push({
+          slug: d.slug,
+          codigo,
+          descricao,
+          nivel: nivelHierarquicoEstrutura(codigo)
+        });
+      }
+      return itens;
     }
 
     function alternarPainelIndice() {
@@ -1065,7 +1088,7 @@
       }
 
       const termo = document.getElementById("filtro-indice-input").value.trim().toLowerCase();
-      const estruturas = dispositivosCache.filter(d => d.tipo === "estrutura");
+      const estruturas = construirItensIndiceEstrutural();
 
       if (estruturas.length === 0) {
         listaEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Esta lei não possui divisões de Títulos ou Capítulos.</p>`;
@@ -1073,15 +1096,19 @@
       }
 
       const filtradas = termo
-        ? estruturas.filter(e => e.texto.toLowerCase().includes(termo))
+        ? estruturas.filter(e =>
+            e.codigo.toLowerCase().includes(termo) ||
+            (e.descricao && e.descricao.toLowerCase().includes(termo))
+          )
         : estruturas;
 
       filtradas.forEach(est => {
-        const lvl = nivelHierarquicoEstrutura(est.texto);
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = `toc-item toc-lvl-${lvl}`;
-        btn.textContent = est.texto;
+        btn.className = `toc-item toc-lvl-${est.nivel}`;
+        btn.innerHTML = est.descricao
+          ? `<span class="toc-item-code">${escaparHtml(est.codigo)}</span> <span class="toc-item-desc">— ${escaparHtml(est.descricao)}</span>`
+          : `<span class="toc-item-code">${escaparHtml(est.codigo)}</span>`;
         btn.onclick = () => saltarParaDispositivo(est.slug);
         listaEl.appendChild(btn);
       });
@@ -1251,10 +1278,8 @@
     }
 
     function enriquecerRemissoesHtml(htmlSeguro) {
-      // Divide por tags HTML para nunca substituir dentro de atributos
       const partes = htmlSeguro.split(/(<[^>]+>)/g);
 
-      // Monta regex para outras leis cadastradas (ex: "Lei nº 14.133", "Lei 9.784", títulos curtos)
       const leisExternas = leisCache.filter(l => !leiSelecionada || l.id !== leiSelecionada.id);
       const padroesLeis = [];
       leisExternas.forEach(l => {
@@ -1279,14 +1304,12 @@
 
         let texto = parte;
 
-        // 1. Remissão para outras leis cadastradas no acervo
         padroesLeis.forEach(item => {
           texto = texto.replace(item.regex, (match) => {
             return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\\'")}')">${match}</span>`;
           });
         });
 
-        // 2. Remissão para artigos (evita aninhar dentro de spans já criados)
         const subPartes = texto.split(/(<[^>]+>)/g);
         texto = subPartes.map(sp => {
           if (sp.startsWith("<")) return sp;
@@ -2430,7 +2453,6 @@
         if (e.shiftKey) {
           document.execCommand("outdent", false, null);
         } else {
-          // Se não estiver em uma lista ainda, ativa marcadores e indenta; se já estiver, recua e troca bolinha por seta
           const dentroLista = document.queryCommandState("insertUnorderedList");
           if (!dentroLista) {
             document.execCommand("insertUnorderedList", false, null);
