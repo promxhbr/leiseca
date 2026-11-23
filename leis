@@ -1,0 +1,8 @@
+seu-repositorio/
+├── index.html
+├── scripts/
+│   ├── parser_leis.py
+│   └── requirements.txt
+└── .github/
+    └── workflows/
+        └── leis_bot.yml
