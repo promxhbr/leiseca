@@ -49,6 +49,44 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.75; transition: background-color 0.2s ease, color 0.2s ease; }
 
+    /* Toast Pop-up Esverdeado no Topo Central */
+    .toast-popup {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-16px);
+      background: #065f46;
+      color: #ecfdf5;
+      border: 1px solid #10b981;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .toast-popup.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: #a7f3d0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .toast-close:hover { color: #fff; }
+
     /* Login */
     .auth-container {
       min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -88,34 +126,124 @@
     .brand { font-size: 1.12rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .brand-actions { display: flex; gap: 6px; align-items: center; }
 
-    /* Botão Flutuante no Canto Esquerdo ao Recolher o Menu */
-    .sidebar-expand-fab {
+    /* =====================================================================
+       DOCK FLUTUANTE LATERAL (ACOMPANHA ROLAGEM ENTRE MENU E TEXTO OU NO CANTO)
+       ===================================================================== */
+    .floating-dock {
       position: fixed;
-      left: 0;
-      top: 50%;
+      left: 320px;
+      top: 42%;
       transform: translateY(-50%);
       z-index: 45;
-      background: var(--cobalt-primary);
-      color: #fff;
-      border: 1px solid var(--cyan-accent);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: left 0.22s ease;
+    }
+    .app-layout.sidebar-collapsed .floating-dock {
+      left: 0px;
+    }
+    @media (max-width: 850px) {
+      .floating-dock { left: 0px; top: auto; bottom: 18px; transform: none; }
+    }
+
+    .dock-item-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .dock-btn {
+      background: var(--bg-surface);
+      color: var(--cyan-accent);
+      border: 1px solid var(--border-color);
       border-left: none;
       border-radius: 0 8px 8px 0;
-      padding: 12px 7px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.35);
-      display: none;
-      transition: background 0.15s ease, padding-left 0.15s ease;
-    }
-    .sidebar-expand-fab:hover {
-      background: var(--cobalt-hover);
-      padding-left: 11px;
-    }
-    .app-layout.sidebar-collapsed .sidebar-expand-fab {
+      width: 34px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      transition: background 0.15s ease, width 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .dock-btn:hover, .dock-btn.active {
+      background: var(--cobalt-primary);
+      color: #fff;
+      border-color: var(--cyan-accent);
+      width: 38px;
+    }
+
+    /* Botão de abrir menu só aparece no dock quando o menu está recolhido */
+    #dock-expand-btn { display: none; }
+    .app-layout.sidebar-collapsed #dock-expand-btn { display: flex; }
+
+    /* Subpainéis Flutuantes da Caneta e da Pesquisa Rápida */
+    .dock-flyout {
+      position: absolute;
+      left: 42px;
+      top: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--cyan-accent);
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      z-index: 50;
+    }
+    .dock-flyout.open { display: flex; }
+
+    .tool-chip {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .tool-chip:hover { transform: scale(1.12); }
+    .tool-chip.selected-tool {
+      border-color: var(--cyan-accent);
+      box-shadow: 0 0 0 2px var(--cyan-accent);
+      transform: scale(1.12);
+    }
+
+    /* Barra de Pesquisa Rápida Flutuante (Ctrl+F interno) */
+    .quick-find-flyout {
+      min-width: 290px;
+    }
+    .quick-find-flyout input {
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      width: 165px;
+    }
+    .find-counter {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      min-width: 42px;
+      text-align: center;
+    }
+    mark.find-match {
+      background: #fde047;
+      color: #000;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+    mark.find-match.current-match {
+      background: #f97316;
+      color: #fff;
+      outline: 2px solid #fff;
     }
 
     /* Filtro de Tags (Matérias) */
@@ -160,7 +288,7 @@
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     /* Área de Leitura */
-    .main-content { padding: 24px 36px; max-width: 920px; width: 100%; margin: 0 auto; }
+    .main-content { padding: 24px 44px; max-width: 920px; width: 100%; margin: 0 auto; }
     @media (max-width: 600px) { .main-content { padding: 18px 16px; } }
 
     .top-controls {
@@ -234,31 +362,21 @@
 
     /* Botão de Expansão dos Filhos do Artigo na Pesquisa */
     .btn-expand-filhos {
-      margin-top: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--cyan-accent);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
+      margin-top: 8px; display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; color: var(--cyan-accent);
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      padding: 4px 10px; border-radius: 6px; cursor: pointer;
     }
-    .btn-expand-filhos:hover {
-      border-color: var(--cyan-accent);
-      background: var(--cyan-soft);
-    }
+    .btn-expand-filhos:hover { border-color: var(--cyan-accent); background: var(--cyan-soft); }
 
     .disp-alterado-tag {
       font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
       border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
     }
 
-    /* Grifos no Texto */
+    /* Grifos e Negritos no Texto */
     mark.user-hl { padding: 1px 3px; border-radius: 3px; color: #0f172a; cursor: pointer; }
+    strong.user-bold { font-weight: 800; color: var(--text-main); cursor: pointer; }
 
     .highlight-popover {
       position: fixed; display: none; align-items: center; gap: 8px;
@@ -301,7 +419,27 @@
       border: 1px solid var(--jurisp-accent);
       padding: 1px 7px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
     }
-    .nota-conteudo-oculto { font-style: italic; color: var(--text-muted); font-size: 0.84rem; }
+    .nota-conteudo-oculto {
+      font-style: italic; color: var(--text-muted); font-size: 0.84rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .icon-btn-inline {
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* Seletor de Tags Interativo no Modal de Nova Lei */
+    .tag-chips-selector {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+    }
+    .tag-select-chip {
+      font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 99px; border: 1px solid var(--border-color);
+      background: var(--bg-elevated); color: var(--text-main);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: transform 0.1s ease, border-color 0.1s ease;
+    }
+    .tag-select-chip:hover { border-color: var(--cyan-accent); transform: scale(1.03); }
 
     /* Editor Rich Text */
     .rich-toolbar {
@@ -374,6 +512,12 @@
 </head>
 <body>
 
+  <!-- POPUP ESVERDEADO DE SUCESSO NO TOPO CENTRAL (2 SEGUNDOS) -->
+  <div id="toast-sucesso" class="toast-popup" role="status">
+    <span id="toast-sucesso-msg">Anotação salva com sucesso!</span>
+    <button type="button" class="toast-close" onclick="fecharToast()" title="Fechar">×</button>
+  </div>
+
   <!-- TELA DE LOGIN -->
   <div id="auth-view" class="auth-container">
     <div class="auth-card">
@@ -390,8 +534,43 @@
 
   <!-- APLICAÇÃO PRINCIPAL -->
   <div id="app-view" class="app-layout hidden">
-    <!-- BOTÃO FLUTUANTE PARA ABRIR O MENU QUANDO RECOLHIDO -->
-    <button class="sidebar-expand-fab" onclick="alternarSidebar()" title="Expandir menu lateral">▶</button>
+    <!-- DOCK FLUTUANTE QUE ACOMPANHA A ROLAGEM -->
+    <div class="floating-dock">
+      <!-- 1. Botão de Expandir Menu (aparece quando recolhido) -->
+      <div class="dock-item-wrapper">
+        <button id="dock-expand-btn" class="dock-btn" onclick="alternarSidebar()" title="Expandir menu lateral (Alt+M)">▶</button>
+      </div>
+
+      <!-- 2. Botão Caneta (Grifar e Negritar ao selecionar texto) -->
+      <div class="dock-item-wrapper" id="dock-pen-wrapper">
+        <button id="dock-pen-btn" class="dock-btn" onclick="alternarPainelCaneta()" title="Ferramentas de marcação (Alt+G)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+        <div id="flyout-caneta" class="dock-flyout">
+          <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Ativo:</span>
+          <button type="button" class="tool-chip" data-tool="hl:#fef08a" style="background:#fef08a;" title="Grifo Amarelo" onclick="selecionarFerramentaCaneta('hl:#fef08a')"></button>
+          <button type="button" class="tool-chip" data-tool="hl:#bbf7d0" style="background:#bbf7d0;" title="Grifo Verde" onclick="selecionarFerramentaCaneta('hl:#bbf7d0')"></button>
+          <button type="button" class="tool-chip" data-tool="hl:#bae6fd" style="background:#bae6fd;" title="Grifo Azul" onclick="selecionarFerramentaCaneta('hl:#bae6fd')"></button>
+          <button type="button" class="tool-chip" data-tool="hl:#fbcfe8" style="background:#fbcfe8;" title="Grifo Rosa" onclick="selecionarFerramentaCaneta('hl:#fbcfe8')"></button>
+          <button type="button" class="tool-chip" data-tool="hl:#fed7aa" style="background:#fed7aa;" title="Grifo Laranja" onclick="selecionarFerramentaCaneta('hl:#fed7aa')"></button>
+          <button type="button" class="tool-chip" data-tool="bold" style="background:var(--bg-elevated); color:var(--text-main);" title="Negrito ao selecionar" onclick="selecionarFerramentaCaneta('bold')">N</button>
+        </div>
+      </div>
+
+      <!-- 3. Botão Pesquisa Rápida na Tela (Estilo Ctrl+F) -->
+      <div class="dock-item-wrapper" id="dock-find-wrapper">
+        <button id="dock-find-btn" class="dock-btn" onclick="alternarPainelBuscaRapida()" title="Pesquisar texto na lei (Alt+F)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <div id="flyout-busca" class="dock-flyout quick-find-flyout">
+          <input type="text" id="input-busca-rapida" placeholder="Localizar na lei..." oninput="executarBuscaRapida()" onkeydown="teclaBuscaRapida(event)" />
+          <span id="contador-busca-rapida" class="find-counter">0/0</span>
+          <button type="button" class="btn btn-outline btn-sm" onclick="navegarBuscaRapida(-1)" title="Anterior (Shift+Enter)">↑</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="navegarBuscaRapida(1)" title="Próximo (Enter)">↓</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fecharBuscaRapida()" title="Fechar (Esc)">×</button>
+        </div>
+      </div>
+    </div>
 
     <!-- BARRA LATERAL -->
     <aside class="sidebar">
@@ -400,7 +579,7 @@
         <div class="brand-actions">
           <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar e Criar Tags">🏷️</button>
           <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
-          <button class="btn btn-outline btn-sm" onclick="alternarSidebar()" title="Recolher menu lateral">◀</button>
+          <button class="btn btn-outline btn-sm" onclick="alternarSidebar()" title="Recolher menu lateral (Alt+M)">◀</button>
         </div>
       </div>
 
@@ -458,14 +637,15 @@
     </main>
   </div>
 
-  <!-- POPOVER FLUTUANTE PARA GRIFAR TEXTO SELECIONADO -->
+  <!-- POPOVER FLUTUANTE PARA GRIFAR/NEGRITAR TEXTO SELECIONADO -->
   <div id="highlight-popover" class="highlight-popover">
-    <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Grifar:</span>
-    <button class="hl-swatch" style="background:#fef08a;" title="Amarelo" onclick="aplicarGrifo('#fef08a')"></button>
-    <button class="hl-swatch" style="background:#bbf7d0;" title="Verde" onclick="aplicarGrifo('#bbf7d0')"></button>
-    <button class="hl-swatch" style="background:#bae6fd;" title="Azul" onclick="aplicarGrifo('#bae6fd')"></button>
-    <button class="hl-swatch" style="background:#fbcfe8;" title="Rosa" onclick="aplicarGrifo('#fbcfe8')"></button>
-    <button class="hl-swatch" style="background:#fed7aa;" title="Laranja" onclick="aplicarGrifo('#fed7aa')"></button>
+    <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Marcar:</span>
+    <button class="hl-swatch" style="background:#fef08a;" title="Amarelo" onclick="aplicarMarcacao('hl:#fef08a')"></button>
+    <button class="hl-swatch" style="background:#bbf7d0;" title="Verde" onclick="aplicarMarcacao('hl:#bbf7d0')"></button>
+    <button class="hl-swatch" style="background:#bae6fd;" title="Azul" onclick="aplicarMarcacao('hl:#bae6fd')"></button>
+    <button class="hl-swatch" style="background:#fbcfe8;" title="Rosa" onclick="aplicarMarcacao('hl:#fbcfe8')"></button>
+    <button class="hl-swatch" style="background:#fed7aa;" title="Laranja" onclick="aplicarMarcacao('hl:#fed7aa')"></button>
+    <button class="hl-swatch" style="background:var(--bg-elevated); color:var(--text-main); font-weight:800; font-size:0.8rem;" title="Negrito" onclick="aplicarMarcacao('bold')">N</button>
   </div>
 
   <!-- MODAL: CADASTRAR NOVA LEI -->
@@ -474,9 +654,10 @@
       <h3>Cadastrar Nova Lei</h3>
       <input type="text" id="nova-lei-titulo" placeholder="Nome curto da lei (aparecerá antes do Art. 1º)" />
       <div>
-        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (selecione ou digite uma nova):</label>
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (digite uma nova ou clique nas tags cadastradas abaixo):</label>
         <input type="text" id="nova-lei-materia" list="sugestoes-materias" placeholder="Ex: Direito Administrativo" autocomplete="off" />
         <datalist id="sugestoes-materias"></datalist>
+        <div id="chips-tags-nova-lei" class="tag-chips-selector"></div>
       </div>
       <input type="url" id="nova-lei-url" placeholder="URL do Planalto ou Senado (ex: https://www.planalto.gov.br/...)" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -492,8 +673,9 @@
       <h3>Editar Lei / Matéria</h3>
       <input type="text" id="edit-lei-titulo" placeholder="Título da lei" />
       <div>
-        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (selecione ou digite uma nova):</label>
+        <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:4px;">Matéria / Tag (digite uma nova ou clique nas tags cadastradas abaixo):</label>
         <input type="text" id="edit-lei-materia" list="sugestoes-materias" placeholder="Matéria / Tag" autocomplete="off" />
+        <div id="chips-tags-editar-lei" class="tag-chips-selector"></div>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-outline" onclick="fecharModal('modal-editar-lei')">Cancelar</button>
@@ -505,7 +687,7 @@
   <!-- MODAL: AVISO E SELEÇÃO DE COR PARA NOVA TAG -->
   <div id="modal-nova-tag-cor" class="modal-backdrop" style="z-index: 60;">
     <div class="modal">
-      <h3 style="color: var(--cyan-accent);">🏷️ Nova Tag Detectada</h3>
+      <h3 style="color: var(--cyan-accent);">🏷️ Nova Tag Sendo Criada</h3>
       <p style="font-size: 0.9rem;">
         A tag <strong id="nome-nova-tag-preview" style="color:var(--cyan-accent);"></strong> ainda não está cadastrada. Selecione uma cor para identificá-la nos cards de leis:
       </p>
@@ -533,7 +715,6 @@
       <h3>🏷️ Gerenciar Tags (Matérias)</h3>
       <p style="font-size:0.82rem; color:var(--text-muted);">Crie novas tags ou edite o nome e a cor das matérias existentes.</p>
 
-      <!-- Criar nova tag diretamente aqui -->
       <div class="tag-create-box">
         <input type="text" id="nova-tag-direta-nome" placeholder="Nome da nova tag (ex: Direito Tributário)" />
         <input type="color" id="nova-tag-direta-cor" value="#0284c7" />
@@ -554,7 +735,6 @@
       <input type="hidden" id="nota-slug" />
       <input type="hidden" id="nota-id" />
 
-      <!-- Checkbox para marcar se é Jurisprudência -->
       <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; font-weight:600; color:var(--jurisp-accent); cursor:pointer; background:var(--jurisp-bg); padding:8px 12px; border-radius:6px; border:1px solid rgba(168, 85, 247, 0.35);">
         <input type="checkbox" id="nota-is-jurisp" onchange="alternarCamposJurisprudencia()" style="width:auto;" />
         <span>⚖️ Esta anotação é uma Jurisprudência (destaque especial)</span>
@@ -639,6 +819,14 @@
     let apenasJurisprudencias = false;
     let selecaoAtualGrifo = null;
     let acaoPendenteLei = null;
+    let ferramentaCanetaAtiva = null;
+    let toastTimer = null;
+    let matchesBuscaRapida = [];
+    let indiceMatchAtual = -1;
+
+    // Ícones SVG de olho aberto e olho fechado
+    const SVG_OLHO_ABERTO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const SVG_OLHO_FECHADO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
 
     window.addEventListener("DOMContentLoaded", async () => {
       if (localStorage.getItem("vm_theme") === "light") {
@@ -649,6 +837,57 @@
       const { data: { session } } = await sb.auth.getSession();
       if (session) iniciarApp(session.user);
     });
+
+    // =========================================================================
+    // ATALHOS DE TECLADO GLOBAIS (Alt+M Menu, Alt+G Caneta, Alt+F / Ctrl+F Busca)
+    // =========================================================================
+    document.addEventListener("keydown", (e) => {
+      if (!usuarioAtual) return;
+
+      // Alt + M -> Recolher / Expandir menu lateral
+      if (e.altKey && e.key.toLowerCase() === "m") {
+        e.preventDefault();
+        alternarSidebar();
+      }
+      // Alt + G -> Abrir / Fechar painel flutuante da Caneta
+      else if (e.altKey && e.key.toLowerCase() === "g") {
+        e.preventDefault();
+        alternarPainelCaneta();
+      }
+      // Alt + F ou Ctrl + F (quando uma lei está aberta) -> Abrir pesquisa rápida flutuante
+      else if ((e.altKey && e.key.toLowerCase() === "f") || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && leiSelecionada)) {
+        e.preventDefault();
+        abrirPainelBuscaRapida();
+      }
+      // Escape -> Fecha painéis flutuantes abertos
+      else if (e.key === "Escape") {
+        fecharBuscaRapida();
+        document.getElementById("flyout-caneta").classList.remove("open");
+        document.getElementById("dock-pen-btn").classList.remove("active");
+        ferramentaCanetaAtiva = null;
+        atualizarBotoesCaneta();
+      }
+    });
+
+    // =========================================================================
+    // TOAST POP-UP ESVERDEADO (2 SEGUNDOS + BOTÃO X)
+    // =========================================================================
+    function mostrarToastSucesso(mensagem) {
+      const toast = document.getElementById("toast-sucesso");
+      document.getElementById("toast-sucesso-msg").textContent = mensagem;
+      toast.classList.add("show");
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        fecharToast();
+      }, 2000);
+    }
+
+    function fecharToast() {
+      const toast = document.getElementById("toast-sucesso");
+      toast.classList.remove("show");
+      if (toastTimer) clearTimeout(toastTimer);
+    }
 
     function alternarTema() {
       const isLight = document.body.classList.toggle("light-mode");
@@ -685,6 +924,155 @@
       document.getElementById("auth-view").classList.add("hidden");
       document.getElementById("app-view").classList.remove("hidden");
       carregarDadosIniciais();
+    }
+
+    // =========================================================================
+    // DOCK FLUTUANTE: CANETA DE GRIFO/NEGRITO CONTÍNUO & BUSCA RÁPIDA (CTRL+F)
+    // =========================================================================
+    function alternarPainelCaneta() {
+      const flyout = document.getElementById("flyout-caneta");
+      const btn = document.getElementById("dock-pen-btn");
+      const abriu = flyout.classList.toggle("open");
+      btn.classList.toggle("active", abriu);
+
+      if (!abriu) {
+        ferramentaCanetaAtiva = null;
+        atualizarBotoesCaneta();
+      } else {
+        fecharBuscaRapida();
+      }
+    }
+
+    function selecionarFerramentaCaneta(ferramenta) {
+      ferramentaCanetaAtiva = (ferramentaCanetaAtiva === ferramenta) ? null : ferramenta;
+      atualizarBotoesCaneta();
+    }
+
+    function atualizarBotoesCaneta() {
+      document.querySelectorAll("#flyout-caneta .tool-chip").forEach(btn => {
+        btn.classList.toggle("selected-tool", btn.dataset.tool === ferramentaCanetaAtiva);
+      });
+    }
+
+    function abrirPainelBuscaRapida() {
+      const flyout = document.getElementById("flyout-busca");
+      const btn = document.getElementById("dock-find-btn");
+      flyout.classList.add("open");
+      btn.classList.add("active");
+      document.getElementById("flyout-caneta").classList.remove("open");
+      document.getElementById("dock-pen-btn").classList.remove("active");
+
+      const inp = document.getElementById("input-busca-rapida");
+      inp.focus();
+      inp.select();
+    }
+
+    function alternarPainelBuscaRapida() {
+      const flyout = document.getElementById("flyout-busca");
+      if (flyout.classList.contains("open")) {
+        fecharBuscaRapida();
+      } else {
+        abrirPainelBuscaRapida();
+      }
+    }
+
+    function fecharBuscaRapida() {
+      document.getElementById("flyout-busca").classList.remove("open");
+      document.getElementById("dock-find-btn").classList.remove("active");
+      limparDestaquesBuscaRapida();
+      document.getElementById("contador-busca-rapida").textContent = "0/0";
+    }
+
+    function limparDestaquesBuscaRapida() {
+      const container = document.getElementById("container-dispositivos");
+      container.querySelectorAll("mark.find-match").forEach(m => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+      });
+      matchesBuscaRapida = [];
+      indiceMatchAtual = -1;
+    }
+
+    function executarBuscaRapida() {
+      limparDestaquesBuscaRapida();
+      const termo = document.getElementById("input-busca-rapida").value.trim();
+      const contadorEl = document.getElementById("contador-busca-rapida");
+
+      if (!termo || termo.length < 1) {
+        contadorEl.textContent = "0/0";
+        return;
+      }
+
+      const termoLower = termo.toLowerCase();
+      const container = document.getElementById("container-dispositivos");
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+      const nosTexto = [];
+      let no;
+      while ((no = walker.nextNode())) {
+        if (no.nodeValue.toLowerCase().includes(termoLower)) {
+          nosTexto.push(no);
+        }
+      }
+
+      nosTexto.forEach(textNode => {
+        const valor = textNode.nodeValue;
+        const valorLower = valor.toLowerCase();
+        let pos = 0;
+        let idx = valorLower.indexOf(termoLower, pos);
+        if (idx === -1) return;
+
+        const frag = document.createDocumentFragment();
+        while (idx !== -1) {
+          if (idx > pos) {
+            frag.appendChild(document.createTextNode(valor.slice(pos, idx)));
+          }
+          const mark = document.createElement("mark");
+          mark.className = "find-match";
+          mark.textContent = valor.slice(idx, idx + termo.length);
+          frag.appendChild(mark);
+          matchesBuscaRapida.push(mark);
+
+          pos = idx + termo.length;
+          idx = valorLower.indexOf(termoLower, pos);
+        }
+        if (pos < valor.length) {
+          frag.appendChild(document.createTextNode(valor.slice(pos)));
+        }
+        textNode.parentNode.replaceChild(frag, textNode);
+      });
+
+      if (matchesBuscaRapida.length > 0) {
+        indiceMatchAtual = 0;
+        destacarMatchAtual();
+      } else {
+        contadorEl.textContent = "0/0";
+      }
+    }
+
+    function navegarBuscaRapida(direcao) {
+      if (matchesBuscaRapida.length === 0) return;
+      indiceMatchAtual = (indiceMatchAtual + direcao + matchesBuscaRapida.length) % matchesBuscaRapida.length;
+      destacarMatchAtual();
+    }
+
+    function destacarMatchAtual() {
+      matchesBuscaRapida.forEach((m, i) => m.classList.toggle("current-match", i === indiceMatchAtual));
+      const atual = matchesBuscaRapida[indiceMatchAtual];
+      if (atual) {
+        atual.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      document.getElementById("contador-busca-rapida").textContent = `${indiceMatchAtual + 1}/${matchesBuscaRapida.length}`;
+    }
+
+    function teclaBuscaRapida(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        navegarBuscaRapida(e.shiftKey ? -1 : 1);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        fecharBuscaRapida();
+      }
     }
 
     // =========================================================================
@@ -745,9 +1133,30 @@
     }
 
     function atualizarSugestoesMaterias() {
-      const datalist = document.getElementById("sugestoes-materias");
       const ordenadas = [...tagsCache].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+      const datalist = document.getElementById("sugestoes-materias");
       datalist.innerHTML = ordenadas.map(t => `<option value="${t.nome}">`).join("");
+
+      // Popula chips clicáveis dentro dos modais de Nova Lei e Editar Lei
+      renderizarChipsTagsModal("chips-tags-nova-lei", "nova-lei-materia", ordenadas);
+      renderizarChipsTagsModal("chips-tags-editar-lei", "edit-lei-materia", ordenadas);
+    }
+
+    function renderizarChipsTagsModal(containerId, inputId, tagsOrdenadas) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = "";
+      tagsOrdenadas.forEach(t => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "tag-select-chip";
+        chip.style.borderColor = t.cor;
+        chip.innerHTML = `<span class="tag-dot" style="background:${t.cor};"></span><span>${t.nome}</span>`;
+        chip.onclick = () => {
+          document.getElementById(inputId).value = t.nome;
+        };
+        container.appendChild(chip);
+      });
     }
 
     function renderizarFiltroMaterias() {
@@ -909,6 +1318,7 @@
         document.getElementById("nova-lei-materia").value = "";
         document.getElementById("nova-lei-url").value = "";
 
+        mostrarToastSucesso("Lei cadastrada! Extraindo artigos...");
         await dispararWorkflowGitHub("extrair_pendentes");
         await carregarLeis();
       } else {
@@ -920,6 +1330,7 @@
         if (error) return alert("Erro ao atualizar: " + error.message);
 
         fecharModal("modal-editar-lei");
+        mostrarToastSucesso("Lei atualizada com sucesso!");
         await carregarLeis();
         const atualizada = leisCache.find(l => l.id === dados.id);
         if (atualizada) selecionarLei(atualizada);
@@ -971,6 +1382,7 @@
       await carregarTags();
       renderizarFiltroMaterias();
       abrirModalGerenciarTags();
+      mostrarToastSucesso("Tag criada com sucesso!");
     }
 
     async function salvarAlteracaoTag(tagId, nomeAntigo) {
@@ -995,7 +1407,7 @@
         const atualizada = leisCache.find(l => l.id === leiSelecionada.id);
         if (atualizada) selecionarLei(atualizada);
       }
-      alert("Tag atualizada!");
+      mostrarToastSucesso("Tag atualizada!");
     }
 
     async function excluirTag(tagId, nomeTag) {
@@ -1008,7 +1420,7 @@
     }
 
     // =========================================================================
-    // LEITURA DA LEI, FILTRO DE JURISPRUDÊNCIAS E PESQUISA INTELIGENTE DE ARTIGO
+    // LEITURA DA LEI, RECARGA DE ANOTAÇÕES SEM PERDER BUSCA E FILTRO DE ARTIGO
     // =========================================================================
     function ehNotaJurisprudencia(nota) {
       return ["STF", "STJ", "Jurisprudência"].includes(nota.tribunal);
@@ -1022,12 +1434,44 @@
       filtrarDispositivos();
     }
 
+    async function recarregarAnotacoesEGrifosMantendoEstado() {
+      if (!leiSelecionada) return;
+
+      const { data: notas } = await sb
+        .from("anotacoes")
+        .select("*")
+        .eq("lei_id", leiSelecionada.id)
+        .order("updated_at", { ascending: true });
+
+      anotacoesCache = {};
+      (notas || []).forEach(n => {
+        if (!anotacoesCache[n.slug]) anotacoesCache[n.slug] = [];
+        anotacoesCache[n.slug].push(n);
+      });
+
+      const { data: grifos } = await sb
+        .from("grifos")
+        .select("*")
+        .eq("lei_id", leiSelecionada.id)
+        .order("created_at", { ascending: true });
+
+      grifosCache = {};
+      (grifos || []).forEach(g => {
+        if (!grifosCache[g.slug]) grifosCache[g.slug] = [];
+        grifosCache[g.slug].push(g);
+      });
+
+      // Mantém exatamente o filtro de artigo / palavra-chave / jurisprudência ativo!
+      filtrarDispositivos();
+    }
+
     async function selecionarLei(lei) {
       leiSelecionada = lei;
       apenasJurisprudencias = false;
       artigosExpandidosBusca = {};
       document.getElementById("busca-artigo").value = "";
       document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
+      fecharBuscaRapida();
       renderizarSidebar();
 
       document.getElementById("estado-vazio").classList.add("hidden");
@@ -1071,32 +1515,7 @@
       }
 
       dispositivosCache = todosDisps;
-
-      const { data: notas } = await sb
-        .from("anotacoes")
-        .select("*")
-        .eq("lei_id", lei.id)
-        .order("updated_at", { ascending: true });
-
-      anotacoesCache = {};
-      (notas || []).forEach(n => {
-        if (!anotacoesCache[n.slug]) anotacoesCache[n.slug] = [];
-        anotacoesCache[n.slug].push(n);
-      });
-
-      const { data: grifos } = await sb
-        .from("grifos")
-        .select("*")
-        .eq("lei_id", lei.id)
-        .order("created_at", { ascending: true });
-
-      grifosCache = {};
-      (grifos || []).forEach(g => {
-        if (!grifosCache[g.slug]) grifosCache[g.slug] = [];
-        grifosCache[g.slug].push(g);
-      });
-
-      renderizarDispositivos(dispositivosCache);
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     function escaparHtml(str) {
@@ -1109,10 +1528,17 @@
       listaGrifos.forEach(g => {
         const trechoEscapado = escaparHtml(g.trecho);
         if (trechoEscapado && html.includes(trechoEscapado)) {
-          html = html.replace(
-            trechoEscapado,
-            `<mark class="user-hl" style="background:${g.cor};" title="Clique para remover grifo" onclick="removerGrifo('${g.id}')">${trechoEscapado}</mark>`
-          );
+          if (g.cor === "BOLD") {
+            html = html.replace(
+              trechoEscapado,
+              `<strong class="user-bold" title="Clique para remover negrito" onclick="removerGrifo('${g.id}')">${trechoEscapado}</strong>`
+            );
+          } else {
+            html = html.replace(
+              trechoEscapado,
+              `<mark class="user-hl" style="background:${g.cor};" title="Clique para remover grifo" onclick="removerGrifo('${g.id}')">${trechoEscapado}</mark>`
+            );
+          }
         }
       });
       return html;
@@ -1134,7 +1560,6 @@
       const rawBusca = document.getElementById("busca-artigo").value.trim();
       const termo = rawBusca.toLowerCase();
 
-      // Identifica se o usuário digitou "Art." ou "Art" (com ou sem número)
       const matchBuscaArtigo = rawBusca.match(/^art\.?\s*(\d*(?:-[a-zA-Z])?)$/i);
 
       if (matchBuscaArtigo && !apenasJurisprudencias) {
@@ -1161,7 +1586,6 @@
         return;
       }
 
-      // Filtro padrão por palavra-chave e/ou botão "Jurisprudências"
       let lista = dispositivosCache;
 
       if (apenasJurisprudencias) {
@@ -1219,7 +1643,6 @@
         const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
         const textoComGrifos = aplicarGrifosNoTexto(d.texto, d.slug);
 
-        // Botão para expandir parágrafos, incisos e alíneas na busca por "Art."
         let botaoExpandirFilhosHtml = "";
         if (d._modoBuscaArtigo && d._qtdFilhos > 0) {
           const aberto = !!artigosExpandidosBusca[d.slug];
@@ -1242,17 +1665,19 @@
               : `<span>${n.tribunal}</span>`;
 
             const corpoHtml = n.oculta
-              ? `<div class="nota-conteudo-oculto">🙈 Anotação oculta — <a href="#" onclick="event.preventDefault(); alternarVisibilidadeNota('${n.id}', false)" style="color:var(--cyan-accent);">Revelar conteúdo</a></div>`
+              ? `<div class="nota-conteudo-oculto">${SVG_OLHO_FECHADO} <span>Anotação oculta —</span> <a href="#" onclick="event.preventDefault(); alternarVisibilidadeNota('${n.id}', false)" style="color:var(--cyan-accent);">Visualizar conteúdo</a></div>`
               : `<div style="white-space: pre-wrap;">${n.conteudo}</div>`;
+
+            const btnVisibilidade = n.oculta
+              ? `<button class="btn btn-outline btn-sm icon-btn-inline" onclick="alternarVisibilidadeNota('${n.id}', false)" title="Visualizar anotação">${SVG_OLHO_ABERTO}<span>Visualizar</span></button>`
+              : `<button class="btn btn-outline btn-sm icon-btn-inline" onclick="alternarVisibilidadeNota('${n.id}', true)" title="Ocultar anotação">${SVG_OLHO_FECHADO}<span>Ocultar</span></button>`;
 
             return `
               <div class="nota-box ${isJurisp ? 'is-jurisp' : n.tribunal}">
                 <div class="nota-meta">
                   ${badgeTipo}
-                  <div style="display:flex; gap:6px;">
-                    <button class="btn btn-outline btn-sm" onclick="alternarVisibilidadeNota('${n.id}', ${!n.oculta})" title="${n.oculta ? 'Mostrar' : 'Ocultar'}">
-                      ${n.oculta ? '👁️ Mostrar' : '🙈 Ocultar'}
-                    </button>
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    ${btnVisibilidade}
                     <button class="btn btn-outline btn-sm" onclick="editarNota('${n.id}', '${d.slug}')">Editar</button>
                     <button class="btn btn-outline btn-sm" onclick="excluirNota('${n.id}')" style="color:var(--danger);">×</button>
                   </div>
@@ -1297,15 +1722,16 @@
 
     async function alternarVisibilidadeNota(notaId, novoEstadoOculta) {
       await sb.from("anotacoes").update({ oculta: novoEstadoOculta }).eq("id", notaId);
-      selecionarLei(leiSelecionada);
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     // =========================================================================
-    // GRIFOS DIRETOS NO TEXTO SELECIONADO
+    // GRIFOS E NEGRITOS DIRETOS NO TEXTO SELECIONADO (CANETA CONTÍNUA OU POPOVER)
     // =========================================================================
-    document.addEventListener("mouseup", (e) => {
+    document.addEventListener("mouseup", async (e) => {
       const popover = document.getElementById("highlight-popover");
-      if (popover.contains(e.target)) return;
+      const dockPen = document.getElementById("dock-pen-wrapper");
+      if (popover.contains(e.target) || dockPen.contains(e.target)) return;
 
       const sel = window.getSelection();
       const texto = sel ? sel.toString().trim() : "";
@@ -1315,6 +1741,14 @@
         const bodyEl = anchorEl ? anchorEl.closest(".disp-text-body") : null;
 
         if (bodyEl && bodyEl.dataset.slug) {
+          // Se uma cor ou Negrito (N) estiver selecionado na caneta flutuante, aplica imediatamente
+          if (ferramentaCanetaAtiva) {
+            window.getSelection().removeAllRanges();
+            await salvarMarcacaoTexto(bodyEl.dataset.slug, texto, ferramentaCanetaAtiva);
+            return;
+          }
+
+          // Caso contrário, exibe o popover flutuante rápido
           const rect = sel.getRangeAt(0).getBoundingClientRect();
           selecaoAtualGrifo = { slug: bodyEl.dataset.slug, trecho: texto };
           popover.style.top = Math.max(10, rect.top - 48) + "px";
@@ -1327,29 +1761,33 @@
       selecaoAtualGrifo = null;
     });
 
-    async function aplicarGrifo(cor) {
+    async function aplicarMarcacao(ferramenta) {
       if (!selecaoAtualGrifo || !leiSelecionada) return;
       const { slug, trecho } = selecaoAtualGrifo;
 
       document.getElementById("highlight-popover").classList.remove("open");
       window.getSelection().removeAllRanges();
+      selecaoAtualGrifo = null;
 
+      await salvarMarcacaoTexto(slug, trecho, ferramenta);
+    }
+
+    async function salvarMarcacaoTexto(slug, trecho, ferramenta) {
+      const valorCor = ferramenta === "bold" ? "BOLD" : ferramenta.replace("hl:", "");
       await sb.from("grifos").insert({
         lei_id: leiSelecionada.id,
         user_id: usuarioAtual.id,
         slug,
         trecho,
-        cor
+        cor: valorCor
       });
-
-      selecaoAtualGrifo = null;
-      selecionarLei(leiSelecionada);
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     async function removerGrifo(grifoId) {
-      if (!confirm("Remover este grifo?")) return;
+      if (!confirm("Remover esta marcação?")) return;
       await sb.from("grifos").delete().eq("id", grifoId);
-      selecionarLei(leiSelecionada);
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     // =========================================================================
@@ -1387,7 +1825,7 @@
         tem_atualizacao: false
       }).eq("id", leiId);
 
-      alert("Lei atualizada com sucesso! Todas as anotações foram preservadas.");
+      mostrarToastSucesso("Lei atualizada preservando todas as notas!");
       await carregarLeis();
       const atualizada = leisCache.find(l => l.id === leiId);
       if (atualizada) selecionarLei(atualizada);
@@ -1395,6 +1833,7 @@
 
     function abrirModalEditarLei() {
       if (!leiSelecionada) return;
+      atualizarSugestoesMaterias();
       document.getElementById("edit-lei-titulo").value = leiSelecionada.titulo;
       document.getElementById("edit-lei-materia").value = leiSelecionada.materia || "Geral";
       document.getElementById("modal-editar-lei").classList.add("open");
@@ -1427,7 +1866,7 @@
     }
 
     // =========================================================================
-    // CRUD DE ANOTAÇÕES E JURISPRUDÊNCIAS
+    // CRUD DE ANOTAÇÕES E JURISPRUDÊNCIAS (SEM PERDER A PESQUISA ATIVA)
     // =========================================================================
     function alternarCamposJurisprudencia() {
       const isJurisp = document.getElementById("nota-is-jurisp").checked;
@@ -1483,12 +1922,14 @@
       const oculta = document.getElementById("nota-oculta").checked;
       if (!conteudo || conteudo === "<br>") return;
 
+      let erroOperacao = null;
       if (notaId) {
-        await sb.from("anotacoes").update({
+        const { error } = await sb.from("anotacoes").update({
           tribunal, conteudo, oculta, updated_at: new Date().toISOString()
         }).eq("id", notaId);
+        erroOperacao = error;
       } else {
-        await sb.from("anotacoes").insert({
+        const { error } = await sb.from("anotacoes").insert({
           lei_id: leiSelecionada.id,
           user_id: usuarioAtual.id,
           slug,
@@ -1496,16 +1937,24 @@
           conteudo,
           oculta
         });
+        erroOperacao = error;
+      }
+
+      if (erroOperacao) {
+        alert("Erro ao salvar anotação: " + erroOperacao.message);
+        return;
       }
 
       fecharModal("modal-nota");
-      selecionarLei(leiSelecionada);
+      mostrarToastSucesso(notaId ? "Anotação atualizada!" : "Anotação salva com sucesso!");
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     async function excluirNota(notaId) {
       if (!confirm("Remover esta anotação?")) return;
       await sb.from("anotacoes").delete().eq("id", notaId);
-      selecionarLei(leiSelecionada);
+      mostrarToastSucesso("Anotação removida!");
+      await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
     // Modais auxiliares
@@ -1531,7 +1980,7 @@
         user_id: usuarioAtual.id, github_owner, github_repo, github_token
       });
       fecharModal("modal-config");
-      alert("Integração salva!");
+      mostrarToastSucesso("Integração salva!");
     }
 
     function fecharModal(id) { document.getElementById(id).classList.remove("open"); }
