@@ -51,63 +51,30 @@
 
     /* Toast Pop-up Esverdeado no Topo Central */
     .toast-popup {
-      position: fixed;
-      top: 18px;
-      left: 50%;
+      position: fixed; top: 18px; left: 50%;
       transform: translateX(-50%) translateY(-16px);
-      background: #065f46;
-      color: #ecfdf5;
-      border: 1px solid #10b981;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
+      background: #065f46; color: #ecfdf5; border: 1px solid #10b981;
+      padding: 8px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 250;
+      opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease;
     }
-    .toast-popup.show {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(-50%) translateY(0);
-    }
-    .toast-close {
-      background: transparent;
-      border: none;
-      color: #a7f3d0;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      line-height: 1;
-    }
+    .toast-popup.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .toast-close { background: transparent; border: none; color: #a7f3d0; font-size: 1.1rem; font-weight: 700; cursor: pointer; line-height: 1; }
     .toast-close:hover { color: #fff; }
 
     /* Login */
-    .auth-container {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .auth-card {
-      background: var(--bg-surface); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 32px; width: 100%; max-width: 400px;
-    }
+    .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; width: 100%; max-width: 400px; }
     .auth-card h1 { color: var(--cyan-accent); font-size: 1.5rem; margin-bottom: 8px; }
     .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
 
     /* Layout Principal com Sidebar Retrátil */
     .app-layout {
-      display: grid;
-      grid-template-columns: 315px 1fr;
-      min-height: 100vh;
+      display: grid; grid-template-columns: 315px 1fr; min-height: 100vh;
       transition: grid-template-columns 0.22s ease;
     }
-    .app-layout.sidebar-collapsed {
-      grid-template-columns: 0px 1fr;
-    }
+    .app-layout.sidebar-collapsed { grid-template-columns: 0px 1fr; }
     @media (max-width: 850px) {
       .app-layout { grid-template-columns: 1fr; }
       .app-layout.sidebar-collapsed .sidebar { display: none; }
@@ -120,68 +87,28 @@
       padding: 16px; display: flex; flex-direction: column; gap: 10px;
       overflow-x: hidden; transition: padding 0.2s ease, opacity 0.15s ease;
     }
-    .app-layout.sidebar-collapsed .sidebar {
-      padding: 0; opacity: 0; pointer-events: none; border: none;
-    }
+    .app-layout.sidebar-collapsed .sidebar { padding: 0; opacity: 0; pointer-events: none; border: none; }
     .brand { font-size: 1.08rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .brand-actions { display: flex; gap: 5px; align-items: center; }
 
-    /* Linha compacta de ações na Sidebar */
-    .sidebar-top-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
+    .sidebar-top-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .materia-select-wrapper select { padding: 7px 10px; font-size: 0.84rem; font-weight: 600; background: var(--bg-elevated); }
 
-    /* Seletor limpo de Tags (Matérias) na Sidebar */
-    .materia-select-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .materia-select-wrapper select {
-      padding: 7px 10px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      background: var(--bg-elevated);
-    }
-
-    /* Alerta global no menu quando alguma lei possui atualização */
     .sidebar-update-alert {
-      background: rgba(245, 158, 11, 0.16);
-      border: 1px solid var(--warning);
-      color: var(--warning);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      transition: background 0.15s ease;
+      background: rgba(245, 158, 11, 0.16); border: 1px solid var(--warning);
+      color: var(--warning); border-radius: 8px; padding: 8px 10px;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
     }
-    .sidebar-update-alert:hover {
-      background: rgba(245, 158, 11, 0.26);
-    }
+    .sidebar-update-alert:hover { background: rgba(245, 158, 11, 0.26); }
 
     /* Dock Flutuante Lateral */
     .floating-dock {
-      position: fixed;
-      left: 315px;
-      top: 42%;
-      transform: translateY(-50%);
-      z-index: 45;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: left 0.22s ease;
+      position: fixed; left: 315px; top: 42%; transform: translateY(-50%);
+      z-index: 45; display: flex; flex-direction: column; gap: 6px; transition: left 0.22s ease;
     }
     .app-layout.sidebar-collapsed .floating-dock { left: 0px; }
-    @media (max-width: 850px) {
-      .floating-dock { left: 0px; top: auto; bottom: 18px; transform: none; }
-    }
+    @media (max-width: 850px) { .floating-dock { left: 0px; top: auto; bottom: 18px; transform: none; } }
 
     .dock-item-wrapper { position: relative; display: flex; align-items: center; }
     .dock-btn {
@@ -210,11 +137,50 @@
     }
     .dock-flyout.open { display: flex; }
 
+    /* Flyout do Índice Estrutural (Títulos, Capítulos, Seções) */
+    .toc-flyout {
+      flex-direction: column;
+      align-items: stretch;
+      white-space: normal;
+      width: 340px;
+      max-height: 68vh;
+      top: -120px;
+      padding: 12px;
+    }
+    .toc-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+      padding-right: 4px;
+    }
+    .toc-item {
+      text-align: left;
+      background: var(--bg-elevated);
+      border: 1px solid transparent;
+      color: var(--text-main);
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      line-height: 1.35;
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+    .toc-item:hover {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-soft);
+    }
+    .toc-lvl-1 { font-weight: 800; color: var(--cyan-accent); text-transform: uppercase; font-size: 0.78rem; }
+    .toc-lvl-2 { font-weight: 700; padding-left: 14px; }
+    .toc-lvl-3 { font-weight: 600; padding-left: 24px; color: var(--text-secondary); }
+    .toc-lvl-4 { font-weight: 500; padding-left: 34px; color: var(--text-muted); font-size: 0.76rem; }
+
     .tool-chip {
-      width: 26px; height: 26px; border-radius: 6px;
+      width: 24px; height: 24px; border-radius: 6px;
       border: 2px solid var(--border-color); cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 0.85rem;
+      font-weight: 800; font-size: 0.8rem;
       transition: transform 0.12s ease, border-color 0.12s ease;
     }
     .tool-chip:hover { transform: scale(1.12); }
@@ -230,14 +196,8 @@
     mark.find-match.current-match { background: #f97316; color: #fff; outline: 2px solid #fff; }
 
     /* Lista de Leis */
-    #lista-leis {
-      display: flex; flex-direction: column; gap: 8px;
-      overflow-y: auto; overflow-x: hidden; padding: 2px;
-    }
-    .grupo-materia-titulo {
-      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px; padding-left: 2px;
-    }
+    #lista-leis { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overflow-x: hidden; padding: 2px; }
+    .grupo-materia-titulo { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--cyan-accent); margin-top: 6px; padding-left: 2px; }
     .lei-item {
       background: var(--bg-elevated); border: 1px solid var(--border-color);
       border-radius: 8px; padding: 10px 12px; cursor: pointer;
@@ -248,9 +208,7 @@
     .lei-item-title { font-weight: 600; font-size: 0.91rem; margin-bottom: 5px; line-height: 1.32; }
     .lei-item-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
-    .badge {
-      display: inline-block; font-size: 0.68rem; padding: 1px 7px; border-radius: 99px; font-weight: 600;
-    }
+    .badge { display: inline-block; font-size: 0.68rem; padding: 1px 7px; border-radius: 99px; font-weight: 600; }
     .badge-tag { border: 1px solid currentColor; }
     .badge-update { background: rgba(245, 158, 11, 0.22); color: var(--warning); border: 1px solid var(--warning); }
     .badge-proc { background: var(--cyan-soft); color: var(--cyan-accent); }
@@ -260,10 +218,7 @@
     .main-content { padding: 24px 44px; max-width: 940px; width: 100%; margin: 0 auto; }
     @media (max-width: 600px) { .main-content { padding: 18px 16px; } }
 
-    .top-controls {
-      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
-      margin-bottom: 14px;
-    }
+    .top-controls { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 14px; }
     .toolbar {
       display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
       margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
@@ -283,42 +238,85 @@
       font-size: 0.96rem; text-transform: uppercase; letter-spacing: 0.8px;
       border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
       background: var(--bg-elevated); border-radius: 6px;
+      scroll-margin-top: 24px;
     }
-    .disp-row { position: relative; transition: background-color 0.15s ease; }
+    .disp-row { position: relative; transition: background-color 0.2s ease; scroll-margin-top: 28px; }
+    .disp-row.flash-target { outline: 2px solid var(--cyan-accent); background: var(--cyan-soft); border-radius: 6px; }
 
     .disp-artigo {
       background: var(--bg-caput); border-left: 4px solid var(--cyan-accent);
-      border-radius: 6px; padding: 12px 16px; margin-top: 22px; margin-bottom: 8px;
-      font-size: 1.01rem;
+      border-radius: 6px; padding: 12px 16px; margin-top: 22px; margin-bottom: 8px; font-size: 1.01rem;
     }
     .disp-paragrafo {
       padding: 4px 12px 4px 18px; margin-bottom: 4px;
       border-left: 2px solid var(--border-color); color: var(--text-secondary); font-size: 0.98rem;
     }
-    .disp-inciso {
-      padding: 3px 12px 3px 32px; margin-bottom: 2px;
-      color: var(--text-secondary); font-size: 0.96rem;
-    }
-    .disp-alinea {
-      padding: 2px 12px 2px 48px; margin-bottom: 2px;
-      color: var(--text-secondary); font-size: 0.95rem;
-    }
+    .disp-inciso { padding: 3px 12px 3px 32px; margin-bottom: 2px; color: var(--text-secondary); font-size: 0.96rem; }
+    .disp-alinea { padding: 2px 12px 2px 48px; margin-bottom: 2px; color: var(--text-secondary); font-size: 0.95rem; }
     .disp-revogado-nota {
-      padding: 10px 14px; margin: 10px 0;
-      border-left: 4px solid var(--danger);
-      background: rgba(239, 68, 68, 0.08);
-      border-radius: 6px;
-      color: var(--text-muted);
+      padding: 10px 14px; margin: 10px 0; border-left: 4px solid var(--danger);
+      background: rgba(239, 68, 68, 0.08); border-radius: 6px; color: var(--text-muted);
     }
-    .disp-paragrafo:hover, .disp-inciso:hover, .disp-alinea:hover {
-      background: var(--cyan-soft); border-radius: 4px;
-    }
+    .disp-paragrafo:hover, .disp-inciso:hover, .disp-alinea:hover { background: var(--cyan-soft); border-radius: 4px; }
 
     .disp-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .disp-text-body { flex: 1; text-align: justify; }
     .disp-rotulo { font-weight: 700; color: var(--cyan-accent); margin-right: 6px; }
     .disp-paragrafo .disp-rotulo, .disp-inciso .disp-rotulo, .disp-alinea .disp-rotulo {
       color: var(--text-main); font-weight: 600;
+    }
+
+    /* Links de Remissão Clicável entre Artigos e Leis */
+    .remissao-link {
+      color: var(--cyan-accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+    .remissao-link:hover {
+      background: var(--cyan-soft);
+      text-decoration-style: solid;
+    }
+
+    /* Painel Flutuante de Consulta de Remissão */
+    .remissao-drawer {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 440px;
+      max-width: calc(100vw - 32px);
+      max-height: 62vh;
+      background: var(--bg-surface);
+      border: 2px solid var(--cyan-accent);
+      border-radius: 12px;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.55);
+      z-index: 120;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .remissao-drawer.open { display: flex; }
+    .remissao-header {
+      background: var(--bg-elevated);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .remissao-body {
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     /* Botão Minimalista '+' para Adicionar Nota */
@@ -332,15 +330,12 @@
       border: 1px solid var(--border-color); color: var(--text-muted);
       cursor: pointer; transition: all 0.15s ease;
     }
-    .btn-add-mini:hover {
-      border-color: var(--cyan-accent); color: var(--cyan-accent); background: var(--cyan-soft);
-    }
+    .btn-add-mini:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: var(--cyan-soft); }
 
-    /* Tag de dispositivo alterado e botão inline para ver versão anterior (válido por 5 dias) */
+    /* Tag de dispositivo alterado e botão inline para ver versão anterior */
     .disp-alterado-tag {
       font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: var(--success);
-      border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px;
-      font-weight: 600;
+      border: 1px solid var(--success); padding: 1px 6px; border-radius: 4px; margin-left: 8px; font-weight: 600;
     }
     .btn-ver-anterior {
       font-size: 0.7rem; background: rgba(245, 158, 11, 0.16); color: var(--warning);
@@ -350,8 +345,7 @@
     .btn-ver-anterior:hover { background: rgba(245, 158, 11, 0.28); }
     .box-texto-anterior {
       margin-top: 8px; padding: 8px 12px;
-      background: rgba(245, 158, 11, 0.1);
-      border-left: 3px solid var(--warning);
+      background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--warning);
       border-radius: 4px; font-size: 0.88rem; color: var(--text-muted);
     }
 
@@ -364,12 +358,29 @@
     }
     .btn-expand-filhos:hover { border-color: var(--cyan-accent); background: var(--cyan-soft); }
 
-    /* Grifos e Negritos no Texto */
+    /* Grifos, Negritos e Cores de Texto */
     mark.user-hl { padding: 1px 3px; border-radius: 3px; color: #0f172a; cursor: pointer; }
     strong.user-bold { font-weight: 800; color: var(--text-main); cursor: pointer; }
+    span.user-color { font-weight: 600; cursor: pointer; }
+
+    /* Adaptação de alto contraste para as 5 cores de texto no modo escuro vs claro */
+    span.user-color[data-color="red"] { color: #f87171; }
+    body.light-mode span.user-color[data-color="red"] { color: #dc2626; }
+
+    span.user-color[data-color="green"] { color: #4ade80; }
+    body.light-mode span.user-color[data-color="green"] { color: #15803d; }
+
+    span.user-color[data-color="darkblue"] { color: #60a5fa; }
+    body.light-mode span.user-color[data-color="darkblue"] { color: #1e3a8a; }
+
+    span.user-color[data-color="purple"] { color: #c084fc; }
+    body.light-mode span.user-color[data-color="purple"] { color: #6b21a8; }
+
+    span.user-color[data-color="darkorange"] { color: #fb923c; }
+    body.light-mode span.user-color[data-color="darkorange"] { color: #c2410c; }
 
     .highlight-popover {
-      position: fixed; display: none; align-items: center; gap: 8px;
+      position: fixed; display: none; align-items: center; gap: 6px; flex-wrap: wrap;
       background: var(--bg-surface); border: 1px solid var(--cyan-accent);
       padding: 8px 12px; border-radius: 99px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 100;
     }
@@ -377,6 +388,8 @@
     .hl-swatch {
       width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
       cursor: pointer; transition: transform 0.12s ease;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.76rem;
     }
     .hl-swatch:hover { transform: scale(1.18); }
 
@@ -391,19 +404,9 @@
       padding: 4px 11px; border-radius: 6px; cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .notas-toggle-bar:hover {
-      background: rgba(254, 243, 199, 0.24);
-      border-color: #f59e0b;
-    }
-    body.light-mode .notas-toggle-bar {
-      color: #9a3412;
-      background: #fef3c7;
-      border-color: #f59e0b;
-    }
-    body.light-mode .notas-toggle-bar:hover {
-      background: #fde68a;
-      border-color: #d97706;
-    }
+    .notas-toggle-bar:hover { background: rgba(254, 243, 199, 0.24); border-color: #f59e0b; }
+    body.light-mode .notas-toggle-bar { color: #9a3412; background: #fef3c7; border-color: #f59e0b; }
+    body.light-mode .notas-toggle-bar:hover { background: #fde68a; border-color: #d97706; }
 
     .notas-lista { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
     .nota-box {
@@ -411,8 +414,7 @@
       border-left: 4px solid var(--warning); padding: 10px 14px; border-radius: 6px; font-size: 0.92rem;
     }
     .nota-box.is-jurisp {
-      background: var(--jurisp-bg);
-      border-color: rgba(168, 85, 247, 0.35);
+      background: var(--jurisp-bg); border-color: rgba(168, 85, 247, 0.35);
       border-left: 4px solid var(--jurisp-accent);
     }
     .nota-box.Doutrina { border-left-color: #10b981; }
@@ -432,25 +434,41 @@
     }
     .icon-btn-inline { display: inline-flex; align-items: center; gap: 4px; }
 
+    /* Marcadores Estilo OneNote nas Anotações (Bolinha Nível 1 -> Seta Nível 2+ com Tab) */
+    .nota-conteudo-render ul, .rich-editor ul {
+      list-style: none;
+      padding-left: 20px;
+      margin: 4px 0;
+    }
+    .nota-conteudo-render ul > li, .rich-editor ul > li {
+      position: relative;
+      margin-bottom: 2px;
+    }
+    .nota-conteudo-render ul > li::before, .rich-editor ul > li::before {
+      content: "•";
+      position: absolute;
+      left: -15px;
+      font-weight: 900;
+      color: var(--cyan-accent);
+    }
+    /* Subnível após pressionar TAB: recuo maior e troca bolinha por pequena seta */
+    .nota-conteudo-render ul ul, .rich-editor ul ul {
+      padding-left: 24px;
+      margin: 2px 0;
+    }
+    .nota-conteudo-render ul ul > li::before, .rich-editor ul ul > li::before {
+      content: "▸";
+      left: -16px;
+      font-size: 0.92em;
+      color: var(--warning);
+    }
+
     /* Histórico de Alterações Legislativas */
     .log-alteracao-item {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.88rem;
+      background: var(--bg-elevated); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem;
     }
-    .log-badge-tipo {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      text-transform: uppercase;
-    }
+    .log-badge-tipo { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
     .log-adicionado { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
     .log-alterado { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     .log-revogado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
@@ -462,9 +480,8 @@
       border-radius: 99px; border: 1px solid var(--border-color);
       background: var(--bg-elevated); color: var(--text-main);
       cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
-      transition: transform 0.1s ease, border-color 0.1s ease;
     }
-    .tag-select-chip:hover { border-color: var(--cyan-accent); transform: scale(1.03); }
+    .tag-select-chip:hover { border-color: var(--cyan-accent); }
     .tag-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
     /* Editor Rich Text */
@@ -478,7 +495,7 @@
     }
     .rich-btn:hover { border-color: var(--cyan-accent); }
     .rich-editor {
-      min-height: 140px; max-height: 300px; overflow-y: auto;
+      min-height: 150px; max-height: 300px; overflow-y: auto;
       background: var(--bg-base); border: 1px solid var(--border-color);
       color: var(--text-main); padding: 12px; border-radius: 6px; font-size: 0.95rem; line-height: 1.6;
     }
@@ -510,16 +527,8 @@
     .btn:hover { background: var(--cobalt-hover); transform: scale(1.02); }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { border-color: var(--cyan-accent); color: var(--cyan-accent); background: transparent; }
-    .btn-active-filter {
-      background: var(--cobalt-primary) !important;
-      border-color: var(--cyan-accent) !important;
-      color: #fff !important;
-    }
-    .btn-jurisp-active {
-      background: var(--jurisp-accent) !important;
-      border-color: var(--jurisp-accent) !important;
-      color: #fff !important;
-    }
+    .btn-active-filter { background: var(--cobalt-primary) !important; border-color: var(--cyan-accent) !important; color: #fff !important; }
+    .btn-jurisp-active { background: var(--jurisp-accent) !important; border-color: var(--jurisp-accent) !important; color: #fff !important; }
     .btn-sm { padding: 4px 9px; font-size: 0.76rem; }
     .btn-warning { background: var(--warning); color: #000; }
 
@@ -567,21 +576,43 @@
         <button id="dock-expand-btn" class="dock-btn" onclick="alternarSidebar()" title="Expandir menu lateral (Alt+M)">▶</button>
       </div>
 
+      <!-- ÍNDICE ESTRUTURAL CLICÁVEL (TÍTULOS, CAPÍTULOS, SEÇÕES) -->
+      <div class="dock-item-wrapper" id="dock-toc-wrapper">
+        <button id="dock-toc-btn" class="dock-btn" onclick="alternarPainelIndice()" title="Índice de Títulos e Capítulos (Alt+I)">📑</button>
+        <div id="flyout-indice" class="dock-flyout toc-flyout">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <strong style="font-size:0.84rem; color:var(--cyan-accent);">📑 Índice Estrutural</strong>
+            <button type="button" class="btn btn-outline btn-sm" onclick="fecharPainelIndice()">×</button>
+          </div>
+          <input type="text" id="filtro-indice-input" placeholder="Filtrar capítulo ou título..." oninput="filtrarIndiceEstrutural()" style="padding:6px 10px; font-size:0.82rem; margin-top:6px;" />
+          <div id="lista-indice-estrutural" class="toc-list"></div>
+        </div>
+      </div>
+
+      <!-- CANETA CONTÍNUA (GRIFOS, NEGRITO E CORES DE TEXTO) -->
       <div class="dock-item-wrapper" id="dock-pen-wrapper">
-        <button id="dock-pen-btn" class="dock-btn" onclick="alternarPainelCaneta()" title="Ferramentas de marcação (Alt+G)">
+        <button id="dock-pen-btn" class="dock-btn" onclick="alternarPainelCaneta()" title="Ferramentas de marcação e cor de texto (Alt+G)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </button>
-        <div id="flyout-caneta" class="dock-flyout">
-          <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Ativo:</span>
+        <div id="flyout-caneta" class="dock-flyout" style="flex-wrap:wrap; max-width:340px; white-space:normal;">
+          <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted);">Grifo:</span>
           <button type="button" class="tool-chip" data-tool="hl:#fef08a" style="background:#fef08a;" title="Grifo Amarelo" onclick="selecionarFerramentaCaneta('hl:#fef08a')"></button>
           <button type="button" class="tool-chip" data-tool="hl:#bbf7d0" style="background:#bbf7d0;" title="Grifo Verde" onclick="selecionarFerramentaCaneta('hl:#bbf7d0')"></button>
           <button type="button" class="tool-chip" data-tool="hl:#bae6fd" style="background:#bae6fd;" title="Grifo Azul" onclick="selecionarFerramentaCaneta('hl:#bae6fd')"></button>
           <button type="button" class="tool-chip" data-tool="hl:#fbcfe8" style="background:#fbcfe8;" title="Grifo Rosa" onclick="selecionarFerramentaCaneta('hl:#fbcfe8')"></button>
           <button type="button" class="tool-chip" data-tool="hl:#fed7aa" style="background:#fed7aa;" title="Grifo Laranja" onclick="selecionarFerramentaCaneta('hl:#fed7aa')"></button>
-          <button type="button" class="tool-chip" data-tool="bold" style="background:var(--bg-elevated); color:var(--text-main);" title="Negrito ao selecionar" onclick="selecionarFerramentaCaneta('bold')">N</button>
+          <button type="button" class="tool-chip" data-tool="bold" style="background:var(--bg-elevated); color:var(--text-main);" title="Negrito" onclick="selecionarFerramentaCaneta('bold')">N</button>
+          <span style="color:var(--border-color);">|</span>
+          <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted);">Texto:</span>
+          <button type="button" class="tool-chip" data-tool="color:red" style="background:#dc2626; color:#fff;" title="Texto Vermelho" onclick="selecionarFerramentaCaneta('color:red')">A</button>
+          <button type="button" class="tool-chip" data-tool="color:green" style="background:#15803d; color:#fff;" title="Texto Verde" onclick="selecionarFerramentaCaneta('color:green')">A</button>
+          <button type="button" class="tool-chip" data-tool="color:darkblue" style="background:#1e3a8a; color:#fff;" title="Texto Azul Escuro" onclick="selecionarFerramentaCaneta('color:darkblue')">A</button>
+          <button type="button" class="tool-chip" data-tool="color:purple" style="background:#6b21a8; color:#fff;" title="Texto Roxo" onclick="selecionarFerramentaCaneta('color:purple')">A</button>
+          <button type="button" class="tool-chip" data-tool="color:darkorange" style="background:#c2410c; color:#fff;" title="Texto Laranja Escuro" onclick="selecionarFerramentaCaneta('color:darkorange')">A</button>
         </div>
       </div>
 
+      <!-- BUSCA RÁPIDA INTERNA (CTRL+F) -->
       <div class="dock-item-wrapper" id="dock-find-wrapper">
         <button id="dock-find-btn" class="dock-btn" onclick="alternarPainelBuscaRapida()" title="Pesquisar texto na lei (Alt+F)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -607,7 +638,6 @@
         </div>
       </div>
 
-      <!-- ALERTA NO MENU QUANDO HOUVER ALTERAÇÃO LEGISLATIVA DETECTADA -->
       <div id="alerta-global-sidebar" class="sidebar-update-alert hidden" onclick="irParaLeiComAlteracao()">
         <span id="texto-alerta-global-sidebar">⚠️ Alteração legislativa detectada!</span>
         <span>Ver →</span>
@@ -618,14 +648,12 @@
         <button class="btn btn-outline btn-sm" onclick="dispararWorkflowGitHub('verificar_todas')" title="Verificar alterações no Planalto/Senado">🔄 Verificar</button>
       </div>
 
-      <!-- SELETOR COMPACTO DE MATÉRIAS (SEM POLUIÇÃO VISUAL DE DEZENAS DE CARDS) -->
       <div class="materia-select-wrapper">
         <select id="select-filtro-materia" onchange="alterarFiltroMateriaSelect(this.value)" title="Filtrar por Matéria / Tag">
           <option value="Todas">📁 Todas as Matérias</option>
         </select>
       </div>
 
-      <!-- LISTA AGRUPADA DE LEIS -->
       <div id="lista-leis"></div>
 
       <button class="btn btn-outline btn-sm" style="margin-top:auto;" onclick="sair()">Sair</button>
@@ -661,7 +689,6 @@
           </div>
         </div>
 
-        <!-- ALERTA DE ALTERAÇÃO LEGISLATIVA NA LEI ABERTA -->
         <div id="banner-atualizacao" class="update-banner hidden">
           <div>
             <strong style="color: var(--warning);">⚠️ Alteração legislativa detectada na fonte oficial!</strong>
@@ -675,15 +702,37 @@
     </main>
   </div>
 
-  <!-- POPOVER FLUTUANTE PARA GRIFAR/NEGRITAR TEXTO SELECIONADO -->
+  <!-- PAINEL FLUTUANTE DE REMISSÃO CLICÁVEL (ARTIGOS E OUTRAS LEIS) -->
+  <div id="remissao-drawer" class="remissao-drawer">
+    <div class="remissao-header">
+      <div>
+        <strong id="remissao-titulo" style="color:var(--cyan-accent); font-size:0.88rem;">Remissão</strong>
+        <div id="remissao-subtitulo" style="font-size:0.74rem; color:var(--text-muted);"></div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button type="button" id="btn-ir-remissao" class="btn btn-sm" onclick="irParaDestinoRemissao()">Ir ao local ↗</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="fecharPainelRemissao()">×</button>
+      </div>
+    </div>
+    <div id="remissao-conteudo" class="remissao-body"></div>
+  </div>
+
+  <!-- POPOVER FLUTUANTE PARA GRIFAR, NEGRITAR OU COLORIR TEXTO SELECIONADO -->
   <div id="highlight-popover" class="highlight-popover">
-    <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Marcar:</span>
-    <button class="hl-swatch" style="background:#fef08a;" title="Amarelo" onclick="aplicarMarcacao('hl:#fef08a')"></button>
-    <button class="hl-swatch" style="background:#bbf7d0;" title="Verde" onclick="aplicarMarcacao('hl:#bbf7d0')"></button>
-    <button class="hl-swatch" style="background:#bae6fd;" title="Azul" onclick="aplicarMarcacao('hl:#bae6fd')"></button>
-    <button class="hl-swatch" style="background:#fbcfe8;" title="Rosa" onclick="aplicarMarcacao('hl:#fbcfe8')"></button>
-    <button class="hl-swatch" style="background:#fed7aa;" title="Laranja" onclick="aplicarMarcacao('hl:#fed7aa')"></button>
-    <button class="hl-swatch" style="background:var(--bg-elevated); color:var(--text-main); font-weight:800; font-size:0.8rem;" title="Negrito" onclick="aplicarMarcacao('bold')">N</button>
+    <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted);">Grifo:</span>
+    <button class="hl-swatch" style="background:#fef08a;" title="Grifo Amarelo" onclick="aplicarMarcacao('hl:#fef08a')"></button>
+    <button class="hl-swatch" style="background:#bbf7d0;" title="Grifo Verde" onclick="aplicarMarcacao('hl:#bbf7d0')"></button>
+    <button class="hl-swatch" style="background:#bae6fd;" title="Grifo Azul" onclick="aplicarMarcacao('hl:#bae6fd')"></button>
+    <button class="hl-swatch" style="background:#fbcfe8;" title="Grifo Rosa" onclick="aplicarMarcacao('hl:#fbcfe8')"></button>
+    <button class="hl-swatch" style="background:#fed7aa;" title="Grifo Laranja" onclick="aplicarMarcacao('hl:#fed7aa')"></button>
+    <button class="hl-swatch" style="background:var(--bg-elevated); color:var(--text-main);" title="Negrito" onclick="aplicarMarcacao('bold')">N</button>
+    <span style="color:var(--border-color);">|</span>
+    <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted);">Cor:</span>
+    <button class="hl-swatch" style="background:#dc2626; color:#fff;" title="Texto Vermelho" onclick="aplicarMarcacao('color:red')">A</button>
+    <button class="hl-swatch" style="background:#15803d; color:#fff;" title="Texto Verde" onclick="aplicarMarcacao('color:green')">A</button>
+    <button class="hl-swatch" style="background:#1e3a8a; color:#fff;" title="Texto Azul Escuro" onclick="aplicarMarcacao('color:darkblue')">A</button>
+    <button class="hl-swatch" style="background:#6b21a8; color:#fff;" title="Texto Roxo" onclick="aplicarMarcacao('color:purple')">A</button>
+    <button class="hl-swatch" style="background:#c2410c; color:#fff;" title="Texto Laranja Escuro" onclick="aplicarMarcacao('color:darkorange')">A</button>
   </div>
 
   <!-- MODAL: HISTÓRICO DE ALTERAÇÕES E ADIÇÕES DA LEI -->
@@ -778,7 +827,7 @@
     </div>
   </div>
 
-  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM MARCAÇÃO DE JURISPRUDÊNCIA -->
+  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM MARCADORES ESTILO ONENOTE -->
   <div id="modal-nota" class="modal-backdrop">
     <div class="modal">
       <h3 id="modal-nota-titulo">Anotação / Jurisprudência</h3>
@@ -811,17 +860,19 @@
         <button type="button" class="rich-btn" onclick="formatarNota('bold')" title="Negrito"><b>B</b></button>
         <button type="button" class="rich-btn" onclick="formatarNota('italic')" title="Itálico"><i>I</i></button>
         <button type="button" class="rich-btn" onclick="formatarNota('underline')" title="Sublinhado"><u>U</u></button>
+        <button type="button" class="rich-btn" onclick="formatarNota('insertUnorderedList')" title="Marcadores estilo OneNote (Tab para subnível com seta ▸)">• Marcadores</button>
         <span style="color:var(--border-color);">|</span>
-        <span style="font-size:0.78rem; color:var(--text-muted);">Cor:</span>
+        <span style="font-size:0.76rem; color:var(--text-muted);">Cor:</span>
         <button type="button" class="hl-swatch" style="background:#f1f5f9; width:18px; height:18px;" onclick="formatarNota('foreColor', '#f1f5f9')" title="Branco/Padrão"></button>
         <button type="button" class="hl-swatch" style="background:#0f172a; width:18px; height:18px;" onclick="formatarNota('foreColor', '#0f172a')" title="Preto"></button>
-        <button type="button" class="hl-swatch" style="background:#38bdf8; width:18px; height:18px;" onclick="formatarNota('foreColor', '#38bdf8')" title="Azul Ciano"></button>
-        <button type="button" class="hl-swatch" style="background:#facc15; width:18px; height:18px;" onclick="formatarNota('foreColor', '#facc15')" title="Amarelo"></button>
-        <button type="button" class="hl-swatch" style="background:#4ade80; width:18px; height:18px;" onclick="formatarNota('foreColor', '#4ade80')" title="Verde"></button>
-        <button type="button" class="hl-swatch" style="background:#f87171; width:18px; height:18px;" onclick="formatarNota('foreColor', '#f87171')" title="Vermelho"></button>
+        <button type="button" class="hl-swatch" style="background:#dc2626; width:18px; height:18px;" onclick="formatarNota('foreColor', '#dc2626')" title="Vermelho"></button>
+        <button type="button" class="hl-swatch" style="background:#16a34a; width:18px; height:18px;" onclick="formatarNota('foreColor', '#16a34a')" title="Verde"></button>
+        <button type="button" class="hl-swatch" style="background:#38bdf8; width:18px; height:18px;" onclick="formatarNota('foreColor', '#38bdf8')" title="Azul"></button>
+        <button type="button" class="hl-swatch" style="background:#a855f7; width:18px; height:18px;" onclick="formatarNota('foreColor', '#a855f7')" title="Roxo"></button>
+        <button type="button" class="hl-swatch" style="background:#ea580c; width:18px; height:18px;" onclick="formatarNota('foreColor', '#ea580c')" title="Laranja Escuro"></button>
       </div>
 
-      <div id="nota-editor" class="rich-editor" contenteditable="true" placeholder="Digite sua anotação ou entendimento jurisprudencial..."></div>
+      <div id="nota-editor" class="rich-editor" contenteditable="true" onkeydown="teclaEditorNota(event)" placeholder="Digite sua anotação... (Use • Marcadores e pressione Tab para recuar com seta ▸)"></div>
 
       <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
         <input type="checkbox" id="nota-oculta" style="width:auto;" />
@@ -875,6 +926,7 @@
     let toastTimer = null;
     let matchesBuscaRapida = [];
     let indiceMatchAtual = -1;
+    let destinoRemissaoAtual = null;
 
     const CINCO_DIAS_MS = 5 * 24 * 60 * 60 * 1000;
 
@@ -892,7 +944,7 @@
     });
 
     // =========================================================================
-    // ATALHOS DE TECLADO GLOBAIS (Alt+M Menu, Alt+G Caneta, Alt+F / Ctrl+F Busca)
+    // ATALHOS DE TECLADO GLOBAIS (Alt+M Menu, Alt+I Índice, Alt+G Caneta, Alt+F / Ctrl+F Busca)
     // =========================================================================
     document.addEventListener("keydown", (e) => {
       if (!usuarioAtual) return;
@@ -900,6 +952,9 @@
       if (e.altKey && e.key.toLowerCase() === "m") {
         e.preventDefault();
         alternarSidebar();
+      } else if (e.altKey && e.key.toLowerCase() === "i" && leiSelecionada) {
+        e.preventDefault();
+        alternarPainelIndice();
       } else if (e.altKey && e.key.toLowerCase() === "g") {
         e.preventDefault();
         alternarPainelCaneta();
@@ -908,6 +963,8 @@
         abrirPainelBuscaRapida();
       } else if (e.key === "Escape") {
         fecharBuscaRapida();
+        fecharPainelIndice();
+        fecharPainelRemissao();
         document.getElementById("flyout-caneta").classList.remove("open");
         document.getElementById("dock-pen-btn").classList.remove("active");
         ferramentaCanetaAtiva = null;
@@ -967,8 +1024,88 @@
     }
 
     // =========================================================================
-    // DOCK FLUTUANTE: CANETA E BUSCA RÁPIDA (CTRL+F)
+    // DOCK FLUTUANTE: ÍNDICE ESTRUTURAL, CANETA E BUSCA RÁPIDA
     // =========================================================================
+    function nivelHierarquicoEstrutura(texto) {
+      const t = (texto || "").trim().toUpperCase();
+      if (/^(LIVRO|PARTE)\b/.test(t)) return 1;
+      if (/^T[ÍI]TULO\b/.test(t)) return 2;
+      if (/^CAP[ÍI]TULO\b/.test(t)) return 3;
+      return 4;
+    }
+
+    function alternarPainelIndice() {
+      const flyout = document.getElementById("flyout-indice");
+      const btn = document.getElementById("dock-toc-btn");
+      const abriu = flyout.classList.toggle("open");
+      btn.classList.toggle("active", abriu);
+
+      if (abriu) {
+        fecharBuscaRapida();
+        document.getElementById("flyout-caneta").classList.remove("open");
+        document.getElementById("dock-pen-btn").classList.remove("active");
+        document.getElementById("filtro-indice-input").value = "";
+        filtrarIndiceEstrutural();
+        document.getElementById("filtro-indice-input").focus();
+      }
+    }
+
+    function fecharPainelIndice() {
+      document.getElementById("flyout-indice").classList.remove("open");
+      document.getElementById("dock-toc-btn").classList.remove("active");
+    }
+
+    function filtrarIndiceEstrutural() {
+      const listaEl = document.getElementById("lista-indice-estrutural");
+      listaEl.innerHTML = "";
+
+      if (!leiSelecionada) {
+        listaEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Abra uma lei para visualizar o índice.</p>`;
+        return;
+      }
+
+      const termo = document.getElementById("filtro-indice-input").value.trim().toLowerCase();
+      const estruturas = dispositivosCache.filter(d => d.tipo === "estrutura");
+
+      if (estruturas.length === 0) {
+        listaEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem;">Esta lei não possui divisões de Títulos ou Capítulos.</p>`;
+        return;
+      }
+
+      const filtradas = termo
+        ? estruturas.filter(e => e.texto.toLowerCase().includes(termo))
+        : estruturas;
+
+      filtradas.forEach(est => {
+        const lvl = nivelHierarquicoEstrutura(est.texto);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `toc-item toc-lvl-${lvl}`;
+        btn.textContent = est.texto;
+        btn.onclick = () => saltarParaDispositivo(est.slug);
+        listaEl.appendChild(btn);
+      });
+    }
+
+    function saltarParaDispositivo(slug) {
+      if (apenasAnotacoes || apenasJurisprudencias || document.getElementById("busca-artigo").value.trim() !== "") {
+        apenasAnotacoes = false;
+        apenasJurisprudencias = false;
+        document.getElementById("busca-artigo").value = "";
+        document.getElementById("btn-filtro-anotacoes").classList.remove("btn-active-filter");
+        document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
+        filtrarDispositivos();
+      }
+
+      const alvo = document.querySelector(`[data-slug="${slug}"]`);
+      if (alvo) {
+        alvo.scrollIntoView({ behavior: "smooth", block: "center" });
+        alvo.classList.add("flash-target");
+        setTimeout(() => alvo.classList.remove("flash-target"), 1800);
+      }
+      fecharPainelIndice();
+    }
+
     function alternarPainelCaneta() {
       const flyout = document.getElementById("flyout-caneta");
       const btn = document.getElementById("dock-pen-btn");
@@ -980,6 +1117,7 @@
         atualizarBotoesCaneta();
       } else {
         fecharBuscaRapida();
+        fecharPainelIndice();
       }
     }
 
@@ -1001,6 +1139,7 @@
       btn.classList.add("active");
       document.getElementById("flyout-caneta").classList.remove("open");
       document.getElementById("dock-pen-btn").classList.remove("active");
+      fecharPainelIndice();
 
       const inp = document.getElementById("input-busca-rapida");
       inp.focus();
@@ -1102,6 +1241,152 @@
         e.preventDefault();
         fecharBuscaRapida();
       }
+    }
+
+    // =========================================================================
+    // REMISSÃO CLICÁVEL ENTRE ARTIGOS E OUTRAS LEIS
+    // =========================================================================
+    function escaparRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function enriquecerRemissoesHtml(htmlSeguro) {
+      // Divide por tags HTML para nunca substituir dentro de atributos
+      const partes = htmlSeguro.split(/(<[^>]+>)/g);
+
+      // Monta regex para outras leis cadastradas (ex: "Lei nº 14.133", "Lei 9.784", títulos curtos)
+      const leisExternas = leisCache.filter(l => !leiSelecionada || l.id !== leiSelecionada.id);
+      const padroesLeis = [];
+      leisExternas.forEach(l => {
+        if (l.titulo && l.titulo.length >= 4) {
+          padroesLeis.push({ regex: new RegExp(`\\b(${escaparRegex(l.titulo)})\\b`, "gi"), leiId: l.id });
+        }
+        const mNum = l.titulo.match(/(Lei(?:\s+Complementar)?|LC|Decreto)\s*(?:n[º°o.]*\s*)?([\d.]+)/i);
+        if (mNum) {
+          const tipoEsc = escaparRegex(mNum[1]);
+          const numEsc = escaparRegex(mNum[2]);
+          padroesLeis.push({
+            regex: new RegExp(`\\b(${tipoEsc}\\s*(?:n[º°o.]*\\s*)?${numEsc}(?:\\/\\d{2,4})?)\\b`, "gi"),
+            leiId: l.id
+          });
+        }
+      });
+
+      const regexArtigo = /\b(arts?\.?\s*\d+(?:-[A-Za-z])?[º°o]?)/gi;
+
+      return partes.map(parte => {
+        if (parte.startsWith("<")) return parte;
+
+        let texto = parte;
+
+        // 1. Remissão para outras leis cadastradas no acervo
+        padroesLeis.forEach(item => {
+          texto = texto.replace(item.regex, (match) => {
+            return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\\'")}')">${match}</span>`;
+          });
+        });
+
+        // 2. Remissão para artigos (evita aninhar dentro de spans já criados)
+        const subPartes = texto.split(/(<[^>]+>)/g);
+        texto = subPartes.map(sp => {
+          if (sp.startsWith("<")) return sp;
+          return sp.replace(regexArtigo, (match) => {
+            const num = extrairNumeroArtigo(match);
+            if (!num) return match;
+            return `<span class="remissao-link" title="Visualizar Art. ${num}" onclick="abrirRemissaoArtigo('${num}', event)">${match}</span>`;
+          });
+        }).join("");
+
+        return texto;
+      }).join("");
+    }
+
+    async function abrirRemissaoArtigo(numArtigo, event) {
+      if (event) event.stopPropagation();
+      const drawer = document.getElementById("remissao-drawer");
+      const tituloEl = document.getElementById("remissao-titulo");
+      const subEl = document.getElementById("remissao-subtitulo");
+      const bodyEl = document.getElementById("remissao-conteudo");
+      const btnIr = document.getElementById("btn-ir-remissao");
+
+      const artCaput = dispositivosCache.find(d => d.tipo === "artigo" && extrairNumeroArtigo(d.rotulo) === numArtigo.toUpperCase());
+
+      tituloEl.textContent = `Remissão: Art. ${numArtigo}`;
+      subEl.textContent = leiSelecionada ? leiSelecionada.titulo : "";
+
+      if (!artCaput) {
+        bodyEl.innerHTML = `<p style="color:var(--text-muted);">O Art. ${numArtigo} não foi localizado nesta norma (pode pertencer a outra lei citada no mesmo trecho).</p>`;
+        btnIr.classList.add("hidden");
+        drawer.classList.add("open");
+        return;
+      }
+
+      const familia = dispositivosCache.filter(d => d.slug === artCaput.slug || obterSlugArtigoPai(d.slug) === artCaput.slug);
+      bodyEl.innerHTML = familia.map(d => `
+        <div>
+          <strong style="color:var(--cyan-accent);">${escaparHtml(d.rotulo)}</strong> ${escaparHtml(d.texto)}
+        </div>
+      `).join("");
+
+      destinoRemissaoAtual = { tipo: "slug", slug: artCaput.slug };
+      btnIr.textContent = "Ir ao artigo ↗";
+      btnIr.classList.remove("hidden");
+      drawer.classList.add("open");
+    }
+
+    async function abrirRemissaoLei(leiId, textoCitado) {
+      const leiAlvo = leisCache.find(l => l.id === leiId);
+      if (!leiAlvo) return;
+
+      const drawer = document.getElementById("remissao-drawer");
+      const tituloEl = document.getElementById("remissao-titulo");
+      const subEl = document.getElementById("remissao-subtitulo");
+      const bodyEl = document.getElementById("remissao-conteudo");
+      const btnIr = document.getElementById("btn-ir-remissao");
+
+      tituloEl.textContent = leiAlvo.titulo;
+      subEl.textContent = `Remissão detectada (${textoCitado}) • Matéria: ${leiAlvo.materia || "Geral"}`;
+      bodyEl.innerHTML = `<p style="color:var(--text-muted);">Carregando dispositivos iniciais...</p>`;
+      destinoRemissaoAtual = { tipo: "lei", leiId: leiAlvo.id };
+      btnIr.textContent = "Abrir lei completa ↗";
+      btnIr.classList.remove("hidden");
+      drawer.classList.add("open");
+
+      const { data: primeiros } = await sb
+        .from("dispositivos")
+        .select("*")
+        .eq("lei_id", leiAlvo.id)
+        .eq("versao_status", "vigente")
+        .order("ordem", { ascending: true })
+        .limit(8);
+
+      if (!primeiros || primeiros.length === 0) {
+        bodyEl.innerHTML = `<p style="color:var(--text-muted);">Nenhum dispositivo extraído ainda para esta norma.</p>`;
+        return;
+      }
+
+      bodyEl.innerHTML = primeiros.map(d => `
+        <div>
+          <strong style="color:var(--cyan-accent);">${escaparHtml(d.rotulo || "")}</strong> ${escaparHtml(d.texto)}
+        </div>
+      `).join("");
+    }
+
+    function irParaDestinoRemissao() {
+      if (!destinoRemissaoAtual) return;
+      if (destinoRemissaoAtual.tipo === "slug") {
+        saltarParaDispositivo(destinoRemissaoAtual.slug);
+        fecharPainelRemissao();
+      } else if (destinoRemissaoAtual.tipo === "lei") {
+        const leiAlvo = leisCache.find(l => l.id === destinoRemissaoAtual.leiId);
+        fecharPainelRemissao();
+        if (leiAlvo) selecionarLei(leiAlvo);
+      }
+    }
+
+    function fecharPainelRemissao() {
+      document.getElementById("remissao-drawer").classList.remove("open");
+      destinoRemissaoAtual = null;
     }
 
     // =========================================================================
@@ -1541,6 +1826,8 @@
       document.getElementById("btn-filtro-anotacoes").classList.remove("btn-active-filter");
       document.getElementById("btn-filtro-jurisp").classList.remove("btn-jurisp-active");
       fecharBuscaRapida();
+      fecharPainelIndice();
+      fecharPainelRemissao();
       renderizarSidebar();
 
       document.getElementById("estado-vazio").classList.add("hidden");
@@ -1602,6 +1889,12 @@
               trechoEscapado,
               `<strong class="user-bold" title="Clique para remover negrito" onclick="removerGrifo('${g.id}')">${trechoEscapado}</strong>`
             );
+          } else if (g.cor && g.cor.startsWith("TEXT_")) {
+            const nomeCor = g.cor.replace("TEXT_", "");
+            html = html.replace(
+              trechoEscapado,
+              `<span class="user-color" data-color="${nomeCor}" title="Clique para remover cor do texto" onclick="removerGrifo('${g.id}')">${trechoEscapado}</span>`
+            );
           } else {
             html = html.replace(
               trechoEscapado,
@@ -1610,12 +1903,12 @@
           }
         }
       });
-      return html;
+      return enriquecerRemissoesHtml(html);
     }
 
     function extrairNumeroArtigo(rotulo) {
       if (!rotulo) return "";
-      const m = rotulo.match(/Art\.?\s*(\d+(?:-[A-Za-z])?)/i);
+      const m = rotulo.match(/Arts?\.?\s*(\d+(?:-[A-Za-z])?)/i);
       return m ? m[1].toUpperCase() : "";
     }
 
@@ -1635,7 +1928,6 @@
       const rawBusca = document.getElementById("busca-artigo").value.trim();
       const termo = rawBusca.toLowerCase();
 
-      // Se ativou o botão "Anotações", inclui também eventuais dispositivos revogados que possuíam notas
       if (apenasAnotacoes) {
         const slugsVigentes = new Set(dispositivosCache.map(d => d.slug));
         let listaComNotas = dispositivosCache.filter(d => (anotacoesCache[d.slug] || []).length > 0);
@@ -1753,6 +2045,7 @@
         if (d.tipo === "estrutura") {
           const h = document.createElement("div");
           h.className = "disp-estrutura";
+          h.dataset.slug = d.slug;
           h.textContent = d.texto;
           container.appendChild(h);
           return;
@@ -1769,7 +2062,6 @@
 
         const tagAlterado = d.foi_alterado ? `<span class="disp-alterado-tag">Atualizado</span>` : "";
 
-        // Botão inline para ver versão anterior válido por até 5 dias após a alteração
         let btnVerAnteriorHtml = "";
         let boxTextoAnteriorHtml = "";
         if (d.texto_anterior && dentroDosCincoDias(d.data_alteracao)) {
@@ -1812,9 +2104,11 @@
               ? `<span class="jurisp-pill">⚖️ ${n.tribunal}</span>`
               : `<span>${n.tribunal}</span>`;
 
+            const conteudoComRemissao = enriquecerRemissoesHtml(n.conteudo);
+
             const corpoHtml = n.oculta
               ? `<div class="nota-conteudo-oculto">${SVG_OLHO_FECHADO} <span>Anotação oculta —</span> <a href="#" onclick="event.preventDefault(); alternarVisibilidadeNota('${n.id}', false)" style="color:var(--cyan-accent);">Visualizar conteúdo</a></div>`
-              : `<div style="white-space: pre-wrap;">${n.conteudo}</div>`;
+              : `<div class="nota-conteudo-render" style="white-space: pre-wrap;">${conteudoComRemissao}</div>`;
 
             const btnVisibilidade = n.oculta
               ? `<button class="btn btn-outline btn-sm icon-btn-inline" onclick="alternarVisibilidadeNota('${n.id}', false)" title="Visualizar anotação">${SVG_OLHO_ABERTO}<span>Visualizar</span></button>`
@@ -1876,7 +2170,7 @@
     }
 
     // =========================================================================
-    // GRIFOS E NEGRITOS DIRETOS NO TEXTO SELECIONADO
+    // GRIFOS, NEGRITOS E CORES DE TEXTO SELECIONADO
     // =========================================================================
     document.addEventListener("mouseup", async (e) => {
       const popover = document.getElementById("highlight-popover");
@@ -1899,7 +2193,7 @@
 
           const rect = sel.getRangeAt(0).getBoundingClientRect();
           selecaoAtualGrifo = { slug: bodyEl.dataset.slug, trecho: texto };
-          popover.style.top = Math.max(10, rect.top - 48) + "px";
+          popover.style.top = Math.max(10, rect.top - 52) + "px";
           popover.style.left = Math.max(10, rect.left) + "px";
           popover.classList.add("open");
           return;
@@ -1921,7 +2215,11 @@
     }
 
     async function salvarMarcacaoTexto(slug, trecho, ferramenta) {
-      const valorCor = ferramenta === "bold" ? "BOLD" : ferramenta.replace("hl:", "");
+      let valorCor = ferramenta;
+      if (ferramenta === "bold") valorCor = "BOLD";
+      else if (ferramenta.startsWith("color:")) valorCor = "TEXT_" + ferramenta.replace("color:", "");
+      else if (ferramenta.startsWith("hl:")) valorCor = ferramenta.replace("hl:", "");
+
       await sb.from("grifos").insert({
         lei_id: leiSelecionada.id,
         user_id: usuarioAtual.id,
@@ -1961,7 +2259,6 @@
       const slugsNovos = new Set(pendentes.map(p => p.slug));
       const registrosMudancas = [];
 
-      // Identifica dispositivos adicionados e alterados
       for (const p of pendentes) {
         const antigo = mapaAntigo[p.slug];
         if (!antigo) {
@@ -1985,7 +2282,6 @@
         }
       }
 
-      // Identifica dispositivos revogados/removidos (se houver anotação, cria card de preservação)
       for (const dAntigo of dispositivosCache) {
         if (!slugsNovos.has(dAntigo.slug)) {
           registrosMudancas.push({
@@ -2011,16 +2307,13 @@
         }
       }
 
-      // Remove apenas os grifos dos dispositivos que tiveram o texto alterado ou revogado
       const slugsModificadosOuRevogados = registrosMudancas.map(r => r.slug);
       if (slugsModificadosOuRevogados.length > 0) {
         await sb.from("grifos").delete().eq("lei_id", leiId).in("slug", slugsModificadosOuRevogados);
       }
 
-      // Remove dispositivos vigentes antigos
       await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
 
-      // Promove pendentes para vigentes gravando texto_anterior e data_alteracao quando houve mudança
       for (const p of pendentes) {
         const antigo = mapaAntigo[p.slug];
         const mudou = !!(antigo && antigo.texto !== p.texto);
@@ -2118,7 +2411,7 @@
     }
 
     // =========================================================================
-    // CRUD DE ANOTAÇÕES E JURISPRUDÊNCIAS (SEM PERDER A PESQUISA ATIVA)
+    // CRUD DE ANOTAÇÕES E MARCADORES ESTILO ONENOTE (TAB -> RECUO COM SETA ▸)
     // =========================================================================
     function alternarCamposJurisprudencia() {
       const isJurisp = document.getElementById("nota-is-jurisp").checked;
@@ -2129,6 +2422,22 @@
     function formatarNota(comando, valor = null) {
       document.getElementById("nota-editor").focus();
       document.execCommand(comando, false, valor);
+    }
+
+    function teclaEditorNota(e) {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          document.execCommand("outdent", false, null);
+        } else {
+          // Se não estiver em uma lista ainda, ativa marcadores e indenta; se já estiver, recua e troca bolinha por seta
+          const dentroLista = document.queryCommandState("insertUnorderedList");
+          if (!dentroLista) {
+            document.execCommand("insertUnorderedList", false, null);
+          }
+          document.execCommand("indent", false, null);
+        }
+      }
     }
 
     function abrirModalNota(slug) {
