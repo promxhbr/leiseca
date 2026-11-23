@@ -23,9 +23,18 @@ HEADERS = {
 def baixar_html(url: str) -> str:
     resp = requests.get(url, headers=HEADERS, timeout=45)
     resp.raise_for_status()
-    if resp.encoding is None or resp.encoding.lower() == "iso-8859-1":
-        resp.encoding = resp.apparent_encoding or "latin-1"
-    return resp.text
+    raw_bytes = resp.content
+
+    # Verifica se o HTML declara UTF-8 explicitamente; caso contrário, Planalto usa Windows-1252
+    cabecalho = raw_bytes[:2048].lower()
+    if b"charset=utf-8" in cabecalho or b'charset="utf-8"' in cabecalho:
+        texto = raw_bytes.decode("utf-8", errors="replace")
+    else:
+        texto = raw_bytes.decode("windows-1252", errors="replace")
+
+    # Correção preventiva caso algum caractere residual venha mal codificado
+    texto = texto.replace("ş", "º").replace("Ş", "º").replace("Ę", "Ê")
+    return texto
 
 def limpar_trechos_revogados(soup: BeautifulSoup):
     for tag in soup.find_all(["strike", "s", "del"]):
@@ -49,12 +58,12 @@ def gerar_slug_estrutura(texto: str, contador: int) -> str:
     return f"EST_{contador}_{base}"
 
 def extrair_dispositivos(html: str):
-    # Usa lxml para não interromper leitura em tags mal fechadas do Planalto
     soup = BeautifulSoup(html, "lxml")
     limpar_trechos_revogados(soup)
 
     dispositivos = []
-    artigo_atual = "PREAMBULO"
+    iniciou_artigos = False
+    artigo_atual = ""
     paragrafo_atual = ""
     inciso_atual = ""
     ordem = 0
@@ -70,7 +79,6 @@ def extrair_dispositivos(html: str):
     textos_processados = set()
 
     for bloco in blocos:
-        # Ignora contêineres externos que apenas envolvem outros parágrafos
         if bloco.name == "div" and bloco.find(["p", "div"]):
             continue
 
@@ -78,9 +86,17 @@ def extrair_dispositivos(html: str):
         if not raw or len(raw) < 2:
             continue
 
-        # Filtra linhas puramente indicativas de revogação sem conteúdo normativo
         if re.match(r"^\(?\s*(?:Revogad[oa]|Vetad[oa])", raw, re.I) and len(raw) < 60:
             continue
+
+        m_art = re_artigo.match(raw)
+
+        # Ignora todos os cabeçalhos, brasões, ementas e títulos antes do Art. 1º
+        if not iniciou_artigos:
+            if m_art:
+                iniciou_artigos = True
+            else:
+                continue
 
         chave_dedup = f"{ordem}_{raw[:80]}"
         if chave_dedup in textos_processados:
@@ -93,7 +109,6 @@ def extrair_dispositivos(html: str):
         slug = ""
 
         m_est = re_estrutura.match(raw)
-        m_art = re_artigo.match(raw)
         m_par = re_paragrafo.match(raw)
         m_inc = re_inciso.match(raw)
         m_ali = re_alinea.match(raw)
@@ -136,12 +151,7 @@ def extrair_dispositivos(html: str):
                 prefixo = f"{prefixo}_{inciso_atual}"
             slug = f"{prefixo}_ALI_{m_ali.group(1).upper()}"
         else:
-            # Continuação de texto ou ementa antes do Art. 1º
-            if artigo_atual == "PREAMBULO":
-                tipo = "estrutura"
-                slug = gerar_slug_estrutura(raw, ordem)
-            else:
-                continue
+            continue
 
         if slug in slugs_vistos:
             slugs_vistos[slug] += 1
