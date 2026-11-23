@@ -1,17 +1,29 @@
-name: Extrator e Monitor de Leis
+name: Monitor e Extrator de Leis
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Todo dia às 06:00 UTC (03:00 BRT)
+    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       modo:
-        description: 'Modo de execução (extrair_pendentes ou verificar_todas)'
+        description: 'Modo de execução'
         required: false
-        default: 'extrair_pendentes'
+        default: 'verificar_todas'
+        type: choice
+        options:
+          - verificar_todas
+          - extrair_pendentes
+          - verificar_lei
+          - reprocessar_indice_lei
+          - reprocessar_todos_indices
+      lei_id:
+        description: 'ID específico da lei (opcional)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
-  executar-parser:
+  executar-extrator:
     runs-on: ubuntu-latest
     steps:
       - name: Baixar código do repositório
@@ -25,9 +37,10 @@ jobs:
       - name: Instalar dependências
         run: pip install -r scripts/requirements.txt
 
-      - name: Executar Parser de Leis
+      - name: Executar robô extrator e verificador
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          MODO: ${{ github.event.inputs.modo || 'verificar_todas' }}
+          MODO_EXECUCAO: ${{ github.event.inputs.modo || 'verificar_todas' }}
+          LEI_ID_ALVO: ${{ github.event.inputs.lei_id || '' }}
         run: python scripts/parser_leis.py
