@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import traceback
 import unicodedata
 from datetime import datetime, timezone
 from curl_cffi import requests as cffi_requests
@@ -51,7 +52,7 @@ def decodificar_bytes(conteudo_bytes: bytes) -> str:
 def baixar_via_playwright(url: str) -> str:
     from playwright.sync_api import sync_playwright
 
-    print("   Acionando navegador Chromium real (Playwright)...", file=sys.stderr)
+    print("   [2/3] Acionando navegador Chromium real (Playwright)...", file=sys.stderr)
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
@@ -73,12 +74,25 @@ def baixar_via_playwright(url: str) -> str:
         return html
 
 
+def baixar_via_proxy_leitura(url: str) -> str:
+    print("   [3/3] Acionando proxy de leitura para contornar bloqueio de IP datacenter...", file=sys.stderr)
+    url_proxy = f"https://r.jina.ai/{url}"
+    resp = cffi_requests.get(url_proxy, impersonate="chrome124", timeout=90)
+    if resp.status_code == 200 and ("Art." in resp.text or "art." in resp.text):
+        # Converte linhas de texto/markdown em parágrafos HTML simples para o extrator
+        linhas = [f"<p>{l.strip()}</p>" for l in resp.text.splitlines() if l.strip()]
+        return "\n".join(linhas)
+    raise RuntimeError(f"Proxy retornou status {resp.status_code}")
+
+
 def baixar_html_oficial(url: str) -> str:
+    url_limpa = url.strip().replace("http://www.planalto.gov.br", "https://www.planalto.gov.br")
+
     # 1. Tentativa rápida com assinatura TLS real do Chrome (curl_cffi)
-    for perfil in ("chrome124", "chrome120", "safari17_0"):
+    for perfil in ("chrome124", "chrome120"):
         try:
             resp = cffi_requests.get(
-                url,
+                url_limpa,
                 impersonate=perfil,
                 timeout=60,
                 verify=False,
@@ -87,20 +101,25 @@ def baixar_html_oficial(url: str) -> str:
                     "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
                 },
             )
+            print(f"   [1/3] curl_cffi ({perfil}) -> HTTP {resp.status_code} ({len(resp.content)} bytes)", file=sys.stderr)
             if resp.status_code == 200:
                 html = decodificar_bytes(resp.content)
                 if "Art." in html or "art." in html:
                     return html
         except Exception as err:
-            print(f"   Perfil {perfil} falhou ({err}).", file=sys.stderr)
+            print(f"   [1/3] Perfil {perfil} falhou: {err}", file=sys.stderr)
             time.sleep(2)
 
-    # 2. Fallback automático: abre Chromium headless real
-    html_browser = baixar_via_playwright(url)
-    if "Art." in html_browser or "art." in html_browser:
-        return html_browser
+    # 2. Fallback automático: Chromium headless real
+    try:
+        html_browser = baixar_via_playwright(url_limpa)
+        if "Art." in html_browser or "art." in html_browser:
+            return html_browser
+    except Exception as err:
+        print(f"   [2/3] Playwright falhou: {err}", file=sys.stderr)
 
-    raise RuntimeError("Não foi possível obter o conteúdo da lei nem via curl_cffi nem via Chromium.")
+    # 3. Fallback final: Proxy de leitura caso o IP do GitHub Actions esteja bloqueado no firewall do governo
+    return baixar_via_proxy_leitura(url_limpa)
 
 
 def linha_parece_descricao_estrutura(linha: str) -> bool:
@@ -288,8 +307,8 @@ def inserir_em_lotes(lei_id: str, dispositivos: list[dict], status: str):
         }
         for d in dispositivos
     ]
-    for i in range(0, len(registros), 150):
-        supabase.table("dispositivos").insert(registros[i : i + 150]).execute()
+    for i in range(0, len(registros), 80):
+        supabase.table("dispositivos").insert(registros[i : i + 80]).execute()
 
 
 def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
@@ -301,6 +320,7 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
         supabase.table("leis").update({"status_extracao": "processando"}).eq("id", lei_id).execute()
         html = baixar_html_oficial(url)
         dispositivos = extrair_dispositivos(html)
+        print(f"   Extraídos {len(dispositivos)} dispositivos da fonte.")
 
         if not dispositivos:
             raise ValueError("Nenhum dispositivo extraído da página.")
@@ -352,6 +372,7 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
 
     except Exception as e:
         print(f" -> Erro ao processar {lei['titulo']}: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
         supabase.table("leis").update({"status_extracao": "erro"}).eq("id", lei_id).execute()
 
