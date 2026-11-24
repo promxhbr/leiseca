@@ -56,7 +56,11 @@ def baixar_via_playwright(url: str) -> str:
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
+            args=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled",
+            ],
         )
         context = browser.new_context(
             user_agent=(
@@ -85,7 +89,9 @@ def baixar_via_proxy_leitura(url: str) -> str:
 
 
 def baixar_html_oficial(url: str) -> str:
-    url_limpa = url.strip().replace("http://www.planalto.gov.br", "https://www.planalto.gov.br")
+    url_limpa = url.strip().replace(
+        "http://www.planalto.gov.br", "https://www.planalto.gov.br"
+    )
 
     for perfil in ("chrome124", "chrome120"):
         try:
@@ -99,7 +105,10 @@ def baixar_html_oficial(url: str) -> str:
                     "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
                 },
             )
-            print(f"   [1/3] curl_cffi ({perfil}) -> HTTP {resp.status_code} ({len(resp.content)} bytes)", file=sys.stderr)
+            print(
+                f"   [1/3] curl_cffi ({perfil}) -> HTTP {resp.status_code} ({len(resp.content)} bytes)",
+                file=sys.stderr,
+            )
             if resp.status_code == 200:
                 html = decodificar_bytes(resp.content)
                 if "Art." in html or "art." in html:
@@ -121,7 +130,11 @@ def baixar_html_oficial(url: str) -> str:
 def linha_parece_descricao_estrutura(linha: str) -> bool:
     if not linha or len(linha) > 220:
         return False
-    if re.match(r"^(Arts?\.|§|Parágrafo\s+único|[IVXLCDM]+\s*[-–—]|[a-z]\)|\"|“|‘)", linha, re.IGNORECASE):
+    if re.match(
+        r"^(Arts?\.|§|Parágrafo\s+único|[IVXLCDM]+\s*[-–—]|[a-z]\)|\"|“|‘)",
+        linha,
+        re.IGNORECASE,
+    ):
         return False
     if linha.endswith((";", ":")):
         return False
@@ -149,7 +162,9 @@ def extrair_dispositivos(html: str) -> list[dict]:
 
     if not blocos_brutos:
         texto_geral = soup.get_text("\n")
-        blocos_brutos = [normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)]
+        blocos_brutos = [
+            normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)
+        ]
 
     blocos_consolidados = []
     idx = 0
@@ -176,8 +191,12 @@ def extrair_dispositivos(html: str) -> list[dict]:
         r"^(LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\b",
         re.IGNORECASE,
     )
-    re_artigo = re.compile(r"^(Arts?\.?\s*\d+(?:-[A-Za-z])?[º°o.]?)\s*(.*)$", re.IGNORECASE)
-    re_paragrafo = re.compile(r"^(§\s*\d+[º°o.]?|Parágrafo\s+único\.?)\s*(.*)$", re.IGNORECASE)
+    re_artigo = re.compile(
+        r"^(Arts?\.?\s*\d+(?:-[A-Za-z])?[º°o.]?)\s*(.*)$", re.IGNORECASE
+    )
+    re_paragrafo = re.compile(
+        r"^(§\s*\d+[º°o.]?|Parágrafo\s+único\.?)\s*(.*)$", re.IGNORECASE
+    )
     re_inciso = re.compile(r"^([IVXLCDM]+\s*[-–—])\s*(.*)$")
     re_alinea = re.compile(r"^([a-z]\))\s*(.*)$")
 
@@ -186,13 +205,15 @@ def extrair_dispositivos(html: str) -> list[dict]:
             cont_estrutura += 1
             ordem += 1
             slug = f"EST_{cont_estrutura}_{slug_seguro(linha)}"
-            dispositivos.append({
-                "slug": slug,
-                "tipo": "estrutura",
-                "rotulo": "",
-                "texto": linha,
-                "ordem": ordem,
-            })
+            dispositivos.append(
+                {
+                    "slug": slug,
+                    "tipo": "estrutura",
+                    "rotulo": "",
+                    "texto": linha,
+                    "ordem": ordem,
+                }
+            )
             continue
 
         m_art = re_artigo.match(linha)
@@ -206,13 +227,15 @@ def extrair_dispositivos(html: str) -> list[dict]:
             par_atual = ""
             inc_atual = ""
             ordem += 1
-            dispositivos.append({
-                "slug": art_atual,
-                "tipo": "artigo",
-                "rotulo": rotulo,
-                "texto": texto,
-                "ordem": ordem,
-            })
+            dispositivos.append(
+                {
+                    "slug": art_atual,
+                    "tipo": "artigo",
+                    "rotulo": rotulo,
+                    "texto": texto,
+                    "ordem": ordem,
+                }
+            )
             continue
 
         if not iniciou_artigos:
@@ -222,17 +245,23 @@ def extrair_dispositivos(html: str) -> list[dict]:
         if m_par:
             rotulo = m_par.group(1).strip()
             texto = m_par.group(2).strip()
-            num_par = "UNICO" if "único" in rotulo.lower() else re.sub(r"[^0-9A-Za-z]", "", rotulo)
+            num_par = (
+                "UNICO"
+                if "único" in rotulo.lower()
+                else re.sub(r"[^0-9A-Za-z]", "", rotulo)
+            )
             par_atual = f"PAR_{num_par}"
             inc_atual = ""
             ordem += 1
-            dispositivos.append({
-                "slug": f"{art_atual}_{par_atual}",
-                "tipo": "paragrafo",
-                "rotulo": rotulo,
-                "texto": texto,
-                "ordem": ordem,
-            })
+            dispositivos.append(
+                {
+                    "slug": f"{art_atual}_{par_atual}",
+                    "tipo": "paragrafo",
+                    "rotulo": rotulo,
+                    "texto": texto,
+                    "ordem": ordem,
+                }
+            )
             continue
 
         m_inc = re_inciso.match(linha)
@@ -243,13 +272,15 @@ def extrair_dispositivos(html: str) -> list[dict]:
             inc_atual = f"INC_{romano}"
             prefixo = f"{art_atual}_{par_atual}" if par_atual else art_atual
             ordem += 1
-            dispositivos.append({
-                "slug": f"{prefixo}_{inc_atual}",
-                "tipo": "inciso",
-                "rotulo": rotulo,
-                "texto": texto,
-                "ordem": ordem,
-            })
+            dispositivos.append(
+                {
+                    "slug": f"{prefixo}_{inc_atual}",
+                    "tipo": "inciso",
+                    "rotulo": rotulo,
+                    "texto": texto,
+                    "ordem": ordem,
+                }
+            )
             continue
 
         m_ali = re_alinea.match(linha)
@@ -264,13 +295,15 @@ def extrair_dispositivos(html: str) -> list[dict]:
                 partes.append(inc_atual)
             partes.append(f"ALI_{letra}")
             ordem += 1
-            dispositivos.append({
-                "slug": "_".join(partes),
-                "tipo": "alinea",
-                "rotulo": rotulo,
-                "texto": texto,
-                "ordem": ordem,
-            })
+            dispositivos.append(
+                {
+                    "slug": "_".join(partes),
+                    "tipo": "alinea",
+                    "rotulo": rotulo,
+                    "texto": texto,
+                    "ordem": ordem,
+                }
+            )
             continue
 
     vistos = {}
@@ -315,7 +348,9 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
     print(f"Processando [{lei['titulo']}] ({url})...")
 
     try:
-        supabase.table("leis").update({"status_extracao": "processando"}).eq("id", lei_id).execute()
+        supabase.table("leis").update({"status_extracao": "processando"}).eq(
+            "id", lei_id
+        ).execute()
         html = baixar_html_oficial(url)
         dispositivos = extrair_dispositivos(html)
         print(f"   Extraídos {len(dispositivos)} dispositivos da fonte.")
@@ -337,60 +372,92 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
         sem_vigentes = (resp_exist.count or 0) == 0
 
         if not hash_atual or forcar_reestruturacao or sem_vigentes:
-            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
+            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
+                "versao_status", "reestruturando"
+            ).execute()
             inserir_em_lotes(lei_id, user_id, dispositivos, "reestruturando")
 
-            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "vigente").execute()
-            supabase.table("dispositivos").update({"versao_status": "vigente"}).eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
+            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
+                "versao_status", "vigente"
+            ).execute()
+            supabase.table("dispositivos").update({"versao_status": "vigente"}).eq(
+                "lei_id", lei_id
+            ).eq("versao_status", "reestruturando").execute()
 
-            supabase.table("leis").update({
-                "hash_atual": novo_hash,
-                "status_extracao": "concluido",
-                "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
-            }).eq("id", lei_id).execute()
-            print(f" -> Estrutura/índice atualizado com sucesso ({len(dispositivos)} dispositivos).")
+            supabase.table("leis").update(
+                {
+                    "hash_atual": novo_hash,
+                    "status_extracao": "concluido",
+                    "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
+                }
+            ).eq("id", lei_id).execute()
+            print(
+                f" -> Estrutura/índice atualizado com sucesso ({len(dispositivos)} dispositivos)."
+            )
             return
 
         if novo_hash != hash_atual:
-            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "pendente").execute()
+            supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
+                "versao_status", "pendente"
+            ).execute()
             inserir_em_lotes(lei_id, user_id, dispositivos, "pendente")
-            supabase.table("leis").update({
-                "hash_pendente": novo_hash,
-                "tem_atualizacao": True,
-                "status_extracao": "concluido",
-                "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
-            }).eq("id", lei_id).execute()
+            supabase.table("leis").update(
+                {
+                    "hash_pendente": novo_hash,
+                    "tem_atualizacao": True,
+                    "status_extracao": "concluido",
+                    "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
+                }
+            ).eq("id", lei_id).execute()
             print(" -> Alteração legislativa detectada e salva como pendente.")
         else:
-            supabase.table("leis").update({
-                "status_extracao": "concluido",
-                "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
-            }).eq("id", lei_id).execute()
+            supabase.table("leis").update(
+                {
+                    "status_extracao": "concluido",
+                    "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
+                }
+            ).eq("id", lei_id).execute()
             print(" -> Sem alterações na fonte oficial.")
 
     except Exception as e:
         print(f" -> Erro ao processar {lei['titulo']}: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
-        supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
-        supabase.table("leis").update({"status_extracao": "erro"}).eq("id", lei_id).execute()
+        supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
+            "versao_status", "reestruturando"
+        ).execute()
+        supabase.table("leis").update({"status_extracao": "erro"}).eq(
+            "id", lei_id
+        ).execute()
 
 
 def main():
     if MODO in ("verificar_lei", "reprocessar_indice_lei") and LEI_ID_ALVO:
         resp = supabase.table("leis").select("*").eq("id", LEI_ID_ALVO).execute()
-        for lei in (resp.data or []):
-            processar_lei(lei, forcar_reestruturacao=(MODO == "reprocessar_indice_lei"))
+        for lei in resp.data or []:
+            processar_lei(
+                lei, forcar_reestruturacao=(MODO == "reprocessar_indice_lei")
+            )
         return
 
     if MODO == "reprocessar_todos_indices":
         resp = supabase.table("leis").select("*").execute()
-        for lei in (resp.data or []):
+        for lei in resp.data or []:
             processar_lei(lei, forcar_reestruturacao=True)
         return
 
     if MODO == "extrair_pendentes":
-        resp = supabase.table("leis").select("*").eq("status_extracao", "pendente").execute()
+        resp = (
+            supabase.table("leis")
+            .select("*")
+            .eq("status_extracao", "pendente")
+            .execute()
+        )
     else:
         resp = supabase.table("leis").select("*").execute()
 
-    for lei in (resp.data or []):
+    for lei in resp.data or []:
+        processar_lei(lei, forcar_reestruturacao=False)
+
+
+if __name__ == "__main__":
+    main()
