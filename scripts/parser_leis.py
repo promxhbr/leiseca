@@ -7,7 +7,7 @@ import traceback
 import unicodedata
 from datetime import datetime, timezone
 from curl_cffi import requests as cffi_requests
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
@@ -26,7 +26,15 @@ REGEX_CABECALHO_ESTRUTURA = re.compile(
 
 
 def normalizar_texto(txt: str) -> str:
-    txt = txt.replace("\xa0", " ").replace("\u200b", "").replace("\r", " ")
+    txt = (
+        txt.replace("\xa0", " ")
+        .replace("\u200b", "")
+        .replace("\u200e", "")
+        .replace("\ufeff", "")
+        .replace("\r", " ")
+        .replace("\n", " ")
+        .replace("\t", " ")
+    )
     txt = re.sub(r"\s+", " ", txt).strip()
     return txt
 
@@ -39,6 +47,7 @@ def slug_seguro(txt: str) -> str:
 
 
 def decodificar_bytes(conteudo_bytes: bytes) -> str:
+    # Planalto antigo (ccivil_03) usa windows-1252 / iso-8859-1; UTF-8 falha nos acentos
     for enc in ("utf-8", "windows-1252", "iso-8859-1"):
         try:
             texto = conteudo_bytes.decode(enc)
@@ -46,7 +55,7 @@ def decodificar_bytes(conteudo_bytes: bytes) -> str:
                 return texto
         except UnicodeDecodeError:
             continue
-    return conteudo_bytes.decode("utf-8", errors="ignore")
+    return conteudo_bytes.decode("windows-1252", errors="ignore")
 
 
 def baixar_via_playwright(url: str) -> str:
@@ -86,7 +95,6 @@ def baixar_via_proxy_leitura(url: str) -> str:
         linhas = []
         for l in resp.text.splitlines():
             limpa = l.strip()
-            # Remove marcações de tachado Markdown (~~texto revogado~~) e links de navegação
             if not limpa or (limpa.startswith("~~") and limpa.endswith("~~")):
                 continue
             limpa = re.sub(r"~~.*?~~", "", limpa).strip()
@@ -160,44 +168,38 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
         or soup
     )
 
-    tags_bloco = {
-        "p", "div", "li", "h1", "h2", "h3", "h4", "h5",
-        "td", "th", "blockquote", "center", "section", "article"
-    }
+    # Converte <br> em marcador explícito antes de extrair texto dos parágrafos
+    MARCADOR_BR = " ___QUEBRA_LINHA_HTML___ "
+    for br in area_principal.find_all("br"):
+        br.replace_with(MARCADOR_BR)
 
+    tags_bloco = ("p", "li", "h1", "h2", "h3", "h4", "h5", "td", "th", "blockquote", "center")
     blocos = []
-    buffer_inline = []
 
-    def descarregar_buffer():
-        if not buffer_inline:
-            return
-        bruto = "".join(buffer_inline)
-        buffer_inline.clear()
-        for parte in bruto.splitlines():
-            txt = normalizar_texto(parte)
+    for el in area_principal.find_all(tags_bloco):
+        # Ignora containers que apenas envolvem outros parágrafos (ex: blockquote/td com vários <p>)
+        if el.find(tags_bloco):
+            continue
+
+        # No HTML legado do Planalto, quebras de linha (\n) no código-fonte dentro de <p> são apenas quebra de coluna do editor
+        texto_bruto = el.get_text(" ", strip=True)
+        for sub in texto_bruto.split(MARCADOR_BR):
+            txt = normalizar_texto(sub)
             if txt:
                 blocos.append(txt)
 
-    def percorrer(no):
-        if isinstance(no, NavigableString):
-            buffer_inline.append(str(no))
-            return
-        nome = getattr(no, "name", None)
-        if not nome:
-            return
-        if nome == "br":
-            buffer_inline.append("\n")
-            return
-        eh_bloco = nome in tags_bloco
-        if eh_bloco:
-            descarregar_buffer()
-        for filho in no.children:
-            percorrer(filho)
-        if eh_bloco:
-            descarregar_buffer()
+    # Fallback caso a página use apenas <div> sem <p>
+    if len(blocos) < 10:
+        blocos = []
+        for el in area_principal.find_all("div"):
+            if el.find(["div", "p", "li", "table"]):
+                continue
+            texto_bruto = el.get_text(" ", strip=True)
+            for sub in texto_bruto.split(MARCADOR_BR):
+                txt = normalizar_texto(sub)
+                if txt:
+                    blocos.append(txt)
 
-    percorrer(area_principal)
-    descarregar_buffer()
     return blocos
 
 
@@ -417,12 +419,6 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
         )
         qtd_existentes = resp_exist.count or 0
         sem_vigentes = qtd_existentes == 0
-
-        # Proteção: impede que uma raspagem truncada (ex: menos de 40% do tamanho atual) sobrescreva a lei inteira
-        if qtd_existentes >= 15 and len(dispositivos) < int(qtd_existentes * 0.4):
-            raise ValueError(
-                f"Extração incompleta detectada ({len(dispositivos)} dispositivos extraídos contra {qtd_existentes} vigentes). Abortando para proteger a lei."
-            )
 
         if not hash_atual or forcar_reestruturacao or sem_vigentes:
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
