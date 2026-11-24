@@ -493,9 +493,36 @@
     .highlight-popover {
       position: fixed; display: none; align-items: center; gap: 6px; flex-wrap: wrap;
       background: var(--bg-surface); border: 1px solid var(--cyan-accent);
-      padding: 8px 12px; border-radius: 99px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 100;
+      padding: 8px 12px; border-radius: 99px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 140;
+      touch-action: manipulation;
     }
     .highlight-popover.open { display: flex; }
+    @media (pointer: coarse), (max-width: 850px) {
+      .highlight-popover {
+        left: 50% !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: 18px !important;
+        transform: translateX(-50%);
+        border-radius: 16px;
+        padding: 10px 14px;
+        max-width: calc(100vw - 24px);
+        justify-content: center;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+      }
+      .highlight-popover .hl-swatch {
+        width: 28px;
+        height: 28px;
+      }
+      .disp-actions {
+        opacity: 0.85 !important;
+      }
+      .btn-add-mini {
+        width: 28px;
+        height: 28px;
+        font-size: 1.05rem;
+      }
+    }
     .hl-swatch {
       width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
       cursor: pointer; transition: transform 0.12s ease;
@@ -2482,38 +2509,81 @@
     }
 
     // =========================================================================
-    // GRIFOS, NEGRITOS E CORES DE TEXTO SELECIONADO
+    // GRIFOS, NEGRITOS E CORES DE TEXTO SELECIONADO (DESKTOP, TABLET E SMARTPHONE)
     // =========================================================================
-    document.addEventListener("mouseup", async (e) => {
-      const popover = document.getElementById("highlight-popover");
-      const dockPen = document.getElementById("dock-pen-wrapper");
-      if (popover.contains(e.target) || dockPen.contains(e.target)) return;
+    let timerSelecaoTouch = null;
+    let interagindoComPopover = false;
 
+    const ehDispositivoTouch = () => window.matchMedia("(pointer: coarse)").matches || ("ontouchstart" in window);
+
+    async function processarSelecaoTexto(origemTouch = false) {
+      const popover = document.getElementById("highlight-popover");
       const sel = window.getSelection();
       const texto = sel ? sel.toString().trim() : "";
 
-      if (texto.length >= 2 && leiSelecionada) {
+      if (texto.length >= 2 && leiSelecionada && sel.rangeCount > 0) {
         const anchorEl = sel.anchorNode && sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
         const bodyEl = anchorEl ? anchorEl.closest(".disp-text-body") : null;
 
         if (bodyEl && bodyEl.dataset.slug) {
           if (ferramentaCanetaAtiva) {
             window.getSelection().removeAllRanges();
+            popover.classList.remove("open");
+            selecaoAtualGrifo = null;
             await salvarMarcacaoTexto(bodyEl.dataset.slug, texto, ferramentaCanetaAtiva);
             return;
           }
 
           const rect = sel.getRangeAt(0).getBoundingClientRect();
           selecaoAtualGrifo = { slug: bodyEl.dataset.slug, trecho: texto };
-          popover.style.top = Math.max(10, rect.top - 52) + "px";
-          popover.style.left = Math.max(10, rect.left) + "px";
+
+          if (!origemTouch && !ehDispositivoTouch()) {
+            const topPos = rect.top > 68 ? rect.top - 52 : rect.bottom + 10;
+            popover.style.top = Math.max(10, topPos) + "px";
+            popover.style.left = Math.max(10, Math.min(window.innerWidth - 360, rect.left)) + "px";
+          }
           popover.classList.add("open");
           return;
         }
       }
-      popover.classList.remove("open");
-      selecaoAtualGrifo = null;
+
+      if (!interagindoComPopover) {
+        popover.classList.remove("open");
+        selecaoAtualGrifo = null;
+      }
+    }
+
+    document.getElementById("highlight-popover").addEventListener("pointerdown", () => {
+      interagindoComPopover = true;
+      setTimeout(() => { interagindoComPopover = false; }, 500);
     });
+
+    document.addEventListener("mouseup", async (e) => {
+      if (ehDispositivoTouch()) return;
+      const popover = document.getElementById("highlight-popover");
+      const dockPen = document.getElementById("dock-pen-wrapper");
+      if (popover.contains(e.target) || dockPen.contains(e.target)) return;
+      await processarSelecaoTexto(false);
+    });
+
+    document.addEventListener("selectionchange", () => {
+      if (!ehDispositivoTouch() || !leiSelecionada) return;
+      if (timerSelecaoTouch) clearTimeout(timerSelecaoTouch);
+      // Aguarda 420ms para o usuário ajustar as alças de seleção no tablet/celular sem interromper
+      timerSelecaoTouch = setTimeout(() => {
+        processarSelecaoTexto(true);
+      }, 420);
+    });
+
+    document.addEventListener("touchend", (e) => {
+      const popover = document.getElementById("highlight-popover");
+      const dockPen = document.getElementById("dock-pen-wrapper");
+      if (popover.contains(e.target) || dockPen.contains(e.target)) return;
+      if (timerSelecaoTouch) clearTimeout(timerSelecaoTouch);
+      timerSelecaoTouch = setTimeout(() => {
+        processarSelecaoTexto(true);
+      }, 320);
+    }, { passive: true });
 
     async function aplicarMarcacao(ferramenta) {
       if (!selecaoAtualGrifo || !leiSelecionada) return;
