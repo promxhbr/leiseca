@@ -7,7 +7,7 @@ import traceback
 import unicodedata
 from datetime import datetime, timezone
 from curl_cffi import requests as cffi_requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
@@ -83,7 +83,16 @@ def baixar_via_proxy_leitura(url: str) -> str:
     url_proxy = f"https://r.jina.ai/{url}"
     resp = cffi_requests.get(url_proxy, impersonate="chrome124", timeout=90)
     if resp.status_code == 200 and ("Art." in resp.text or "art." in resp.text):
-        linhas = [f"<p>{l.strip()}</p>" for l in resp.text.splitlines() if l.strip()]
+        linhas = []
+        for l in resp.text.splitlines():
+            limpa = l.strip()
+            # Remove marcações de tachado Markdown (~~texto revogado~~) e links de navegação
+            if not limpa or (limpa.startswith("~~") and limpa.endswith("~~")):
+                continue
+            limpa = re.sub(r"~~.*?~~", "", limpa).strip()
+            limpa = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", limpa).strip()
+            if limpa:
+                linhas.append(f"<p>{limpa}</p>")
         return "\n".join(linhas)
     raise RuntimeError(f"Proxy retornou status {resp.status_code}")
 
@@ -144,7 +153,6 @@ def linha_parece_descricao_estrutura(linha: str) -> bool:
 
 
 def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
-    # Em páginas do Senado, o texto normativo costuma ficar dentro de #conteudo ou .texto-norma
     area_principal = (
         soup.find(id="conteudo")
         or soup.find(class_=re.compile(r"(texto[-_]?norma|norma[-_]?texto|conteudo[-_]?norma)", re.I))
@@ -152,33 +160,44 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
         or soup
     )
 
-    for br in area_principal.find_all("br"):
-        br.replace_with("\n")
+    tags_bloco = {
+        "p", "div", "li", "h1", "h2", "h3", "h4", "h5",
+        "td", "th", "blockquote", "center", "section", "article"
+    }
 
     blocos = []
-    tags_bloco = {"p", "div", "li", "h1", "h2", "h3", "h4", "h5", "td", "th", "blockquote"}
+    buffer_inline = []
 
-    for el in area_principal.find_all(tags_bloco):
-        # Só pula container se houver sub-blocos que realmente contenham texto normativo próprio
-        filhos_bloco = [
-            f for f in el.find_all(tags_bloco)
-            if normalizar_texto(f.get_text(" ", strip=True))
-        ]
-        if filhos_bloco:
-            continue
-
-        bruto = el.get_text("\n", strip=True)
+    def descarregar_buffer():
+        if not buffer_inline:
+            return
+        bruto = "".join(buffer_inline)
+        buffer_inline.clear()
         for parte in bruto.splitlines():
             txt = normalizar_texto(parte)
             if txt:
                 blocos.append(txt)
 
-    if not blocos:
-        texto_geral = area_principal.get_text("\n")
-        blocos = [
-            normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)
-        ]
+    def percorrer(no):
+        if isinstance(no, NavigableString):
+            buffer_inline.append(str(no))
+            return
+        nome = getattr(no, "name", None)
+        if not nome:
+            return
+        if nome == "br":
+            buffer_inline.append("\n")
+            return
+        eh_bloco = nome in tags_bloco
+        if eh_bloco:
+            descarregar_buffer()
+        for filho in no.children:
+            percorrer(filho)
+        if eh_bloco:
+            descarregar_buffer()
 
+    percorrer(area_principal)
+    descarregar_buffer()
     return blocos
 
 
@@ -396,7 +415,14 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
             .limit(1)
             .execute()
         )
-        sem_vigentes = (resp_exist.count or 0) == 0
+        qtd_existentes = resp_exist.count or 0
+        sem_vigentes = qtd_existentes == 0
+
+        # Proteção: impede que uma raspagem truncada (ex: menos de 40% do tamanho atual) sobrescreva a lei inteira
+        if qtd_existentes >= 15 and len(dispositivos) < int(qtd_existentes * 0.4):
+            raise ValueError(
+                f"Extração incompleta detectada ({len(dispositivos)} dispositivos extraídos contra {qtd_existentes} vigentes). Abortando para proteger a lei."
+            )
 
         if not hash_atual or forcar_reestruturacao or sem_vigentes:
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq(
