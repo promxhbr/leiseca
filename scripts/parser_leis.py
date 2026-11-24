@@ -75,11 +75,10 @@ def baixar_via_playwright(url: str) -> str:
 
 
 def baixar_via_proxy_leitura(url: str) -> str:
-    print("   [3/3] Acionando proxy de leitura para contornar bloqueio de IP datacenter...", file=sys.stderr)
+    print("   [3/3] Acionando proxy de leitura...", file=sys.stderr)
     url_proxy = f"https://r.jina.ai/{url}"
     resp = cffi_requests.get(url_proxy, impersonate="chrome124", timeout=90)
     if resp.status_code == 200 and ("Art." in resp.text or "art." in resp.text):
-        # Converte linhas de texto/markdown em parágrafos HTML simples para o extrator
         linhas = [f"<p>{l.strip()}</p>" for l in resp.text.splitlines() if l.strip()]
         return "\n".join(linhas)
     raise RuntimeError(f"Proxy retornou status {resp.status_code}")
@@ -88,7 +87,6 @@ def baixar_via_proxy_leitura(url: str) -> str:
 def baixar_html_oficial(url: str) -> str:
     url_limpa = url.strip().replace("http://www.planalto.gov.br", "https://www.planalto.gov.br")
 
-    # 1. Tentativa rápida com assinatura TLS real do Chrome (curl_cffi)
     for perfil in ("chrome124", "chrome120"):
         try:
             resp = cffi_requests.get(
@@ -110,7 +108,6 @@ def baixar_html_oficial(url: str) -> str:
             print(f"   [1/3] Perfil {perfil} falhou: {err}", file=sys.stderr)
             time.sleep(2)
 
-    # 2. Fallback automático: Chromium headless real
     try:
         html_browser = baixar_via_playwright(url_limpa)
         if "Art." in html_browser or "art." in html_browser:
@@ -118,7 +115,6 @@ def baixar_html_oficial(url: str) -> str:
     except Exception as err:
         print(f"   [2/3] Playwright falhou: {err}", file=sys.stderr)
 
-    # 3. Fallback final: Proxy de leitura caso o IP do GitHub Actions esteja bloqueado no firewall do governo
     return baixar_via_proxy_leitura(url_limpa)
 
 
@@ -294,10 +290,11 @@ def calcular_hash(dispositivos: list[dict]) -> str:
     return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 
-def inserir_em_lotes(lei_id: str, dispositivos: list[dict], status: str):
+def inserir_em_lotes(lei_id: str, user_id: str, dispositivos: list[dict], status: str):
     registros = [
         {
             "lei_id": lei_id,
+            "user_id": user_id,
             "slug": d["slug"],
             "tipo": d["tipo"],
             "rotulo": d["rotulo"],
@@ -313,6 +310,7 @@ def inserir_em_lotes(lei_id: str, dispositivos: list[dict], status: str):
 
 def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
     lei_id = lei["id"]
+    user_id = lei["user_id"]
     url = lei["url"]
     print(f"Processando [{lei['titulo']}] ({url})...")
 
@@ -340,7 +338,7 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
 
         if not hash_atual or forcar_reestruturacao or sem_vigentes:
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
-            inserir_em_lotes(lei_id, dispositivos, "reestruturando")
+            inserir_em_lotes(lei_id, user_id, dispositivos, "reestruturando")
 
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "vigente").execute()
             supabase.table("dispositivos").update({"versao_status": "vigente"}).eq("lei_id", lei_id).eq("versao_status", "reestruturando").execute()
@@ -355,7 +353,7 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
 
         if novo_hash != hash_atual:
             supabase.table("dispositivos").delete().eq("lei_id", lei_id).eq("versao_status", "pendente").execute()
-            inserir_em_lotes(lei_id, dispositivos, "pendente")
+            inserir_em_lotes(lei_id, user_id, dispositivos, "pendente")
             supabase.table("leis").update({
                 "hash_pendente": novo_hash,
                 "tem_atualizacao": True,
@@ -396,8 +394,3 @@ def main():
         resp = supabase.table("leis").select("*").execute()
 
     for lei in (resp.data or []):
-        processar_lei(lei, forcar_reestruturacao=False)
-
-
-if __name__ == "__main__":
-    main()
