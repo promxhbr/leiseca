@@ -236,6 +236,55 @@
     .brand-actions { display: flex; gap: 5px; align-items: center; }
 
     .sidebar-top-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-sidebar-jurisp {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      background: var(--jurisp-bg);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: var(--jurisp-accent);
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-sidebar-jurisp:hover, .btn-sidebar-jurisp.active {
+      background: var(--jurisp-accent);
+      color: #fff;
+      border-color: var(--jurisp-accent);
+    }
+    .global-jurisp-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--jurisp-accent);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .global-jurisp-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .global-jurisp-dispositivo {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+      padding: 8px 11px;
+      border-radius: 6px;
+      border-left: 3px solid var(--cyan-accent);
+    }
     .materia-select-wrapper select { padding: 7px 10px; font-size: 0.84rem; font-weight: 600; background: var(--bg-elevated); }
 
     .sidebar-update-alert {
@@ -969,6 +1018,11 @@
         <button class="btn btn-outline btn-sm" onclick="verificarTodasAsLeis()" title="Verificar alterações em todas as leis">🔄 Verificar Todas</button>
       </div>
 
+      <button type="button" id="btn-sidebar-todas-jurisp" class="btn-sidebar-jurisp" onclick="abrirTodasJurisprudenciasGlobais()" title="Listar todas as jurisprudências cadastradas em todas as leis">
+        <span>⚖️</span>
+        <span>Todas as Jurisprudências</span>
+      </button>
+
       <div class="materia-select-wrapper">
         <select id="select-filtro-materia" onchange="alterarFiltroMateriaSelect(this.value)" title="Filtrar por Matéria / Tag">
           <option value="Todas">📁 Todas as Matérias</option>
@@ -1004,6 +1058,32 @@
       <div id="estado-vazio" style="text-align:center; padding:60px 20px; color:var(--text-muted);">
         <h2>Selecione ou cadastre uma lei ao lado</h2>
         <p>Cole o link do Planalto ou do Senado Federal para estruturar artigos, incisos e alíneas automaticamente.</p>
+      </div>
+
+      <!-- VISÃO CONSOLIDADA: TODAS AS JURISPRUDÊNCIAS DE TODAS AS LEIS -->
+      <div id="visao-todas-jurisprudencias" class="hidden">
+        <div class="toolbar">
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <h2 style="color: var(--jurisp-accent);">⚖️ Todas as Jurisprudências</h2>
+              <span id="contador-global-jurisp" class="jurisp-pill">0 registros</span>
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">Acervo consolidado de entendimentos do STF, STJ e súmulas vinculadas a todas as suas leis.</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <select id="filtro-global-tribunal" onchange="filtrarJurisprudenciasGlobais()" style="width:auto; padding:7px 10px; font-size:0.84rem;">
+              <option value="Todos">Todos os Tribunais</option>
+              <option value="STF">STF</option>
+              <option value="STJ">STJ</option>
+              <option value="Jurisprudência">Outros / Súmulas</option>
+            </select>
+            <select id="filtro-global-materia-jurisp" onchange="filtrarJurisprudenciasGlobais()" style="width:auto; padding:7px 10px; font-size:0.84rem;">
+              <option value="Todas">Todas as Matérias</option>
+            </select>
+            <input type="text" id="busca-global-jurisp" placeholder="Buscar tese, súmula ou artigo..." oninput="filtrarJurisprudenciasGlobais()" style="width:210px;" />
+          </div>
+        </div>
+        <div id="container-global-jurisprudencias"></div>
       </div>
 
       <div id="leitor-lei" class="hidden">
@@ -2329,9 +2409,152 @@
       filtrarDispositivos();
     }
 
+    let todasJurisprudenciasCache = [];
+
+    async function abrirTodasJurisprudenciasGlobais() {
+      leiSelecionada = null;
+      fecharMenuMobile();
+      fecharBuscaRapida();
+      fecharPainelIndice();
+      fecharPainelRemissao();
+      renderizarSidebar();
+
+      const btnSide = document.getElementById("btn-sidebar-todas-jurisp");
+      if (btnSide) btnSide.classList.add("active");
+
+      document.getElementById("estado-vazio").classList.add("hidden");
+      document.getElementById("leitor-lei").classList.add("hidden");
+      const visaoEl = document.getElementById("visao-todas-jurisprudencias");
+      visaoEl.classList.remove("hidden");
+
+      const container = document.getElementById("container-global-jurisprudencias");
+      container.innerHTML = `<p style="color:var(--text-muted);">Carregando todas as jurisprudências...</p>`;
+
+      const { data: notas, error } = await sb
+        .from("anotacoes")
+        .select("*")
+        .in("tribunal", ["STF", "STJ", "Jurisprudência"])
+        .order("updated_at", { ascending: false });
+
+      if (error) {
+        container.innerHTML = `<p style="color:var(--danger);">Erro ao carregar jurisprudências: ${escaparHtml(error.message)}</p>`;
+        return;
+      }
+
+      const listaNotas = notas || [];
+      const slugsUnicos = [...new Set(listaNotas.map(n => n.slug).filter(Boolean))];
+      const mapaDispositivos = {};
+
+      if (slugsUnicos.length > 0) {
+        for (let i = 0; i < slugsUnicos.length; i += 200) {
+          const loteSlugs = slugsUnicos.slice(i, i + 200);
+          const { data: disps } = await sb
+            .from("dispositivos")
+            .select("lei_id, slug, rotulo, texto")
+            .in("slug", loteSlugs)
+            .eq("versao_status", "vigente");
+          (disps || []).forEach(d => {
+            mapaDispositivos[`${d.lei_id}::${d.slug}`] = d;
+          });
+        }
+      }
+
+      const mapaLeis = {};
+      leisCache.forEach(l => { mapaLeis[l.id] = l; });
+
+      todasJurisprudenciasCache = listaNotas.map(n => {
+        const lei = mapaLeis[n.lei_id] || { id: n.lei_id, titulo: "Lei não identificada", materia: "Geral" };
+        const disp = mapaDispositivos[`${n.lei_id}::${n.slug}`] || null;
+        return {
+          ...n,
+          _leiTitulo: lei.titulo,
+          _leiMateria: (lei.materia || "Geral").trim(),
+          _dispRotulo: disp ? (disp.rotulo || n.slug) : n.slug,
+          _dispTexto: disp ? disp.texto : ""
+        };
+      });
+
+      const selectMat = document.getElementById("filtro-global-materia-jurisp");
+      const materias = [...new Set(todasJurisprudenciasCache.map(j => j._leiMateria))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      selectMat.innerHTML = `<option value="Todas">Todas as Matérias</option>` +
+        materias.map(m => `<option value="${escaparHtml(m)}">${escaparHtml(m)}</option>`).join("");
+
+      document.getElementById("filtro-global-tribunal").value = "Todos";
+      document.getElementById("busca-global-jurisp").value = "";
+      filtrarJurisprudenciasGlobais();
+    }
+
+    function filtrarJurisprudenciasGlobais() {
+      const tribunal = document.getElementById("filtro-global-tribunal").value;
+      const materia = document.getElementById("filtro-global-materia-jurisp").value;
+      const termo = document.getElementById("busca-global-jurisp").value.trim().toLowerCase();
+
+      const filtradas = todasJurisprudenciasCache.filter(item => {
+        if (tribunal !== "Todos" && item.tribunal !== tribunal) return false;
+        if (materia !== "Todas" && item._leiMateria !== materia) return false;
+        if (termo) {
+          const textoLimpoNota = item.conteudo.replace(/<[^>]+>/g, " ").toLowerCase();
+          const alvo = `${item._leiTitulo} ${item._leiMateria} ${item._dispRotulo} ${item._dispTexto} ${textoLimpoNota}`.toLowerCase();
+          if (!alvo.includes(termo)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById("contador-global-jurisp").textContent =
+        filtradas.length === 1 ? "1 registro" : `${filtradas.length} registros`;
+
+      const container = document.getElementById("container-global-jurisprudencias");
+      container.innerHTML = "";
+
+      if (filtradas.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); padding:20px 0;">Nenhuma jurisprudência encontrada para os filtros selecionados.</p>`;
+        return;
+      }
+
+      filtradas.forEach(item => {
+        const corTag = obterCorTag(item._leiMateria);
+        const tagStyle = corTag
+          ? `style="color:${corTag}; background:${hexParaRgbaSuave(corTag, 0.15)}; border-color:${corTag};"`
+          : "";
+
+        const card = document.createElement("div");
+        card.className = "global-jurisp-card";
+        card.innerHTML = `
+          <div class="global-jurisp-header">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span class="jurisp-pill">⚖️ ${escaparHtml(item.tribunal)}</span>
+              <strong style="color:var(--cyan-accent); font-size:0.93rem;">${escaparHtml(item._leiTitulo)}</strong>
+              <span class="badge badge-tag" ${tagStyle}>${escaparHtml(item._leiMateria)}</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="irParaDispositivoDaJurisprudencia('${item.lei_id}', '${item.slug}')">
+              Ir para o artigo ↗
+            </button>
+          </div>
+          <div class="global-jurisp-dispositivo">
+            <strong style="color:var(--cyan-accent);">${escaparHtml(item._dispRotulo)}</strong>
+            <span>${escaparHtml(item._dispTexto)}</span>
+          </div>
+          <div class="nota-conteudo-render" style="white-space: pre-wrap; font-size:0.93rem;">${enriquecerRemissoesHtml(item.conteudo)}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function irParaDispositivoDaJurisprudencia(leiId, slug) {
+      const leiAlvo = leisCache.find(l => l.id === leiId);
+      if (!leiAlvo) return;
+      await selecionarLei(leiAlvo);
+      setTimeout(() => {
+        saltarParaDispositivo(slug);
+      }, 80);
+    }
+
     async function selecionarLei(lei) {
       leiSelecionada = lei;
       fecharMenuMobile();
+      const btnSide = document.getElementById("btn-sidebar-todas-jurisp");
+      if (btnSide) btnSide.classList.remove("active");
+      document.getElementById("visao-todas-jurisprudencias").classList.add("hidden");
       apenasAnotacoes = false;
       apenasJurisprudencias = false;
       artigosExpandidosBusca = {};
