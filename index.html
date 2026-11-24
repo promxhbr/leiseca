@@ -868,7 +868,7 @@
       <p>Acesse suas leis comentadas e jurisprudências sincronizadas.</p>
       <div style="display:flex; flex-direction:column; gap:12px;">
         <input type="email" id="login-email" placeholder="Seu e-mail" />
-        <input type="password" id="login-pass" placeholder="Sua senha" />
+        <input type="password" id="login-pass" placeholder="Sua senha" onkeydown="if(event.key==='Enter') fazerLogin()" />
         <button class="btn" onclick="fazerLogin()">Entrar</button>
         <p id="auth-error" style="color: var(--danger); font-size: 0.85rem;"></p>
       </div>
@@ -1517,8 +1517,7 @@
         let codigo = textoLimpo;
         let descricao = "";
 
-        const matchInline = textoLimpo.match(/^((?:LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+(?:[IVXLCDM0-9A-Z-]+|ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR)(?:\s+(?:ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR))?)\s*(?:[-–—:]|
-)\s*(.+)$/i);
+        const matchInline = textoLimpo.match(/^((?:LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+(?:[IVXLCDM0-9A-Z-]+|ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR)(?:\s+(?:ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR))?)\s*(?:[-–—:]|\n)\s*(.+)$/i);
         if (matchInline) {
           codigo = matchInline[1].trim();
           descricao = matchInline[2].trim();
@@ -1765,7 +1764,7 @@
     // REMISSÃO CLICÁVEL ENTRE ARTIGOS E OUTRAS LEIS
     // =========================================================================
     function escaparRegex(str) {
-      return str.replace(/[.*+?^${}()|[\]\]/g, "\$&");
+      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
     function enriquecerRemissoesHtml(htmlSeguro) {
@@ -1775,20 +1774,20 @@
       const padroesLeis = [];
       leisExternas.forEach(l => {
         if (l.titulo && l.titulo.length >= 4) {
-          padroesLeis.push({ regex: new RegExp(`\b(${escaparRegex(l.titulo)})\b`, "gi"), leiId: l.id });
+          padroesLeis.push({ regex: new RegExp(`\\b(${escaparRegex(l.titulo)})\\b`, "gi"), leiId: l.id });
         }
         const mNum = l.titulo.match(/(Lei(?:\s+Complementar)?|LC|Decreto)\s*(?:n[º°o.]*\s*)?([\d.]+)/i);
         if (mNum) {
           const tipoEsc = escaparRegex(mNum[1]);
           const numEsc = escaparRegex(mNum[2]);
           padroesLeis.push({
-            regex: new RegExp(`\b(${tipoEsc}\s*(?:n[º°o.]*\s*)?${numEsc}(?:\/\d{2,4})?)\b`, "gi"),
+            regex: new RegExp(`\\b(${tipoEsc}\\s*(?:n[º°o.]*\\s*)?${numEsc}(?:\\/\\d{2,4})?)\\b`, "gi"),
             leiId: l.id
           });
         }
       });
 
-      const regexArtigo = / (arts?\.?\s*\d+(?:-[A-Za-z])?[º°o]?)/gi;
+      const regexArtigo = /\b(arts?\.?\s*\d+(?:-[A-Za-z])?[º°o]?)/gi;
 
       return partes.map(parte => {
         if (parte.startsWith("<")) return parte;
@@ -1797,7 +1796,7 @@
 
         padroesLeis.forEach(item => {
           texto = texto.replace(item.regex, (match) => {
-            return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\'")}')">${match}</span>`;
+            return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\\'")}')">${match}</span>`;
           });
         });
 
@@ -2267,8 +2266,8 @@
         row.innerHTML = `
           <input type="text" id="tag-nome-${tag.id}" value="${tag.nome}" />
           <input type="color" id="tag-cor-${tag.id}" value="${tag.cor || '#1d4ed8'}" />
-          <button class="btn btn-sm" onclick="salvarAlteracaoTag('${tag.id}', '${tag.nome.replace(/'/g, "\'")}')">Salvar</button>
-          <button class="btn btn-outline btn-sm" onclick="excluirTag('${tag.id}', '${tag.nome.replace(/'/g, "\'")}')" style="color:var(--danger);">×</button>
+          <button class="btn btn-sm" onclick="salvarAlteracaoTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')">Salvar</button>
+          <button class="btn btn-outline btn-sm" onclick="excluirTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')" style="color:var(--danger);">×</button>
         `;
         lista.appendChild(row);
       });
@@ -3236,8 +3235,7 @@
 
       if (!resp.ok) {
         const detalhe = await resp.text();
-        alert(`Erro ao acionar GitHub Actions (${resp.status}): verifique o nome do repositório e o token em ⚙️.
-${detalhe}`);
+        alert(`Erro ao acionar GitHub Actions (${resp.status}): verifique o nome do repositório e o token em ⚙️.\n${detalhe}`);
         return false;
       }
       return true;
