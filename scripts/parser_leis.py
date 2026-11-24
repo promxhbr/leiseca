@@ -47,7 +47,6 @@ def slug_seguro(txt: str) -> str:
 
 
 def decodificar_bytes(conteudo_bytes: bytes) -> str:
-    # Planalto antigo (ccivil_03) é sempre windows-1252 / iso-8859-1
     try:
         return conteudo_bytes.decode("utf-8")
     except UnicodeDecodeError:
@@ -157,12 +156,19 @@ def linha_parece_descricao_estrutura(linha: str) -> bool:
 
 
 def limpar_html_legado(html: str) -> str:
-    # Remove apenas blocos <script>...</script> e <style>...</style> que tenham fechamento explícito
-    html = re.sub(r"<script\b[^>]*>[\s\S]*?</script>", " ", html, flags=re.IGNORECASE)
-    html = re.sub(r"<style\b[^>]*>[\s\S]*?</style>", " ", html, flags=re.IGNORECASE)
-    html = re.sub(r"<!--[\s\S]*?-->", " ", html)
-    # Remove texto riscado (revogado) com fechamento explícito
-    html = re.sub(r"<(strike|s|del)\b[^>]*>[\s\S]*?</\1>", " ", html, flags=re.IGNORECASE)
+    # Remove apenas script/style/head curtos (< 50KB) para nunca engolir o corpo da lei por tag mal fechada
+    html = re.sub(r"<head\b[^>]*>[\s\S]{0,50000}?</head>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<script\b[^>]*>[\s\S]{0,50000}?</script>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<style\b[^>]*>[\s\S]{0,50000}?</style>", " ", html, flags=re.IGNORECASE)
+    # Remove riscado apenas se curto (< 4000 caracteres = 1 dispositivo revogado, nunca a lei inteira)
+    html = re.sub(
+        r"<(strike|s|del)\b[^>]*>[\s\S]{0,4000}?</\1>",
+        " ",
+        html,
+        flags=re.IGNORECASE,
+    )
+    # Neutraliza tags <strike>/<s>/<del> órfãs que não têm fechamento no HTML do FrontPage
+    html = re.sub(r"</?(strike|s|del)\b[^>]*>", " ", html, flags=re.IGNORECASE)
     return html
 
 
@@ -170,11 +176,10 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
     area_principal = (
         soup.find(id="conteudo")
         or soup.find(class_=re.compile(r"(texto[-_]?norma|norma[-_]?texto|conteudo[-_]?norma)", re.I))
-        or soup.body
         or soup
     )
 
-    tags_ignorar = {"script", "style", "head", "nav", "footer", "header", "aside", "strike", "s", "del"}
+    tags_ignorar = {"script", "style", "head", "nav", "footer", "header", "aside"}
     tags_quebra_bloco = {
         "p", "div", "li", "h1", "h2", "h3", "h4", "h5", "h6",
         "tr", "td", "th", "blockquote", "center", "section", "article", "hr"
