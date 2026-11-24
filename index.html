@@ -3148,6 +3148,7 @@
       const mapaAntigo = {};
       dispositivosCache.forEach(d => { mapaAntigo[d.slug] = d; });
 
+      const ehExtracaoParcial = dispositivosCache.length > 0 && pendentes.length < (dispositivosCache.length * 0.5);
       const slugsNovos = new Set(pendentes.map(p => p.slug));
       const registrosMudancas = [];
 
@@ -3174,27 +3175,29 @@
         }
       }
 
-      for (const dAntigo of dispositivosCache) {
-        if (!slugsNovos.has(dAntigo.slug)) {
-          registrosMudancas.push({
-            tipo: "revogado",
-            slug: dAntigo.slug,
-            rotulo: dAntigo.rotulo || dAntigo.slug,
-            texto_novo: null,
-            texto_anterior: dAntigo.texto,
-            data: agoraIso
-          });
-
-          const temNotasNesteSlug = (anotacoesCache[dAntigo.slug] || []).length > 0;
-          if (temNotasNesteSlug) {
-            await sb.from("anotacoes").insert({
-              lei_id: leiId,
-              user_id: usuarioAtual.id,
+      if (!ehExtracaoParcial) {
+        for (const dAntigo of dispositivosCache) {
+          if (!slugsNovos.has(dAntigo.slug)) {
+            registrosMudancas.push({
+              tipo: "revogado",
               slug: dAntigo.slug,
-              tribunal: "Nota",
-              conteudo: `<b>[Aviso do Sistema - Dispositivo Revogado em ${new Date().toLocaleDateString("pt-BR")}]:</b> O dispositivo original (<i>${dAntigo.rotulo} ${dAntigo.texto}</i>) foi revogado/removido da fonte oficial, mas sua anotação foi preservada.`,
-              oculta: false
+              rotulo: dAntigo.rotulo || dAntigo.slug,
+              texto_novo: null,
+              texto_anterior: dAntigo.texto,
+              data: agoraIso
             });
+
+            const temNotasNesteSlug = (anotacoesCache[dAntigo.slug] || []).length > 0;
+            if (temNotasNesteSlug) {
+              await sb.from("anotacoes").insert({
+                lei_id: leiId,
+                user_id: usuarioAtual.id,
+                slug: dAntigo.slug,
+                tribunal: "Nota",
+                conteudo: `<b>[Aviso do Sistema - Dispositivo Revogado em ${new Date().toLocaleDateString("pt-BR")}]:</b> O dispositivo original (<i>${dAntigo.rotulo} ${dAntigo.texto}</i>) foi revogado/removido da fonte oficial, mas sua anotação foi preservada.`,
+                oculta: false
+              });
+            }
           }
         }
       }
@@ -3206,23 +3209,49 @@
         }
       }
 
-      await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
+      if (ehExtracaoParcial) {
+        // Modo incremental: mantém toda a lei vigente intacta e atualiza/insere apenas os dispositivos alterados ou novos
+        for (const p of pendentes) {
+          const antigo = mapaAntigo[p.slug];
+          if (antigo) {
+            await sb.from("dispositivos").update({
+              texto: p.texto,
+              rotulo: p.rotulo || antigo.rotulo,
+              ordem: p.ordem ?? antigo.ordem,
+              foi_alterado: antigo.texto !== p.texto,
+              texto_anterior: antigo.texto !== p.texto ? antigo.texto : antigo.texto_anterior,
+              data_alteracao: antigo.texto !== p.texto ? agoraIso : antigo.data_alteracao
+            }).eq("id", antigo.id);
 
-      await sb.from("dispositivos").update({
-        versao_status: "vigente",
-        foi_alterado: false,
-        texto_anterior: null,
-        data_alteracao: null
-      }).eq("lei_id", leiId).eq("versao_status", "pendente");
+            await sb.from("dispositivos").delete().eq("id", p.id);
+          } else {
+            await sb.from("dispositivos").update({
+              versao_status: "vigente",
+              foi_alterado: true,
+              data_alteracao: agoraIso
+            }).eq("id", p.id);
+          }
+        }
+      } else {
+        // Modo completo: substitui a estrutura vigente preservando o histórico dos alterados
+        await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
 
-      for (const p of pendentes) {
-        const antigo = mapaAntigo[p.slug];
-        if (antigo && antigo.texto !== p.texto) {
-          await sb.from("dispositivos").update({
-            foi_alterado: true,
-            texto_anterior: antigo.texto,
-            data_alteracao: agoraIso
-          }).eq("id", p.id);
+        await sb.from("dispositivos").update({
+          versao_status: "vigente",
+          foi_alterado: false,
+          texto_anterior: null,
+          data_alteracao: null
+        }).eq("lei_id", leiId).eq("versao_status", "pendente");
+
+        for (const p of pendentes) {
+          const antigo = mapaAntigo[p.slug];
+          if (antigo && antigo.texto !== p.texto) {
+            await sb.from("dispositivos").update({
+              foi_alterado: true,
+              texto_anterior: antigo.texto,
+              data_alteracao: agoraIso
+            }).eq("id", p.id);
+          }
         }
       }
 
