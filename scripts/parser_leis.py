@@ -26,7 +26,7 @@ REGEX_CABECALHO_ESTRUTURA = re.compile(
 
 
 def normalizar_texto(txt: str) -> str:
-    txt = txt.replace("\xa0", " ").replace("\r", " ")
+    txt = txt.replace("\xa0", " ").replace("\u200b", "").replace("\r", " ")
     txt = re.sub(r"\s+", " ", txt).strip()
     return txt
 
@@ -143,28 +143,55 @@ def linha_parece_descricao_estrutura(linha: str) -> bool:
     return True
 
 
+def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
+    # Em páginas do Senado, o texto normativo costuma ficar dentro de #conteudo ou .texto-norma
+    area_principal = (
+        soup.find(id="conteudo")
+        or soup.find(class_=re.compile(r"(texto[-_]?norma|norma[-_]?texto|conteudo[-_]?norma)", re.I))
+        or soup.body
+        or soup
+    )
+
+    for br in area_principal.find_all("br"):
+        br.replace_with("\n")
+
+    blocos = []
+    tags_bloco = {"p", "div", "li", "h1", "h2", "h3", "h4", "h5", "td", "th", "blockquote"}
+
+    for el in area_principal.find_all(tags_bloco):
+        # Só pula container se houver sub-blocos que realmente contenham texto normativo próprio
+        filhos_bloco = [
+            f for f in el.find_all(tags_bloco)
+            if normalizar_texto(f.get_text(" ", strip=True))
+        ]
+        if filhos_bloco:
+            continue
+
+        bruto = el.get_text("\n", strip=True)
+        for parte in bruto.splitlines():
+            txt = normalizar_texto(parte)
+            if txt:
+                blocos.append(txt)
+
+    if not blocos:
+        texto_geral = area_principal.get_text("\n")
+        blocos = [
+            normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)
+        ]
+
+    return blocos
+
+
 def extrair_dispositivos(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
 
-    for tag in soup(["script", "style", "head", "nav", "footer"]):
+    for tag in soup(["script", "style", "head", "nav", "footer", "header", "aside"]):
         tag.decompose()
 
     for riscado in soup.find_all(["strike", "s", "del"]):
         riscado.decompose()
 
-    blocos_brutos = []
-    for el in soup.find_all(["p", "div", "h1", "h2", "h3", "h4"]):
-        if el.find(["p", "div"]):
-            continue
-        txt = normalizar_texto(el.get_text(" ", strip=True))
-        if txt:
-            blocos_brutos.append(txt)
-
-    if not blocos_brutos:
-        texto_geral = soup.get_text("\n")
-        blocos_brutos = [
-            normalizar_texto(l) for l in texto_geral.splitlines() if normalizar_texto(l)
-        ]
+    blocos_brutos = extrair_blocos_texto(soup)
 
     blocos_consolidados = []
     idx = 0
@@ -387,6 +414,8 @@ def processar_lei(lei: dict, forcar_reestruturacao: bool = False):
             supabase.table("leis").update(
                 {
                     "hash_atual": novo_hash,
+                    "hash_pendente": None,
+                    "tem_atualizacao": False,
                     "status_extracao": "concluido",
                     "ultima_verificacao": datetime.now(timezone.utc).isoformat(),
                 }
