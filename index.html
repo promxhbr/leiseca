@@ -630,6 +630,11 @@
       cursor: pointer; font-weight: 600;
     }
     .btn-ver-anterior:hover { background: rgba(245, 158, 11, 0.28); }
+    .btn-pin-anterior-ativo {
+      background: rgba(245, 158, 11, 0.2) !important;
+      border-color: var(--warning) !important;
+      color: var(--warning) !important;
+    }
     .box-texto-anterior {
       margin-top: 8px; padding: 8px 12px;
       background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--warning);
@@ -1084,6 +1089,7 @@
             <button class="btn btn-outline btn-sm" id="btn-filtro-jurisp" onclick="alternarFiltroJurisprudencias()" title="Exibir apenas jurisprudências desta lei">⚖️ Jurisprudências</button>
             <button class="btn btn-outline btn-sm" id="btn-verificar-lei-atual" onclick="verificarLeiAtual(false)" title="Verificar alterações ou atualizar estrutura apenas desta lei">🔄 Verificar</button>
             <button class="btn btn-outline btn-sm" id="btn-historico-alteracoes" onclick="abrirModalHistoricoAlteracoes()" title="Visualizar tudo o que foi adicionado ou modificado na lei">🕒 Alterações</button>
+            <button class="btn btn-outline btn-sm hidden" id="btn-manter-redacao-anterior" onclick="alternarManterRedacaoAnteriorLei()" title="Manter permanentemente a última redação anterior desta lei até a próxima atualização">📌 Manter redação anterior (30d)</button>
             <button class="btn btn-outline btn-sm" onclick="abrirModalEditarLei()">Editar</button>
             <button class="btn btn-outline btn-sm" onclick="excluirLeiAtual()" style="color:var(--danger); border-color:var(--danger);">Excluir</button>
           </div>
@@ -1331,7 +1337,7 @@
     let leisConcluidasRecentes = {};
     let timerPollingLeis = null;
 
-    const CINCO_DIAS_MS = 5 * 24 * 60 * 60 * 1000;
+    const TRINTA_DIAS_MS = 30 * 24 * 60 * 60 * 1000;
 
     const SVG_OLHO_ABERTO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     const SVG_OLHO_FECHADO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
@@ -1461,6 +1467,100 @@
       document.getElementById("auth-view").classList.add("hidden");
       document.getElementById("app-view").classList.remove("hidden");
       carregarDadosIniciais();
+    }
+
+    // =========================================================================
+    // CONTROLE DE EXIBIÇÃO DA REDAÇÃO ANTERIOR (30 DIAS OU FIXADA POR LEI)
+    // =========================================================================
+    function obterLogsReaisLei(lei) {
+      if (!lei || !Array.isArray(lei.log_alteracoes)) return [];
+      return lei.log_alteracoes.filter(item => item && item.tipo !== "_config_manter_anterior");
+    }
+
+    function leiMantemRedacaoAnterior(lei) {
+      if (!lei) return false;
+      if (Array.isArray(lei.log_alteracoes)) {
+        const cfg = lei.log_alteracoes.find(item => item && item.tipo === "_config_manter_anterior");
+        if (cfg && typeof cfg.manter === "boolean") return cfg.manter;
+      }
+      return localStorage.getItem(`vm_manter_anterior_${lei.id}`) === "true";
+    }
+
+    function atualizarBotaoManterRedacaoAnterior() {
+      const btn = document.getElementById("btn-manter-redacao-anterior");
+      if (!btn || !leiSelecionada) return;
+
+      const temAlgumaAnterior = dispositivosCache.some(d => !!obterDadosRedacaoAnterior(d));
+      if (!temAlgumaAnterior) {
+        btn.classList.add("hidden");
+        return;
+      }
+
+      btn.classList.remove("hidden");
+      const fixada = leiMantemRedacaoAnterior(leiSelecionada);
+      if (fixada) {
+        btn.textContent = "📌 Redação anterior fixada";
+        btn.classList.add("btn-pin-anterior-ativo");
+        btn.title = "Redação anterior mantida permanentemente até a próxima alteração desta lei. Clique para voltar ao prazo padrão de 30 dias.";
+      } else {
+        btn.textContent = "📌 Manter redação anterior (30d)";
+        btn.classList.remove("btn-pin-anterior-ativo");
+        btn.title = "Por padrão, a redação anterior fica visível por 30 dias. Clique para mantê-la salva nesta lei até a próxima atualização.";
+      }
+    }
+
+    async function alternarManterRedacaoAnteriorLei() {
+      if (!leiSelecionada) return;
+      const novoEstado = !leiMantemRedacaoAnterior(leiSelecionada);
+      localStorage.setItem(`vm_manter_anterior_${leiSelecionada.id}`, String(novoEstado));
+
+      const logsLimpos = obterLogsReaisLei(leiSelecionada);
+      const novoLog = novoEstado
+        ? [{ tipo: "_config_manter_anterior", manter: true, data: new Date().toISOString() }, ...logsLimpos]
+        : logsLimpos;
+
+      leiSelecionada.log_alteracoes = novoLog;
+      const idx = leisCache.findIndex(l => l.id === leiSelecionada.id);
+      if (idx !== -1) leisCache[idx].log_alteracoes = novoLog;
+
+      atualizarBotaoManterRedacaoAnterior();
+      filtrarDispositivos();
+
+      mostrarToastSucesso(
+        novoEstado
+          ? "Redação anterior fixada nesta lei até a próxima alteração!"
+          : "Prazo padrão de 30 dias restaurado para esta lei."
+      );
+
+      await sb.from("leis").update({ log_alteracoes: novoLog }).eq("id", leiSelecionada.id);
+    }
+
+    function obterDadosRedacaoAnterior(d) {
+      if (d.texto_anterior) {
+        return { texto: d.texto_anterior, data: d.data_alteracao };
+      }
+      if (leiSelecionada && Array.isArray(leiSelecionada.log_alteracoes)) {
+        const reg = leiSelecionada.log_alteracoes.find(
+          item => item && item.slug === d.slug && item.texto_anterior
+        );
+        if (reg) {
+          return { texto: reg.texto_anterior, data: reg.data };
+        }
+      }
+      return null;
+    }
+
+    function dentroDosTrintaDias(dataIso) {
+      if (!dataIso) return false;
+      const diff = Date.now() - new Date(dataIso).getTime();
+      return diff >= 0 && diff <= TRINTA_DIAS_MS;
+    }
+
+    function podeExibirRedacaoAnterior(d) {
+      const dadosAnt = obterDadosRedacaoAnterior(d);
+      if (!dadosAnt || !dadosAnt.texto) return false;
+      if (leiMantemRedacaoAnterior(leiSelecionada)) return true;
+      return dentroDosTrintaDias(dadosAnt.data);
     }
 
     // =========================================================================
@@ -2566,7 +2666,7 @@
 
       document.getElementById("link-fonte-lei").href = lei.url;
 
-      const logsLei = Array.isArray(lei.log_alteracoes) ? lei.log_alteracoes : [];
+      const logsLei = obterLogsReaisLei(lei);
       const dataUltAltIso = lei.ultima_alteracao || (logsLei.length > 0 ? logsLei[0].data : null);
       document.getElementById("meta-ultima-alteracao").textContent =
         "Última alteração: " + (dataUltAltIso ? new Date(dataUltAltIso).toLocaleDateString("pt-BR") : "Sem registro");
@@ -2598,6 +2698,7 @@
       }
 
       dispositivosCache = todosDisps;
+      atualizarBotaoManterRedacaoAnterior();
       await recarregarAnotacoesEGrifosMantendoEstado();
     }
 
@@ -2643,12 +2744,6 @@
       if (!slug) return "";
       const m = slug.match(/^(ART_[0-9A-Z-]+)/i);
       return m ? m[1] : "";
-    }
-
-    function dentroDosCincoDias(dataIso) {
-      if (!dataIso) return false;
-      const diff = Date.now() - new Date(dataIso).getTime();
-      return diff >= 0 && diff <= CINCO_DIAS_MS;
     }
 
     function filtrarDispositivos() {
@@ -2768,6 +2863,8 @@
         return;
       }
 
+      const leiFixada = leiMantemRedacaoAnterior(leiSelecionada);
+
       lista.forEach(d => {
         if (d.tipo === "estrutura") {
           const h = document.createElement("div");
@@ -2791,17 +2888,21 @@
 
         let btnVerAnteriorHtml = "";
         let boxTextoAnteriorHtml = "";
-        if (d.texto_anterior) {
+        if (podeExibirRedacaoAnterior(d)) {
+          const dadosAnt = obterDadosRedacaoAnterior(d);
           const abertoAnt = !!textosAnterioresAbertos[d.slug];
+          const dicaPrazo = leiFixada
+            ? "Redação anterior fixada nesta lei até a próxima atualização"
+            : "Disponível por até 30 dias após a alteração (ou fixe no topo da lei)";
           btnVerAnteriorHtml = `
-            <button type="button" class="btn-ver-anterior" onclick="alternarTextoAnterior('${d.slug}')" title="Comparar com a redação anterior">
+            <button type="button" class="btn-ver-anterior" onclick="alternarTextoAnterior('${d.slug}')" title="${dicaPrazo}">
               ${abertoAnt ? 'Ocultar redação anterior' : 'Ver redação anterior'}
             </button>
           `;
           if (abertoAnt) {
             boxTextoAnteriorHtml = `
               <div class="box-texto-anterior">
-                <strong>Redação anterior:</strong> ${escaparHtml(d.texto_anterior)}
+                <strong>Redação anterior:</strong> ${escaparHtml(dadosAnt.texto)}
               </div>
             `;
           }
@@ -3010,7 +3111,7 @@
     // =========================================================================
     async function aplicarAtualizacaoSegura() {
       if (!leiSelecionada) return;
-      if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações serão mantidas (inclusive em dispositivos revogados), grifos em trechos inalterados permanecem e você poderá ver a redação anterior por 5 dias.")) return;
+      if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações serão mantidas (inclusive em dispositivos revogados), grifos em trechos inalterados permanecem e você poderá ver a redação anterior por 30 dias (ou fixá-la na lei).")) return;
 
       const leiId = leiSelecionada.id;
 
@@ -3125,7 +3226,9 @@
         }
       }
 
-      const logAtual = Array.isArray(leiSelecionada.log_alteracoes) ? leiSelecionada.log_alteracoes : [];
+      // Ao aplicar uma nova alteração, reseta a trava permanente anterior para que o usuário possa refazer a opção
+      localStorage.removeItem(`vm_manter_anterior_${leiId}`);
+      const logAtual = obterLogsReaisLei(leiSelecionada);
       const novoLog = [...registrosMudancas, ...logAtual].slice(0, 200);
 
       const payloadLei = {
@@ -3157,7 +3260,7 @@
       const listaEl = document.getElementById("lista-historico-alteracoes");
       listaEl.innerHTML = "";
 
-      const logs = Array.isArray(leiSelecionada.log_alteracoes) ? leiSelecionada.log_alteracoes : [];
+      const logs = obterLogsReaisLei(leiSelecionada);
       if (logs.length === 0) {
         listaEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">Nenhuma alteração legislativa registrada para esta lei até o momento.</p>`;
       } else {
@@ -3244,6 +3347,7 @@
     async function excluirLeiAtual() {
       if (!leiSelecionada) return;
       if (!confirm(`Excluir "${leiSelecionada.titulo}" e todas as suas notas?`)) return;
+      localStorage.removeItem(`vm_manter_anterior_${leiSelecionada.id}`);
       await sb.from("leis").delete().eq("id", leiSelecionada.id);
       leiSelecionada = null;
       document.getElementById("leitor-lei").classList.add("hidden");
