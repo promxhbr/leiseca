@@ -47,14 +47,11 @@ def slug_seguro(txt: str) -> str:
 
 
 def decodificar_bytes(conteudo_bytes: bytes) -> str:
-    for enc in ("utf-8", "windows-1252", "iso-8859-1"):
-        try:
-            texto = conteudo_bytes.decode(enc)
-            if "Art." in texto or "art." in texto:
-                return texto
-        except UnicodeDecodeError:
-            continue
-    return conteudo_bytes.decode("windows-1252", errors="ignore")
+    # Planalto antigo (ccivil_03) é sempre windows-1252 / iso-8859-1
+    try:
+        return conteudo_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return conteudo_bytes.decode("windows-1252", errors="replace")
 
 
 def baixar_via_playwright(url: str) -> str:
@@ -159,6 +156,16 @@ def linha_parece_descricao_estrutura(linha: str) -> bool:
     return True
 
 
+def limpar_html_legado(html: str) -> str:
+    # Remove apenas blocos <script>...</script> e <style>...</style> que tenham fechamento explícito
+    html = re.sub(r"<script\b[^>]*>[\s\S]*?</script>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<style\b[^>]*>[\s\S]*?</style>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<!--[\s\S]*?-->", " ", html)
+    # Remove texto riscado (revogado) com fechamento explícito
+    html = re.sub(r"<(strike|s|del)\b[^>]*>[\s\S]*?</\1>", " ", html, flags=re.IGNORECASE)
+    return html
+
+
 def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
     area_principal = (
         soup.find(id="conteudo")
@@ -167,6 +174,7 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
         or soup
     )
 
+    tags_ignorar = {"script", "style", "head", "nav", "footer", "header", "aside", "strike", "s", "del"}
     tags_quebra_bloco = {
         "p", "div", "li", "h1", "h2", "h3", "h4", "h5", "h6",
         "tr", "td", "th", "blockquote", "center", "section", "article", "hr"
@@ -192,6 +200,9 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
         if not nome:
             return
 
+        if nome in tags_ignorar:
+            return
+
         if nome == "br":
             descarregar()
             return
@@ -212,23 +223,12 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
 
 
 def extrair_dispositivos(html: str) -> list[dict]:
-    # Usa lxml ou html5lib se disponível para não fechar <p> legado prematuramente; senão html.parser
-    for parser_name in ("lxml", "html.parser"):
-        try:
-            soup = BeautifulSoup(html, parser_name)
-            break
-        except Exception:
-            continue
-
-    for tag in soup(["script", "style", "head", "nav", "footer", "header", "aside"]):
-        tag.decompose()
-
-    for riscado in soup.find_all(["strike", "s", "del"]):
-        riscado.decompose()
+    html_limpo = limpar_html_legado(html)
+    soup = BeautifulSoup(html_limpo, "html.parser")
 
     blocos_brutos = extrair_blocos_texto(soup)
+    print(f"   Diagnóstico HTML: {len(blocos_brutos)} blocos brutos lidos.", file=sys.stderr)
 
-    # Caso algum <p> gigante tenha múltiplos dispositivos separados apenas por espaço antes de Art./§/Inciso
     blocos_expandidos = []
     re_quebra_interna = re.compile(
         r"\s+(?=(?:Arts?\.?\s*\d+(?:-[A-Za-z])?[º°o.]|§\s*\d+[º°o.]|Parágrafo\s+único\.?)\s)"
