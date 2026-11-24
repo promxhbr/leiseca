@@ -73,25 +73,165 @@
     .auth-card h1 { color: var(--cyan-accent); font-size: 1.5rem; margin-bottom: 8px; }
     .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
 
-    /* Layout Principal com Sidebar Retrátil */
+    /* Layout Principal com Sidebar Retrátil (Desktop) */
     .app-layout {
       display: grid; grid-template-columns: 315px 1fr; min-height: 100vh;
       transition: grid-template-columns 0.22s ease;
     }
     .app-layout.sidebar-collapsed { grid-template-columns: 0px 1fr; }
-    @media (max-width: 850px) {
-      .app-layout { grid-template-columns: 1fr; }
-      .app-layout.sidebar-collapsed .sidebar { display: none; }
-      .sidebar { border-right: none; border-bottom: 1px solid var(--border-color); }
-    }
 
-    /* Sidebar */
+    /* Sidebar Desktop */
     .sidebar {
       background: var(--bg-surface); border-right: 1px solid var(--border-color);
       padding: 16px; display: flex; flex-direction: column; gap: 10px;
       overflow-x: hidden; transition: padding 0.2s ease, opacity 0.15s ease;
     }
     .app-layout.sidebar-collapsed .sidebar { padding: 0; opacity: 0; pointer-events: none; border: none; }
+
+    /* Overlay e Cabeçalho Mobile (Ocultos no Desktop) */
+    .mobile-sidebar-backdrop {
+      display: none;
+    }
+    .mobile-header-bar {
+      display: none;
+    }
+    .btn-close-mobile-sidebar {
+      display: none;
+    }
+
+    /* Experiência Mobile & Tablet (<= 960px): Gaveta Lateral Deslizante (Drawer) + Topbar Compacta */
+    @media (max-width: 960px) {
+      .app-layout,
+      .app-layout.sidebar-collapsed {
+        display: block;
+        min-height: 100vh;
+      }
+
+      .mobile-header-bar {
+        position: sticky;
+        top: 0;
+        z-index: 42;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 14px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+      }
+
+      .mobile-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .btn-mobile-menu {
+        background: var(--bg-elevated);
+        border: 1px solid var(--cyan-accent);
+        color: var(--cyan-accent);
+        border-radius: 8px;
+        height: 36px;
+        padding: 0 11px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .mobile-brand-mini {
+        font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+        font-weight: 900;
+        font-size: 1.05rem;
+        background: linear-gradient(125deg, #ffffff 10%, var(--cyan-accent) 60%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        white-space: nowrap;
+      }
+      body.light-mode .mobile-brand-mini {
+        background: linear-gradient(125deg, #0f172a 10%, #1d4ed8 60%, #0284c7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .mobile-sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.72);
+        backdrop-filter: blur(2px);
+        z-index: 88;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease;
+        display: block;
+      }
+      .app-layout.mobile-menu-open .mobile-sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .sidebar,
+      .app-layout.sidebar-collapsed .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(86vw, 340px);
+        max-width: 340px;
+        height: 100dvh;
+        z-index: 90;
+        padding: 16px;
+        opacity: 1;
+        pointer-events: auto;
+        border-right: 1px solid var(--cyan-accent);
+        box-shadow: 12px 0 36px rgba(0, 0, 0, 0.6);
+        transform: translateX(-105%);
+        transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .app-layout.mobile-menu-open .sidebar {
+        transform: translateX(0);
+      }
+
+      .btn-close-mobile-sidebar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-elevated);
+        color: var(--text-main);
+        font-size: 1.15rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      /* Ocultar botão de recolher desktop no dock lateral no mobile (já está na topbar) */
+      #dock-sidebar-wrapper {
+        display: none;
+      }
+
+      .floating-dock {
+        left: 0px !important;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .top-controls {
+        display: none;
+      }
+
+      .main-content {
+        padding: 16px 16px 88px 16px;
+      }
+    }
     .brand { font-size: 1.08rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .brand-actions { display: flex; gap: 5px; align-items: center; }
 
@@ -714,7 +854,7 @@
     <!-- DOCK FLUTUANTE UNIFICADO QUE ACOMPANHA A ROLAGEM -->
     <div class="floating-dock">
       <!-- 1. BOTÃO RETRAIR / EXPANDIR MENU LATERAL -->
-      <div class="dock-item-wrapper">
+      <div class="dock-item-wrapper" id="dock-sidebar-wrapper">
         <button id="dock-sidebar-btn" class="dock-btn" onclick="alternarSidebar()" title="Recolher ou expandir menu lateral (Alt+M)">
           <svg id="icon-sidebar-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
@@ -790,7 +930,10 @@
       </div>
     </div>
 
-    <!-- BARRA LATERAL LIMPA E COMPACTA -->
+    <!-- BACKDROP MOBILE/TABLET -->
+    <div id="mobile-sidebar-backdrop" class="mobile-sidebar-backdrop" onclick="fecharMenuMobile()"></div>
+
+    <!-- BARRA LATERAL (DESKTOP FIXA / MOBILE GAVETA DESLIZANTE) -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-title-wrap">
@@ -812,6 +955,7 @@
         <div class="brand-actions">
           <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar e Criar Tags">🏷️</button>
           <button class="btn btn-outline btn-sm" onclick="abrirModalConfig()" title="Configurar GitHub Actions">⚙️</button>
+          <button type="button" class="btn-close-mobile-sidebar" onclick="fecharMenuMobile()" title="Fechar menu">×</button>
         </div>
       </div>
 
@@ -835,6 +979,21 @@
 
       <button class="btn btn-outline btn-sm" style="margin-top:auto;" onclick="sair()">Sair</button>
     </aside>
+
+    <!-- BARRA SUPERIOR FIXA EXCLUSIVA PARA MOBILE E TABLET -->
+    <header class="mobile-header-bar">
+      <div class="mobile-header-left">
+        <button type="button" class="btn-mobile-menu" onclick="abrirMenuMobile()" aria-label="Abrir lista de leis">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <span>Leis</span>
+        </button>
+        <span class="mobile-brand-mini">Smart Mecum</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button type="button" class="btn btn-sm" onclick="abrirModalNovaLei()" style="padding:6px 10px;">+ Lei</button>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-toggle-theme-mobile" onclick="alternarTema()" style="padding:6px 9px;">☀️</button>
+      </div>
+    </header>
 
     <!-- CONTEÚDO DA LEI -->
     <main class="main-content">
@@ -1120,6 +1279,8 @@
       if (localStorage.getItem("vm_theme") === "light") {
         document.body.classList.add("light-mode");
         document.getElementById("btn-toggle-theme").textContent = "🌙 Modo Escuro";
+        const btnMob = document.getElementById("btn-toggle-theme-mobile");
+        if (btnMob) btnMob.textContent = "🌙";
       }
 
       window.addEventListener("scroll", atualizarVisibilidadeBotaoTopo, { passive: true });
@@ -1192,14 +1353,28 @@
       const isLight = document.body.classList.toggle("light-mode");
       localStorage.setItem("vm_theme", isLight ? "light" : "dark");
       document.getElementById("btn-toggle-theme").textContent = isLight ? "🌙 Modo Escuro" : "☀️ Modo Claro";
+      const btnMob = document.getElementById("btn-toggle-theme-mobile");
+      if (btnMob) btnMob.textContent = isLight ? "🌙" : "☀️";
       renderizarSidebar();
     }
 
     function alternarSidebar() {
+      if (window.innerWidth <= 960) {
+        document.getElementById("app-view").classList.toggle("mobile-menu-open");
+        return;
+      }
       const appEl = document.getElementById("app-view");
       const recolhida = appEl.classList.toggle("sidebar-collapsed");
       const btn = document.getElementById("dock-sidebar-btn");
       btn.innerHTML = recolhida ? SVG_SETA_DIREITA : SVG_SETA_ESQUERDA;
+    }
+
+    function abrirMenuMobile() {
+      document.getElementById("app-view").classList.add("mobile-menu-open");
+    }
+
+    function fecharMenuMobile() {
+      document.getElementById("app-view").classList.remove("mobile-menu-open");
     }
 
     async function fazerLogin() {
@@ -2156,6 +2331,7 @@
 
     async function selecionarLei(lei) {
       leiSelecionada = lei;
+      fecharMenuMobile();
       apenasAnotacoes = false;
       apenasJurisprudencias = false;
       artigosExpandidosBusca = {};
