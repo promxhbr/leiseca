@@ -2791,10 +2791,10 @@
 
         let btnVerAnteriorHtml = "";
         let boxTextoAnteriorHtml = "";
-        if (d.texto_anterior && dentroDosCincoDias(d.data_alteracao)) {
+        if (d.texto_anterior) {
           const abertoAnt = !!textosAnterioresAbertos[d.slug];
           btnVerAnteriorHtml = `
-            <button type="button" class="btn-ver-anterior" onclick="alternarTextoAnterior('${d.slug}')" title="Disponível por até 5 dias após a alteração">
+            <button type="button" class="btn-ver-anterior" onclick="alternarTextoAnterior('${d.slug}')" title="Comparar com a redação anterior">
               ${abertoAnt ? 'Ocultar redação anterior' : 'Ver redação anterior'}
             </button>
           `;
