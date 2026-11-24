@@ -7,7 +7,7 @@ import traceback
 import unicodedata
 from datetime import datetime, timezone
 from curl_cffi import requests as cffi_requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
@@ -47,7 +47,6 @@ def slug_seguro(txt: str) -> str:
 
 
 def decodificar_bytes(conteudo_bytes: bytes) -> str:
-    # Planalto antigo (ccivil_03) usa windows-1252 / iso-8859-1; UTF-8 falha nos acentos
     for enc in ("utf-8", "windows-1252", "iso-8859-1"):
         try:
             texto = conteudo_bytes.decode(enc)
@@ -168,43 +167,58 @@ def extrair_blocos_texto(soup: BeautifulSoup) -> list[str]:
         or soup
     )
 
-    # Converte <br> em marcador explícito antes de extrair texto dos parágrafos
-    MARCADOR_BR = " ___QUEBRA_LINHA_HTML___ "
-    for br in area_principal.find_all("br"):
-        br.replace_with(MARCADOR_BR)
+    tags_quebra_bloco = {
+        "p", "div", "li", "h1", "h2", "h3", "h4", "h5", "h6",
+        "tr", "td", "th", "blockquote", "center", "section", "article", "hr"
+    }
 
-    tags_bloco = ("p", "li", "h1", "h2", "h3", "h4", "h5", "td", "th", "blockquote", "center")
     blocos = []
+    buffer_inline = []
 
-    for el in area_principal.find_all(tags_bloco):
-        # Ignora containers que apenas envolvem outros parágrafos (ex: blockquote/td com vários <p>)
-        if el.find(tags_bloco):
-            continue
+    def descarregar():
+        if not buffer_inline:
+            return
+        texto = normalizar_texto("".join(buffer_inline))
+        buffer_inline.clear()
+        if texto:
+            blocos.append(texto)
 
-        # No HTML legado do Planalto, quebras de linha (\n) no código-fonte dentro de <p> são apenas quebra de coluna do editor
-        texto_bruto = el.get_text(" ", strip=True)
-        for sub in texto_bruto.split(MARCADOR_BR):
-            txt = normalizar_texto(sub)
-            if txt:
-                blocos.append(txt)
+    def caminhar(no):
+        if isinstance(no, NavigableString):
+            buffer_inline.append(str(no))
+            return
 
-    # Fallback caso a página use apenas <div> sem <p>
-    if len(blocos) < 10:
-        blocos = []
-        for el in area_principal.find_all("div"):
-            if el.find(["div", "p", "li", "table"]):
-                continue
-            texto_bruto = el.get_text(" ", strip=True)
-            for sub in texto_bruto.split(MARCADOR_BR):
-                txt = normalizar_texto(sub)
-                if txt:
-                    blocos.append(txt)
+        nome = getattr(no, "name", None)
+        if not nome:
+            return
 
+        if nome == "br":
+            descarregar()
+            return
+
+        eh_bloco = nome in tags_quebra_bloco
+        if eh_bloco:
+            descarregar()
+
+        for filho in no.children:
+            caminhar(filho)
+
+        if eh_bloco:
+            descarregar()
+
+    caminhar(area_principal)
+    descarregar()
     return blocos
 
 
 def extrair_dispositivos(html: str) -> list[dict]:
-    soup = BeautifulSoup(html, "html.parser")
+    # Usa lxml ou html5lib se disponível para não fechar <p> legado prematuramente; senão html.parser
+    for parser_name in ("lxml", "html.parser"):
+        try:
+            soup = BeautifulSoup(html, parser_name)
+            break
+        except Exception:
+            continue
 
     for tag in soup(["script", "style", "head", "nav", "footer", "header", "aside"]):
         tag.decompose()
@@ -214,12 +228,24 @@ def extrair_dispositivos(html: str) -> list[dict]:
 
     blocos_brutos = extrair_blocos_texto(soup)
 
+    # Caso algum <p> gigante tenha múltiplos dispositivos separados apenas por espaço antes de Art./§/Inciso
+    blocos_expandidos = []
+    re_quebra_interna = re.compile(
+        r"\s+(?=(?:Arts?\.?\s*\d+(?:-[A-Za-z])?[º°o.]|§\s*\d+[º°o.]|Parágrafo\s+único\.?)\s)"
+    )
+    for b in blocos_brutos:
+        partes = re_quebra_interna.split(b)
+        for p in partes:
+            limpa = normalizar_texto(p)
+            if limpa:
+                blocos_expandidos.append(limpa)
+
     blocos_consolidados = []
     idx = 0
-    while idx < len(blocos_brutos):
-        atual = blocos_brutos[idx]
-        if REGEX_CABECALHO_ESTRUTURA.match(atual) and (idx + 1) < len(blocos_brutos):
-            seguinte = blocos_brutos[idx + 1]
+    while idx < len(blocos_expandidos):
+        atual = blocos_expandidos[idx]
+        if REGEX_CABECALHO_ESTRUTURA.match(atual) and (idx + 1) < len(blocos_expandidos):
+            seguinte = blocos_expandidos[idx + 1]
             if linha_parece_descricao_estrutura(seguinte):
                 blocos_consolidados.append(f"{atual} — {seguinte}")
                 idx += 2
