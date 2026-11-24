@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Mecum | Lei Seca & Jurisprudência</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d162c'/%3E%3Cpath d='M7 9.5C7 8.1 8.1 7 9.5 7H15v18H9.5A2.5 2.5 0 0 1 7 22.5v-13Z' fill='%231d4ed8' stroke='%2300e5ff' stroke-width='1.5'/%3E%3Cpath d='M25 9.5C25 8.1 23.9 7 22.5 7H17v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13Z' fill='%230d162c' stroke='%2300e5ff' stroke-width='1.5'/%3E%3Cpath d='M21 11.5L22 14l2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5Z' fill='%2300e5ff'/%3E%3C/svg%3E" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -269,23 +272,63 @@
     body.light-mode .badge-done { color: #059669; background: rgba(16, 185, 129, 0.14); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.45); }
 
-    /* Brand Logo Smart Mecum */
+    /* Brand Logo Smart Mecum — Identidade Visual Reforçada */
+    .brand {
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.16);
+    }
+    body.light-mode .brand {
+      border-bottom-color: var(--border-color);
+    }
     .brand-title-wrap {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 11px;
+    }
+    .brand-logo-badge {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: 10px;
+      background: linear-gradient(145deg, rgba(29, 78, 216, 0.32), rgba(0, 229, 255, 0.12));
+      border: 1.5px solid rgba(0, 229, 255, 0.45);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .brand-title-wrap:hover .brand-logo-badge {
+      transform: scale(1.05);
+      border-color: var(--cyan-accent);
+    }
+    body.light-mode .brand-logo-badge {
+      background: linear-gradient(145deg, rgba(29, 78, 216, 0.12), rgba(3, 105, 161, 0.08));
+      border-color: rgba(29, 78, 216, 0.35);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
     }
     .brand-logo-svg {
-      width: 26px; height: 26px; flex-shrink: 0;
+      width: 26px; height: 26px; display: block;
+    }
+    .brand-text-stack {
+      display: flex; flex-direction: column; line-height: 1.05;
     }
     .brand-title-text {
-      font-weight: 800; letter-spacing: -0.2px;
-      background: linear-gradient(135deg, var(--cyan-accent), #60a5fa);
+      font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.34rem;
+      font-weight: 900;
+      letter-spacing: -0.4px;
+      background: linear-gradient(125deg, #ffffff 10%, var(--cyan-accent) 60%, #3b82f6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     body.light-mode .brand-title-text {
-      background: linear-gradient(135deg, #1d4ed8, #0369a1);
+      background: linear-gradient(125deg, #0f172a 10%, #1d4ed8 60%, #0284c7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+    .brand-subtitle-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
     /* Botão Voltar ao Topo no Dock Lateral */
@@ -613,16 +656,21 @@
   <!-- TELA DE LOGIN -->
   <div id="auth-view" class="auth-container">
     <div class="auth-card">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="8" fill="#0d162c" stroke="#1e325c" stroke-width="1.5"/>
-          <path d="M7 9.5C7 8.1 8.1 7 9.5 7H15v18H9.5A2.5 2.5 0 0 1 7 22.5v-13Z" fill="#1d4ed8" fill-opacity="0.35" stroke="#00e5ff" stroke-width="1.7"/>
-          <path d="M25 9.5C25 8.1 23.9 7 22.5 7H17v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13Z" stroke="#00e5ff" stroke-width="1.7"/>
-          <line x1="10" y1="12" x2="13" y2="12" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="10" y1="16" x2="13" y2="16" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M21 11L22 13.5L24.5 14.5L22 15.5L21 18L20 15.5L17.5 14.5L20 13.5L21 11Z" fill="#00e5ff"/>
-        </svg>
-        <h1 style="margin-bottom:0;">Smart Mecum</h1>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <div class="brand-logo-badge" style="width:48px; height:48px; border-radius:12px;">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.5 9C5.5 7.343 6.843 6 8.5 6H15v20H8.5A3 3 0 0 1 5.5 23V9Z" fill="#1d4ed8" fill-opacity="0.4" stroke="#00e5ff" stroke-width="2"/>
+            <path d="M26.5 9C26.5 7.343 25.157 6 23.5 6H17v20h6.5a3 3 0 0 0 3-3V9Z" stroke="#00e5ff" stroke-width="2"/>
+            <line x1="8.8" y1="11.5" x2="12.2" y2="11.5" stroke="#00e5ff" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="8.8" y1="15.5" x2="12.2" y2="15.5" stroke="#00e5ff" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="8.8" y1="19.5" x2="11.2" y2="19.5" stroke="#00e5ff" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M21.5 10.2L22.7 13.3L25.8 14.5L22.7 15.7L21.5 18.8L20.3 15.7L17.2 14.5L20.3 13.3L21.5 10.2Z" fill="#00e5ff"/>
+          </svg>
+        </div>
+        <div class="brand-text-stack">
+          <h1 class="brand-title-text" style="font-size:1.75rem; margin-bottom:0;">Smart Mecum</h1>
+          <span class="brand-subtitle-text" style="font-size:0.7rem;">Lei Seca & Jurisprudência</span>
+        </div>
       </div>
       <p>Acesse suas leis comentadas e jurisprudências sincronizadas.</p>
       <div style="display:flex; flex-direction:column; gap:12px;">
@@ -719,15 +767,20 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-title-wrap">
-          <svg class="brand-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="currentColor" fill-opacity="0.1"/>
-            <path d="M6.5 9.5C6.5 8.1 7.6 7 9 7H15v18H9a2.5 2.5 0 0 1-2.5-2.5v-13Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M25.5 9.5C25.5 8.1 24.4 7 23 7H17v18h6a2.5 2.5 0 0 0 2.5-2.5v-13Z" stroke="currentColor" stroke-width="1.8"/>
-            <line x1="9.5" y1="12" x2="12.5" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <line x1="9.5" y1="16" x2="12.5" y2="16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M21 11L22 13.5L24.5 14.5L22 15.5L21 18L20 15.5L17.5 14.5L20 13.5L21 11Z" fill="currentColor"/>
-          </svg>
-          <span class="brand-title-text">Smart Mecum</span>
+          <div class="brand-logo-badge">
+            <svg class="brand-logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M5.5 9C5.5 7.343 6.843 6 8.5 6H15v20H8.5A3 3 0 0 1 5.5 23V9Z" fill="currentColor" fill-opacity="0.24" stroke="currentColor" stroke-width="2"/>
+              <path d="M26.5 9C26.5 7.343 25.157 6 23.5 6H17v20h6.5a3 3 0 0 0 3-3V9Z" stroke="currentColor" stroke-width="2"/>
+              <line x1="8.8" y1="11.5" x2="12.2" y2="11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="8.8" y1="15.5" x2="12.2" y2="15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="8.8" y1="19.5" x2="11.2" y2="19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M21.5 10.2L22.7 13.3L25.8 14.5L22.7 15.7L21.5 18.8L20.3 15.7L17.2 14.5L20.3 13.3L21.5 10.2Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="brand-text-stack">
+            <span class="brand-title-text">Smart Mecum</span>
+            <span class="brand-subtitle-text">Lei Seca & Jurisprudência</span>
+          </div>
         </div>
         <div class="brand-actions">
           <button class="btn btn-outline btn-sm" onclick="abrirModalGerenciarTags()" title="Gerenciar e Criar Tags">🏷️</button>
