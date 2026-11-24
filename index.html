@@ -89,17 +89,11 @@
     .app-layout.sidebar-collapsed .sidebar { padding: 0; opacity: 0; pointer-events: none; border: none; }
 
     /* Overlay e Cabeçalho Mobile (Ocultos no Desktop) */
-    .mobile-sidebar-backdrop {
-      display: none;
-    }
-    .mobile-header-bar {
-      display: none;
-    }
-    .btn-close-mobile-sidebar {
-      display: none;
-    }
+    .mobile-sidebar-backdrop { display: none; }
+    .mobile-header-bar { display: none; }
+    .btn-close-mobile-sidebar { display: none; }
 
-    /* Experiência Mobile & Tablet (<= 960px): Gaveta Lateral Deslizante (Drawer) + Topbar Compacta */
+    /* Experiência Mobile & Tablet (<= 960px) */
     @media (max-width: 960px) {
       .app-layout,
       .app-layout.sidebar-collapsed {
@@ -213,10 +207,7 @@
         cursor: pointer;
       }
 
-      /* Ocultar botão de recolher desktop no dock lateral no mobile (já está na topbar) */
-      #dock-sidebar-wrapper {
-        display: none;
-      }
+      #dock-sidebar-wrapper { display: none; }
 
       .floating-dock {
         left: 0px !important;
@@ -224,14 +215,10 @@
         transform: translateY(-50%);
       }
 
-      .top-controls {
-        display: none;
-      }
-
-      .main-content {
-        padding: 16px 16px 88px 16px;
-      }
+      .top-controls { display: none; }
+      .main-content { padding: 16px 16px 88px 16px; }
     }
+
     .brand { font-size: 1.08rem; font-weight: 700; color: var(--cyan-accent); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     .brand-actions { display: flex; gap: 5px; align-items: center; }
 
@@ -327,7 +314,7 @@
     }
     .dock-flyout.open { display: flex; }
 
-    /* Painel Compacto em Grade da Caneta Contínua (Nunca corta na tela) */
+    /* Painel Compacto em Grade da Caneta Contínua */
     .pen-flyout-compact {
       flex-direction: column;
       align-items: stretch;
@@ -351,7 +338,7 @@
       gap: 6px;
     }
 
-    /* Flyout do Índice Estrutural (Títulos, Capítulos, Seções com seus Textos) */
+    /* Flyout do Índice Estrutural */
     .toc-flyout {
       flex-direction: column;
       align-items: stretch;
@@ -461,17 +448,13 @@
     body.light-mode .badge-done { color: #059669; background: rgba(16, 185, 129, 0.14); }
     .badge-err { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.45); }
 
-    /* Brand Logo Smart Mecum — Identidade Visual Reforçada */
+    /* Brand Logo Smart Mecum */
     .brand {
       padding-bottom: 6px;
       border-bottom: 1px solid rgba(0, 229, 255, 0.16);
     }
-    body.light-mode .brand {
-      border-bottom-color: var(--border-color);
-    }
-    .brand-title-wrap {
-      display: flex; align-items: center; gap: 11px;
-    }
+    body.light-mode .brand { border-bottom-color: var(--border-color); }
+    .brand-title-wrap { display: flex; align-items: center; gap: 11px; }
     .brand-logo-badge {
       width: 38px; height: 38px; flex-shrink: 0;
       border-radius: 10px;
@@ -490,12 +473,8 @@
       border-color: rgba(29, 78, 216, 0.35);
       box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
     }
-    .brand-logo-svg {
-      width: 26px; height: 26px; display: block;
-    }
-    .brand-text-stack {
-      display: flex; flex-direction: column; line-height: 1.05;
-    }
+    .brand-logo-svg { width: 26px; height: 26px; display: block; }
+    .brand-text-stack { display: flex; flex-direction: column; line-height: 1.05; }
     .brand-title-text {
       font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
       font-size: 1.34rem;
@@ -542,6 +521,13 @@
       display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
       margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
     }
+    .lei-meta-subbar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      margin-top: 4px; font-size: 0.77rem; color: var(--text-muted);
+    }
+    .lei-meta-subbar a { color: var(--text-muted); text-decoration: none; }
+    .lei-meta-subbar a:hover { color: var(--cyan-accent); text-decoration: underline; }
+    .lei-meta-sep { opacity: 0.45; }
 
     /* Banner de Atualização Legislativa */
     .update-banner {
@@ -699,18 +685,9 @@
         justify-content: center;
         box-shadow: 0 12px 32px rgba(0,0,0,0.65);
       }
-      .highlight-popover .hl-swatch {
-        width: 28px;
-        height: 28px;
-      }
-      .disp-actions {
-        opacity: 0.85 !important;
-      }
-      .btn-add-mini {
-        width: 28px;
-        height: 28px;
-        font-size: 1.05rem;
-      }
+      .highlight-popover .hl-swatch { width: 28px; height: 28px; }
+      .disp-actions { opacity: 0.85 !important; }
+      .btn-add-mini { width: 28px; height: 28px; font-size: 1.05rem; }
     }
     .hl-swatch {
       width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
@@ -720,7 +697,7 @@
     }
     .hl-swatch:hover { transform: scale(1.18); }
 
-    /* Anotações Retráteis (Tom Amarelado Suave + Fonte Laranja Escuro) */
+    /* Anotações Retráteis */
     .notas-wrapper { margin-top: 8px; margin-bottom: 8px; }
     .notas-toggle-bar {
       display: inline-flex; align-items: center; gap: 6px;
@@ -761,7 +738,7 @@
     }
     .icon-btn-inline { display: inline-flex; align-items: center; gap: 4px; }
 
-    /* Marcadores Estilo OneNote nas Anotações (Bolinha Nível 1 -> Seta Nível 2+ com Tab) */
+    /* Marcadores Estilo OneNote nas Anotações */
     .nota-conteudo-render ul, .rich-editor ul {
       list-style: none; padding-left: 20px; margin: 4px 0;
     }
@@ -863,7 +840,7 @@
 </head>
 <body>
 
-  <!-- POPUP ESVERDEADO DE SUCESSO NO TOPO CENTRAL (2 SEGUNDOS) -->
+  <!-- POPUP ESVERDEADO DE SUCESSO NO TOPO CENTRAL -->
   <div id="toast-sucesso" class="toast-popup" role="status">
     <span id="toast-sucesso-msg">Anotação salva com sucesso!</span>
     <button type="button" class="toast-close" onclick="fecharToast()" title="Fechar">×</button>
@@ -909,7 +886,7 @@
         </button>
       </div>
 
-      <!-- 2. ÍNDICE ESTRUTURAL MINIMALISTA (TÍTULOS, CAPÍTULOS, SEÇÕES + DESCRIÇÕES) -->
+      <!-- 2. ÍNDICE ESTRUTURAL MINIMALISTA -->
       <div class="dock-item-wrapper" id="dock-toc-wrapper">
         <button id="dock-toc-btn" class="dock-btn" onclick="alternarPainelIndice()" title="Índice de Títulos e Capítulos (Alt+I)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -927,7 +904,7 @@
         </div>
       </div>
 
-      <!-- 3. CANETA CONTÍNUA COMPACTA EM GRADE (GRIFOS, NEGRITO E CORES DE TEXTO) -->
+      <!-- 3. CANETA CONTÍNUA COMPACTA EM GRADE -->
       <div class="dock-item-wrapper" id="dock-pen-wrapper">
         <button id="dock-pen-btn" class="dock-btn" onclick="alternarPainelCaneta()" title="Ferramentas de marcação e cor de texto (Alt+G)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -971,7 +948,7 @@
         </div>
       </div>
 
-      <!-- 5. BOTÃO VOLTAR AO TOPO (SURGE AO ROLAR A PÁGINA PARA BAIXO) -->
+      <!-- 5. BOTÃO VOLTAR AO TOPO -->
       <div class="dock-item-wrapper dock-top-wrapper" id="dock-top-wrapper">
         <button id="dock-top-btn" class="dock-btn" onclick="voltarAoTopo()" title="Voltar ao topo da página">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -982,7 +959,7 @@
     <!-- BACKDROP MOBILE/TABLET -->
     <div id="mobile-sidebar-backdrop" class="mobile-sidebar-backdrop" onclick="fecharMenuMobile()"></div>
 
-    <!-- BARRA LATERAL (DESKTOP FIXA / MOBILE GAVETA DESLIZANTE) -->
+    <!-- BARRA LATERAL -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-title-wrap">
@@ -1093,7 +1070,13 @@
               <h2 id="titulo-lei-atual" style="color: var(--cyan-accent);"></h2>
               <span id="tag-lei-atual" class="badge badge-tag" style="cursor:pointer;" onclick="abrirModalEditarLei()" title="Clique para editar título ou matéria"></span>
             </div>
-            <a id="link-fonte-lei" href="#" target="_blank" style="font-size:0.8rem; color:var(--text-muted);">Abrir texto oficial na fonte ↗</a>
+            <div class="lei-meta-subbar">
+              <a id="link-fonte-lei" href="#" target="_blank">Fonte oficial ↗</a>
+              <span class="lei-meta-sep">•</span>
+              <span id="meta-ultima-alteracao">Última alteração: —</span>
+              <span class="lei-meta-sep">•</span>
+              <span id="meta-ultima-verificacao">Última verificação: —</span>
+            </div>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <input type="text" id="busca-artigo" placeholder="Ex: Art. 5 ou palavra..." oninput="filtrarDispositivos()" style="width:190px;" />
@@ -1119,7 +1102,7 @@
     </main>
   </div>
 
-  <!-- PAINEL FLUTUANTE DE REMISSÃO CLICÁVEL (ARTIGOS E OUTRAS LEIS) -->
+  <!-- PAINEL FLUTUANTE DE REMISSÃO CLICÁVEL -->
   <div id="remissao-drawer" class="remissao-drawer">
     <div class="remissao-header">
       <div>
@@ -1244,7 +1227,7 @@
     </div>
   </div>
 
-  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO COM MARCADORES ESTILO ONENOTE -->
+  <!-- MODAL: ADICIONAR / EDITAR ANOTAÇÃO -->
   <div id="modal-nota" class="modal-backdrop">
     <div class="modal">
       <h3 id="modal-nota-titulo">Anotação / Jurisprudência</h3>
@@ -1384,7 +1367,7 @@
     }
 
     // =========================================================================
-    // ATALHOS DE TECLADO GLOBAIS (Alt+M Menu, Alt+I Índice, Alt+G Caneta, Alt+F / Ctrl+F Busca)
+    // ATALHOS DE TECLADO GLOBAIS
     // =========================================================================
     document.addEventListener("keydown", (e) => {
       if (!usuarioAtual) return;
@@ -1413,7 +1396,7 @@
     });
 
     // =========================================================================
-    // TOAST POP-UP ESVERDEADO (2 SEGUNDOS + BOTÃO X)
+    // TOAST POP-UP ESVERDEADO
     // =========================================================================
     function mostrarToastSucesso(mensagem) {
       const toast = document.getElementById("toast-sucesso");
@@ -1488,7 +1471,6 @@
       const leiAlvoId = leiSelecionada.id;
       const modo = atualizarEstrutura ? "reprocessar_indice_lei" : "verificar_lei";
 
-      // Ativa imediatamente o card laranja no menu enquanto dispara o robô
       const idxCache = leisCache.findIndex(l => l.id === leiAlvoId);
       if (idxCache !== -1) {
         leisCache[idxCache].status_extracao = "processando";
@@ -1511,18 +1493,18 @@
     }
 
     // =========================================================================
-    // DOCK FLUTUANTE: ÍNDICE ESTRUTURAL COM DESCRIÇÕES, CANETA E BUSCA RÁPIDA
+    // DOCK FLUTUANTE: ÍNDICE ESTRUTURAL, CANETA E BUSCA RÁPIDA
     // =========================================================================
     function nivelHierarquicoEstrutura(texto) {
       const t = (texto || "").trim().toUpperCase();
-      if (/^(LIVRO|PARTE)\b/.test(t)) return 1;
-      if (/^T[ÍI]TULO\b/.test(t)) return 2;
-      if (/^CAP[ÍI]TULO\b/.test(t)) return 3;
+      if (/^(LIVRO|PARTE) /.test(t)) return 1;
+      if (/^T[ÍI]TULO /.test(t)) return 2;
+      if (/^CAP[ÍI]TULO /.test(t)) return 3;
       return 4;
     }
 
     function ehCabecalhoEstrutural(texto) {
-      return /^(LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\b/i.test((texto || "").trim());
+      return /^(LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O) /i.test((texto || "").trim());
     }
 
     function construirItensIndiceEstrutural() {
@@ -1535,13 +1517,12 @@
         let codigo = textoLimpo;
         let descricao = "";
 
-        // Caso 1: Já veio unificado (ex: "TÍTULO I — Dos Princípios Fundamentais" ou "TÍTULO I - ...")
-        const matchInline = textoLimpo.match(/^((?:LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+(?:[IVXLCDM0-9A-Z-]+|ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR)(?:\s+(?:ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR))?)\s*(?:[-–—:]|\n)\s*(.+)$/i);
+        const matchInline = textoLimpo.match(/^((?:LIVRO|PARTE|T[ÍI]TULO|CAP[ÍI]TULO|SE[ÇC][ÃA]O|SUBSE[ÇC][ÃA]O)\s+(?:[IVXLCDM0-9A-Z-]+|ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR)(?:\s+(?:ÚNICO|GERAL|PRELIMINAR|ESPECIAL|COMPLEMENTAR))?)\s*(?:[-–—:]|
+)\s*(.+)$/i);
         if (matchInline) {
           codigo = matchInline[1].trim();
           descricao = matchInline[2].trim();
         } else {
-          // Caso 2: A descrição foi salva no dispositivo imediatamente seguinte (seja tipo estrutura ou texto descritivo curto sem Art.)
           const proximo = dispositivosCache[i + 1];
           if (proximo && proximo.tipo === "estrutura" && !ehCabecalhoEstrutural(proximo.texto)) {
             descricao = (proximo.texto || "").replace(/\s+/g, " ").trim();
@@ -1784,7 +1765,7 @@
     // REMISSÃO CLICÁVEL ENTRE ARTIGOS E OUTRAS LEIS
     // =========================================================================
     function escaparRegex(str) {
-      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return str.replace(/[.*+?^${}()|[\]\]/g, "\$&");
     }
 
     function enriquecerRemissoesHtml(htmlSeguro) {
@@ -1794,20 +1775,20 @@
       const padroesLeis = [];
       leisExternas.forEach(l => {
         if (l.titulo && l.titulo.length >= 4) {
-          padroesLeis.push({ regex: new RegExp(`\\b(${escaparRegex(l.titulo)})\\b`, "gi"), leiId: l.id });
+          padroesLeis.push({ regex: new RegExp(`\b(${escaparRegex(l.titulo)})\b`, "gi"), leiId: l.id });
         }
         const mNum = l.titulo.match(/(Lei(?:\s+Complementar)?|LC|Decreto)\s*(?:n[º°o.]*\s*)?([\d.]+)/i);
         if (mNum) {
           const tipoEsc = escaparRegex(mNum[1]);
           const numEsc = escaparRegex(mNum[2]);
           padroesLeis.push({
-            regex: new RegExp(`\\b(${tipoEsc}\\s*(?:n[º°o.]*\\s*)?${numEsc}(?:\\/\\d{2,4})?)\\b`, "gi"),
+            regex: new RegExp(`\b(${tipoEsc}\s*(?:n[º°o.]*\s*)?${numEsc}(?:\/\d{2,4})?)\b`, "gi"),
             leiId: l.id
           });
         }
       });
 
-      const regexArtigo = /\b(arts?\.?\s*\d+(?:-[A-Za-z])?[º°o]?)/gi;
+      const regexArtigo = / (arts?\.?\s*\d+(?:-[A-Za-z])?[º°o]?)/gi;
 
       return partes.map(parte => {
         if (parte.startsWith("<")) return parte;
@@ -1816,7 +1797,7 @@
 
         padroesLeis.forEach(item => {
           texto = texto.replace(item.regex, (match) => {
-            return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\\'")}')">${match}</span>`;
+            return `<span class="remissao-link" title="Consultar ${match}" onclick="abrirRemissaoLei('${item.leiId}', '${match.replace(/'/g, "\'")}')">${match}</span>`;
           });
         });
 
@@ -1923,7 +1904,7 @@
     }
 
     // =========================================================================
-    // CORES, TAGS (SELETOR COMPACTO NO MENU) E LEIS
+    // CORES, TAGS E LEIS
     // =========================================================================
     function hexParaRgbaSuave(hex, alpha) {
       if (!hex || !hex.startsWith("#") || hex.length < 7) return "";
@@ -2286,8 +2267,8 @@
         row.innerHTML = `
           <input type="text" id="tag-nome-${tag.id}" value="${tag.nome}" />
           <input type="color" id="tag-cor-${tag.id}" value="${tag.cor || '#1d4ed8'}" />
-          <button class="btn btn-sm" onclick="salvarAlteracaoTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')">Salvar</button>
-          <button class="btn btn-outline btn-sm" onclick="excluirTag('${tag.id}', '${tag.nome.replace(/'/g, "\\'")}')" style="color:var(--danger);">×</button>
+          <button class="btn btn-sm" onclick="salvarAlteracaoTag('${tag.id}', '${tag.nome.replace(/'/g, "\'")}')">Salvar</button>
+          <button class="btn btn-outline btn-sm" onclick="excluirTag('${tag.id}', '${tag.nome.replace(/'/g, "\'")}')" style="color:var(--danger);">×</button>
         `;
         lista.appendChild(row);
       });
@@ -2585,6 +2566,15 @@
       }
 
       document.getElementById("link-fonte-lei").href = lei.url;
+
+      const logsLei = Array.isArray(lei.log_alteracoes) ? lei.log_alteracoes : [];
+      const dataUltAltIso = lei.ultima_alteracao || (logsLei.length > 0 ? logsLei[0].data : null);
+      document.getElementById("meta-ultima-alteracao").textContent =
+        "Última alteração: " + (dataUltAltIso ? new Date(dataUltAltIso).toLocaleDateString("pt-BR") : "Sem registro");
+      document.getElementById("meta-ultima-verificacao").textContent =
+        "Última verificação: " + (lei.ultima_verificacao
+          ? new Date(lei.ultima_verificacao).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+          : "—");
 
       const banner = document.getElementById("banner-atualizacao");
       if (lei.tem_atualizacao) banner.classList.remove("hidden");
@@ -2908,7 +2898,7 @@
     }
 
     // =========================================================================
-    // GRIFOS, NEGRITOS E CORES DE TEXTO SELECIONADO (DESKTOP, TABLET E SMARTPHONE)
+    // GRIFOS, NEGRITOS E CORES DE TEXTO SELECIONADO
     // =========================================================================
     let timerSelecaoTouch = null;
     let interagindoComPopover = false;
@@ -2968,7 +2958,6 @@
     document.addEventListener("selectionchange", () => {
       if (!ehDispositivoTouch() || !leiSelecionada) return;
       if (timerSelecaoTouch) clearTimeout(timerSelecaoTouch);
-      // Aguarda 420ms para o usuário ajustar as alças de seleção no tablet/celular sem interromper
       timerSelecaoTouch = setTimeout(() => {
         processarSelecaoTexto(true);
       }, 420);
@@ -3025,13 +3014,35 @@
       if (!confirm("Deseja aplicar a nova redação da lei? Suas anotações serão mantidas (inclusive em dispositivos revogados), grifos em trechos inalterados permanecem e você poderá ver a redação anterior por 5 dias.")) return;
 
       const leiId = leiSelecionada.id;
-      const { data: pendentes } = await sb
-        .from("dispositivos")
-        .select("*")
-        .eq("lei_id", leiId)
-        .eq("versao_status", "pendente");
 
-      if (!pendentes || pendentes.length === 0) return;
+      let pendentes = [];
+      let inicioPend = 0;
+      const passoPend = 1000;
+      while (true) {
+        const { data: lotePend, error: errPend } = await sb
+          .from("dispositivos")
+          .select("*")
+          .eq("lei_id", leiId)
+          .eq("versao_status", "pendente")
+          .order("ordem", { ascending: true })
+          .range(inicioPend, inicioPend + passoPend - 1);
+
+        if (errPend) {
+          alert("Erro ao ler dispositivos pendentes: " + errPend.message);
+          return;
+        }
+        if (!lotePend || lotePend.length === 0) break;
+        pendentes = pendentes.concat(lotePend);
+        if (lotePend.length < passoPend) break;
+        inicioPend += passoPend;
+      }
+
+      if (pendentes.length === 0) {
+        await sb.from("leis").update({ tem_atualizacao: false, hash_pendente: null }).eq("id", leiId);
+        document.getElementById("banner-atualizacao").classList.add("hidden");
+        await carregarLeis();
+        return;
+      }
 
       const agoraIso = new Date().toISOString();
       const mapaAntigo = {};
@@ -3090,36 +3101,56 @@
 
       const slugsModificadosOuRevogados = registrosMudancas.map(r => r.slug);
       if (slugsModificadosOuRevogados.length > 0) {
-        await sb.from("grifos").delete().eq("lei_id", leiId).in("slug", slugsModificadosOuRevogados);
+        for (let i = 0; i < slugsModificadosOuRevogados.length; i += 200) {
+          await sb.from("grifos").delete().eq("lei_id", leiId).in("slug", slugsModificadosOuRevogados.slice(i, i + 200));
+        }
       }
 
       await sb.from("dispositivos").delete().eq("lei_id", leiId).eq("versao_status", "vigente");
 
+      await sb.from("dispositivos").update({
+        versao_status: "vigente",
+        foi_alterado: false,
+        texto_anterior: null,
+        data_alteracao: null
+      }).eq("lei_id", leiId).eq("versao_status", "pendente");
+
       for (const p of pendentes) {
         const antigo = mapaAntigo[p.slug];
-        const mudou = !!(antigo && antigo.texto !== p.texto);
-        await sb.from("dispositivos").update({
-          versao_status: "vigente",
-          foi_alterado: mudou,
-          texto_anterior: mudou ? antigo.texto : null,
-          data_alteracao: mudou ? agoraIso : null
-        }).eq("id", p.id);
+        if (antigo && antigo.texto !== p.texto) {
+          await sb.from("dispositivos").update({
+            foi_alterado: true,
+            texto_anterior: antigo.texto,
+            data_alteracao: agoraIso
+          }).eq("id", p.id);
+        }
       }
 
       const logAtual = Array.isArray(leiSelecionada.log_alteracoes) ? leiSelecionada.log_alteracoes : [];
       const novoLog = [...registrosMudancas, ...logAtual].slice(0, 200);
 
-      await sb.from("leis").update({
-        hash_atual: leiSelecionada.hash_pendente,
+      const payloadLei = {
+        hash_atual: leiSelecionada.hash_pendente || leiSelecionada.hash_atual,
         hash_pendente: null,
         tem_atualizacao: false,
         log_alteracoes: novoLog
-      }).eq("id", leiId);
+      };
+
+      const { error: errUpdateLei } = await sb.from("leis").update(payloadLei).eq("id", leiId);
+      if (errUpdateLei) {
+        alert("Erro ao finalizar status da lei: " + errUpdateLei.message);
+        return;
+      }
+
+      document.getElementById("banner-atualizacao").classList.add("hidden");
+      leiSelecionada.tem_atualizacao = false;
+      leiSelecionada.hash_pendente = null;
+      leiSelecionada.log_alteracoes = novoLog;
 
       mostrarToastSucesso("Lei atualizada preservando todas as anotações!");
       await carregarLeis();
       const atualizada = leisCache.find(l => l.id === leiId);
-      if (atualizada) selecionarLei(atualizada);
+      if (atualizada) await selecionarLei(atualizada);
     }
 
     function abrirModalHistoricoAlteracoes() {
@@ -3205,7 +3236,8 @@
 
       if (!resp.ok) {
         const detalhe = await resp.text();
-        alert(`Erro ao acionar GitHub Actions (${resp.status}): verifique o nome do repositório e o token em ⚙️.\n${detalhe}`);
+        alert(`Erro ao acionar GitHub Actions (${resp.status}): verifique o nome do repositório e o token em ⚙️.
+${detalhe}`);
         return false;
       }
       return true;
@@ -3222,7 +3254,7 @@
     }
 
     // =========================================================================
-    // CRUD DE ANOTAÇÕES E MARCADORES ESTILO ONENOTE (TAB -> RECUO COM SETA ▸)
+    // CRUD DE ANOTAÇÕES E MARCADORES ESTILO ONENOTE
     // =========================================================================
     function alternarCamposJurisprudencia() {
       const isJurisp = document.getElementById("nota-is-jurisp").checked;
